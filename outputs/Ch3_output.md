@@ -4,8 +4,8 @@
 sample     : tthcpv_gen_elpr (chunk 0) <br>
 
 #### STDHEP and sidecar paths
-stdhep     : /data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/generator/stdhep/E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0.stdhep <br>
-sidecar    : /data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/generator/sidecars/E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0.tthcpv_me.csv <br>
+stdhep     : `/data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/generator/stdhep/E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0.stdhep` <br>
+sidecar    : `/data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/generator/sidecars/E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0.tthcpv_me.csv` <br>
 
 #### sidecar/alignment counts
 sidecar rows=12500 skipped=0 aligned=12500 <br>
@@ -33,7 +33,7 @@ weight check: ok=True n_pos=6298 n_neg=6202 signed_sum=0.00303872 fb <br>
 ### Reco Output
 
 #### Input SLICO File Path
-`/data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/complete_reco/complete_reco_kinfit_ready_E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0_sgv.slcio' <br>
+`/data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/complete_reco/complete_reco_kinfit_ready_E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0_sgv.slcio` <br>
 
 
 #### Inspect in particular OutputErrorFlowJets6, RefinedJets6, ISOElectrons, and ISOMuons
@@ -63,16 +63,72 @@ ISOElectrons: n=0
 ## Ch.3 Step 2 - Inspect the Underlying LCIO Records Directly
 
 ### Generator Event
-1. incoming electron direction
-2. the parent/daughter chain for t , t ¯ , H , and the two hadronic W daughters
+1. run/event number
+   - Event: 0, run: 0
+2. incoming electron direction (PDG: 11) 
+   - momentum (px, py, pz) = (0.00e+00, 0.00e+00, 2.48e+02) <br>
+   => Direction: +z direction 
+3. the parent/daughter chain for t , t¯ , H , and the two hadronic W daughters
+   - t (PDG: 6)
+     - parent: e-, daughter: b, W+
+   - t¯ (PDG: -6)
+     - paremt: e-, daughter: b¯, W-
+   - H (PDG: 25) and the two hadronic W daughters (PDG: 24, -24)
+     - parent: e-, daughter: W+, W-
+       - parent: W+, daughter: d¯, u
+       - parent: W-, daughter: s, c¯
 
 ### Reco Event
-1. run/event number: 
-2. collection names and sizes
+1. run/event number
+   - Event: 0, run: 1
+2. collection names and sizes:
+   - ISOElectrons, Size 0
+   - ISOMuons, Size 0
+   - OutputErrorFlowJets6, Size 6
+     - momentum (px,py,pz) = (-5.44e+01, -9.37e+01, +1.09e+01)
+     - Energy = 1.15e+02
+     - mass = 3.54e+01
+     - charge = 1.00e+00
+     - position (x,y,z) = (+0.00e+00, +0.00e+00, +0.00e+00)
+   - RefinedJets6, Size 6
+     - Unprinted due to segmentation fault (core dumped)
 3. the six-jet collections
+  - Both OutputErrorFlowJets6 and RefinedJets6 exist and contain 6 reconstructed jets each.
 4. isolated-lepton collection
+  - Both ISOElectrons and ISOMuons have a size of 0 (no isolated leptons identified for this event).
 5. any PID parameters visible for the jets
+  - OutputErrorFlowJets6: No PID parameters.
+  - RefinedJets6: Unprinted in this specific dumpevent execution due to a Segmentation fault.
 
-These notes establish intuition for what the later CSV columns actually mean; dumpevent itself is not a selection or physics-result tool.
 
+## Ch.3 Step 3 - Run the local generator example and inspect its table
+> Memo: <br> When you run `run_baseline.sh` it executes these 6 steps in order: <br> 1. Inspect Generator Data <br> 2. Export CSV Features (CPV & SM) <br> 3. Create Angular Histograms <br> 4. Train XGBoost ML Model <br> 5. Evaluate ML Scores <br> 6. Calculate Fisher Information / Sensitivity
+
+
+## Ch.3 Step 4 - Run a 50-event kinfit smoke in a separate directory
+> Memo: <br> Since running <br>
+```bash scripts/run_kinfit_assignment.sh \ <br> --config configs/analysis_ow_lr.yaml \ <br> --chunk 0 \ <br> --max-events 50 \ <br>  --out-dir outputs/ow_lr/kinfit_smoke``` gave me an error: `Refusing to overwrite /data/dust/user/ozakinan/analysis/tth-cpv-observable-ilc/outputs/ow_lr/kinfit_smoke/kinfit_tthcpv_reco_elpr_chunk0.root`, <br> so I run ```--out-dir outputs/ow_lr/kinfit_smoke_2``` instead.
+
+## Ch.3 Step 5 - Run one complete CPV chunk and its SM denominator through HTCondor
+
+
+## Ch.3 Summary
+1. Which generator STDHEP, sidecar, reco SLCIO, and kinfit ROOT file entered the run?
+   - stdhep : `/data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/generator/stdhep/E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0.stdhep`
+   - sidecar : `/data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/generator/sidecars/E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0.tthcpv_me.csv`
+   - reco SLICO: `/data/dust/user/zhangyuy/analysis/tth/events_physsim/production/cpv_tth/eL.pR/I01234_0/complete_reco/complete_reco_kinfit_ready_E550-Test.Ptthcpv.Gphyssim.eL.pR.I01234_0.0_sgv.slcio`
+   - kinfit ROOT file: NEED TO CHECK
+
+2. Which objects and collections were read from one event?
+   - ISOElectrons (size 0 in test event)
+   - ISOMuons (size 0 in test event)
+   - OutputErrorFlowJets6 (6 reconstructed jets with momentum)
+   - RefinedJets6 (6 reconstructed jets with Weaver/PID probabilities)
+     
+3. Which frame, axis convention, object ordering, and weight column were used?
+   - a
+4. How many events entered, failed reconstruction, passed kinfit, and filled OW ?
+   - a
+5. Where are the event table, metadata, validation JSON, histogram CSV, and plot?
+   - a
 
