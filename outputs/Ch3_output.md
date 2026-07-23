@@ -60,4 +60,19 @@ ISOMuons: n=0
 ISOElectrons: n=0
 
 
+## Ch.3 Step 2 - Inspect the Underlying LCIO Records Directly
+
+### Generator Event
+1. incoming electron direction
+2. the parent/daughter chain for t , t ¯ , H , and the two hadronic W daughters
+
+### Reco Event
+1. run/event number: 
+2. collection names and sizes
+3. the six-jet collections
+4. isolated-lepton collection
+5. any PID parameters visible for the jets
+
+These notes establish intuition for what the later CSV columns actually mean; dumpevent itself is not a selection or physics-result tool.
+
 
