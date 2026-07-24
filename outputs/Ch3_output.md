@@ -106,11 +106,20 @@ ISOElectrons: n=0
 
 
 ## Ch.3 Step 4 - Run a 50-event kinfit smoke in a separate directory
-> Memo: <br> Since running <br>
-```bash scripts/run_kinfit_assignment.sh \ <br> --config configs/analysis_ow_lr.yaml \ <br> --chunk 0 \ <br> --max-events 50 \ <br>  --out-dir outputs/ow_lr/kinfit_smoke``` gave me an error: `Refusing to overwrite /data/dust/user/ozakinan/analysis/tth-cpv-observable-ilc/outputs/ow_lr/kinfit_smoke/kinfit_tthcpv_reco_elpr_chunk0.root`, <br> so I run ```--out-dir outputs/ow_lr/kinfit_smoke_2``` instead.
+> Memo: <br> Since running <br>`bash scripts/run_kinfit_assignment.sh \` <br> `--config configs/analysis_ow_lr.yaml \` <br> `--chunk 0 \ <br> --max-events 50 \` <br>  `--out-dir outputs/ow_lr/kinfit_smoke` <br> gave me an error: `Refusing to overwrite /data/dust/user/ozakinan/analysis/tth-cpv-observable-ilc/outputs/ow_lr/kinfit_smoke/kinfit_tthcpv_reco_elpr_chunk0.root`, <br> so I run `--out-dir outputs/ow_lr/kinfit_smoke_2` instead.
 
 ## Ch.3 Step 5 - Run one complete CPV chunk and its SM denominator through HTCondor
+Things to check about Pass condition:
+- schema_report
+- the SM metadata records finite LR physical normalization
+- reco metadata point to the expected CPV/SM kinfit ROOT and SLCIO files
+- event-number mismatches are zero; kinfit mode, score, and fitted-neutrino checks remain valid
+- all selected reco rows have finite O_W and O_ℓν
+- orientation counts/margins are present; all four histograms have identical edges and n_out_of_range=0
+- the Fisher JSON names O_W_all_sm_reco_bins.csv as nu0_source.
 
+
+## Ch.3 Step 6 - Run one complete CPV chunk and its SM denominator through HTCondor
 
 ## Ch.3 Summary
 1. Which generator STDHEP, sidecar, reco SLCIO, and kinfit ROOT file entered the run?
@@ -131,4 +140,14 @@ ISOElectrons: n=0
    - a
 5. Where are the event table, metadata, validation JSON, histogram CSV, and plot?
    - a
+  
+
+## Peronal Memo
+- `configs/analysis_ow_lr.yaml`
+  - 
+check: <br>
+- `scripts/export_features.py`
+- `scripts/build_angular_observable.py`
+- `configs/analysis_ow_lr.yaml`
+- 
 
