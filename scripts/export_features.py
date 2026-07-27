@@ -40,7 +40,12 @@ from ilc_tth_cpv.io import (  # noqa: E402
     validate_table,
     write_table,
 )
-from ilc_tth_cpv.objects import identify_semileptonic_truth  # noqa: E402
+from ilc_tth_cpv.objects import (  # noqa: E402
+    classify_higgs_decay,
+    classify_ttbar_decay,
+    identify_semileptonic_truth,
+)
+
 from ilc_tth_cpv.slcio import (  # noqa: E402
     four_momentum,
     get_collection,
@@ -429,6 +434,7 @@ def export_gen(
     reader = open_stdhep(chunk["stdhep"])
     rows = []
     n_read = 0
+    selection_counts = Counter()
     for event_record in event_records:
         if max_events and n_read >= max_events:
             break
@@ -437,8 +443,60 @@ def export_gen(
             break
         n_read += 1
         row_meta = event_record if component == "interference" else None
-        mc_list = [col.getElementAt(k) for k in range(col.getNumberOfElements())]
+        mc_list = [
+            col.getElementAt(k)
+            for k in range(col.getNumberOfElements())
+        ]
+
+        selection_counts["events_read"] += 1
+
+        higgs_mode = classify_higgs_decay(mc_list)
+        ttbar_mode = classify_ttbar_decay(mc_list)
+
+        selection_counts[f"higgs_mode::{higgs_mode}"] += 1
+        selection_counts[f"ttbar_mode::{ttbar_mode}"] += 1
+
+        if higgs_mode != "H->bb":
+            selection_counts["rejected_non_hbb"] += 1
+            continue
+
+        selection_counts["events_hbb"] += 1
+
+        if ttbar_mode != "semileptonic_emu":
+            selection_counts["rejected_non_semileptonic_emu"] += 1
+            continue
+
+        selection_counts["events_channel_selected"] += 1
+
         truth = identify_semileptonic_truth(mc_list)
+
+        required_truth_objects = (
+            "higgs",
+            "top",
+            "antitop",
+            "top_b",
+            "antitop_bbar",
+            "w_plus",
+            "w_minus",
+            "wjet_quark",
+            "wjet_antiquark",
+            "lepton",
+            "neutrino",
+        )
+
+        missing_truth_objects = [
+            name
+            for name in required_truth_objects
+            if getattr(truth, name) is None
+        ]
+
+        if missing_truth_objects:
+            selection_counts["rejected_incomplete_truth_objects"] += 1
+            for name in missing_truth_objects:
+                selection_counts[f"missing_truth_object::{name}"] += 1
+            continue
+
+        selection_counts["events_truth_selected"] += 1
 
         # Convention A (theory-study primary): boost into the frame, then
         # measure angles against the fixed lab axes — no rotation after boost.
@@ -523,6 +581,17 @@ def export_gen(
         "feature_policy": "raw variables only (E, theta, phi, mass)",
         "n_sidecar": len(sidecar),
         "n_skipped": len(skipped),
+        "truth_selection": {
+            "higgs_decay": "H->bb",
+            "ttbar_decay": "semileptonic_emu",
+            "tau_policy": "exclude direct W->tau nu",
+            "hadronic_w_flavor_policy": (
+                "require q and qbar with |PDG| in 1..4; rare W->cb is "
+                "counted as incomplete truth objects"
+            ),
+        },
+        "selection_counts": dict(selection_counts),
+        "n_read": n_read,
         "n_exported": len(rows),
         "max_events": max_events,
         "weight_report": (
@@ -534,6 +603,9 @@ def export_gen(
         "schema_report": report,
         "created": datetime.datetime.now().isoformat(),
     })
+    print("generator truth-channel selection:")
+    for key, value in sorted(selection_counts.items()):
+        print(f"  {key}: {value}")
     print(f"wrote {len(rows)} rows -> {out_path}")
     print(f"schema check: ok={report['ok']}")
     for problem in report["problems"]:
