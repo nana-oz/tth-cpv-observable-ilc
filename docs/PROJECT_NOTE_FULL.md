@@ -1533,8 +1533,13 @@ scripts/export_features.py
 ```
 
 Chapter 4 must extend this same code path with the analyser metadata and
-`O_lD` column. The current selection requires a strict direct-electron or
-direct-muon semileptonic topology:
+`O_lD` column. The current generator selection requires both
+
+```math
+H\to b\bar b
+```
+
+and a strict direct-electron or direct-muon semileptonic top-pair topology:
 
 ```math
 N_{W,\mathrm{had}}=1,
@@ -1551,6 +1556,13 @@ Here:
 
 The truth selection must exclude fully hadronic events, dilepton events, and
 events in which the charged lepton is produced through a tau decay.
+
+The baseline hadronic-W analyser is restricted to $u,d,s,c$ and their
+antiquarks. A physical $W^+\to c\bar b$ or $W^-\to b\bar c$ decay is currently
+classified as hadronic but then rejected by the required light-quark-pair
+completeness check because the $b$ daughter is not a W-analyser candidate.
+Preserve and report this policy for the baseline. Do not silently add $b$ to
+the W-jet analyser set.
 
 The generator feature table should record at least:
 
@@ -1575,26 +1587,27 @@ been implemented, repeat the generator part of Chapter 3 Step 5.
 
 Do not overwrite the frozen Chapter 3 products.
 
-Create a new Chapter 4 config, for example
+Create the Chapter 4 config by copying the complete frozen LR config:
 
-```text
-configs/analysis_angular_lr.yaml
+```bash
+cp configs/analysis_ow_lr.yaml configs/analysis_angular_lr.yaml
 ```
 
-with a separate output directory:
+Do not construct the new config from the short YAML fragment below; it would
+omit the registered samples, weights, split, binning, and kinfit settings.
+Keep all inherited settings and change only:
 
 ```yaml
 analysis:
   name: angular_lr_comparison
-  helicity: LR
   observable_family: O_W
-
-observable:
-  default_frame: higgs_rest
 
 outputs:
   base_dir: outputs/angular_lr
 ```
+
+`observable_family: O_W` remains the default only. The commands below select
+either feature-table column explicitly through `--observable`.
 
 The CPV-interference generator export is
 
@@ -1669,6 +1682,35 @@ are not part of the final common-topology comparison in this chapter.
 Use the existing feature-export, histogram, and Fisher framework.
 
 Do not create a second independent analysis chain.
+
+### Start here: implementation map
+
+Do not infer the repository status from a planned output filename. Use this
+map before editing:
+
+| Capability | Current status | Student action |
+| --- | --- | --- |
+| $H\to b\bar b$ plus direct $e/\mu$ semileptonic truth selection | implemented | preserve it in `objects.py` and `export_features.py` |
+| `O_W` at gen and reco level | implemented | use it as the reference observable |
+| `--observable <column-name>` | implemented | use the existing interface in `build_angular_observable.py` |
+| truth down-type analyser metadata and `O_lD` | not implemented | extend `objects.py` and `export_features.py` |
+| charge-dependent reco analyser ordering | not implemented | add one helper in `flavor.py`, then call it from `export_features.py` |
+| reconstructed `lepton_flavour` | not implemented | return the source collection from `first_isolated_lepton()` |
+| electron/muon template filtering | not implemented | add `--lepton-flavour` to `build_angular_observable.py` |
+| Chapter 4 config | not present | copy the complete LR config as described in §4.1.4 |
+| new schema entries and convention tests | not present | update `DATA_SCHEMA.md` and the tests named in §4.2.6 |
+
+Recommended implementation order:
+
+```text
+1. truth metadata and gen O_lD
+2. charge-ordering helper and its unit tests
+3. reco lepton category and reco O_lD
+4. electron/muon histogram filtering
+5. schema documentation
+6. one-chunk gen and reco validation
+7. Fisher table and plots
+```
 
 ### 4.2.1 Truth object identification
 
@@ -1893,13 +1935,26 @@ lepton_charge
 lepton_flavour
 ```
 
-A possible value of `down_candidate_source` is
+Freeze `hadronic_W_charge` as the electric charge $+1$ or $-1$, not the PDG
+code $+24$ or $-24$. The reco mapping is:
 
 ```text
-qbar_orientation_plus_lepton_charge
+lepton_charge > 0:
+    hadronic_W_charge = -1
+    idx_W_down_candidate = idx_W_quark
+
+lepton_charge < 0:
+    hadronic_W_charge = +1
+    idx_W_down_candidate = idx_W_antiquark
 ```
 
-for the initial baseline.
+Use
+
+```text
+down_candidate_source = qqbar_orientation_plus_lepton_charge
+```
+
+for this initial baseline.
 
 ### 4.2.4 Reconstructed lepton flavour
 
@@ -2011,6 +2066,53 @@ indices remain unchanged. The important statement is that the same physical
 quark, antiquark, and down-type candidate are recovered after the input slot
 order is exchanged.
 
+Put the charge-ordering and W-slot tests in
+
+```text
+tests/test_flavor.py
+```
+
+Keep the existing wrap and `delta_phi` checks in
+
+```text
+tests/test_angles.py
+```
+
+Add truth-topology and down-type-daughter tests in
+
+```text
+tests/test_objects.py
+```
+
+Add electron/muon table-filter tests in
+
+```text
+tests/test_angular_categories.py
+```
+
+These tests must show that the electron and muon rows are disjoint, their union
+equals the `all` rows, and changing only `--output-tag` does not select a
+category.
+
+After implementation, run:
+
+```bash
+pytest -q \
+  tests/test_flavor.py \
+  tests/test_angles.py \
+  tests/test_objects.py \
+  tests/test_angular_categories.py
+```
+
+Then run one generator and one reco export and check that:
+
+```text
+O_W and O_lD have documented finite-event counts
+electron count + muon count = all-category count
+invalid lepton charge never receives a default O_lD ordering
+the metadata records the H->bb, direct-e/mu and W->cb policies
+```
+
 ---
 
 ## 4.3 Generator-to-reconstruction comparison
@@ -2019,7 +2121,7 @@ The primary comparison uses:
 
 ```text
 gen:
-    strict direct-e/mu semileptonic events for which the observable is valid
+    H->bb, strict direct-e/mu semileptonic events for which the observable is valid
 
 reco:
     full accepted reconstruction baseline
@@ -2166,11 +2268,11 @@ Produce the following table:
 
 | Observable            | Lepton category     | Gen population            | Reco population          | Frame        | $N_{\rm gen}$ | $N_{\rm reco}$ | $I_{\rm gen}$ | $I_{\rm reco}$ | $I_{\rm reco}/I_{\rm gen}$ |
 | --------------------- | ------------------- | ------------------------- | ------------------------ | ------------ | ------------: | -------------: | ------------: | -------------: | -------------------------: |
-| $O_{jj}$ (`O_W`)      | electron            | strict semileptonic $e$   | full accepted reco $e$   | `higgs_rest` |               |                |               |                |                            |
-| $O_{jj}$ (`O_W`)      | muon                | strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |               |                |               |                |                            |
+| $O_{jj}$ (`O_W`)      | electron            | $H\to b\bar b$, strict semileptonic $e$   | full accepted reco $e$   | `higgs_rest` |               |                |               |                |                            |
+| $O_{jj}$ (`O_W`)      | muon                | $H\to b\bar b$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |               |                |               |                |                            |
 | $O_{jj}$ (`O_W`)      | combined likelihood | $e+\mu$ categories        | $e+\mu$ categories       | `higgs_rest` |               |                |   $I_e+I_\mu$ |    $I_e+I_\mu$ |                            |
-| $O_{\ell D}$ (`O_lD`) | electron            | strict semileptonic $e$   | full accepted reco $e$   | `higgs_rest` |               |                |               |                |                            |
-| $O_{\ell D}$ (`O_lD`) | muon                | strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |               |                |               |                |                            |
+| $O_{\ell D}$ (`O_lD`) | electron            | $H\to b\bar b$, strict semileptonic $e$   | full accepted reco $e$   | `higgs_rest` |               |                |               |                |                            |
+| $O_{\ell D}$ (`O_lD`) | muon                | $H\to b\bar b$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |               |                |               |                |                            |
 | $O_{\ell D}$ (`O_lD`) | combined likelihood | $e+\mu$ categories        | $e+\mu$ categories       | `higgs_rest` |               |                |   $I_e+I_\mu$ |    $I_e+I_\mu$ |                            |
 
 For the combined rows:
@@ -2287,7 +2389,7 @@ Do not switch between several different names for the same template.
 
 ### 4.5.1 Minimum required plots
 
-The minimum required plots are:
+There are four required comparison types:
 
 1. $O_{jj}$: signed CPV-interference template, generator versus
    reconstruction level;
@@ -2301,6 +2403,11 @@ The minimum required plots are:
 
 For the primary statistical result, electron and muon remain separate
 categories.
+
+Each of the four comparison types must therefore contain separate electron and
+muon panels. This means either four two-panel figures or eight single-panel
+figures. A single inclusive curve is not a substitute for these category
+plots.
 
 A combined $e+\mu$ curve may be shown for visual comparison, but the combined
 Fisher result must still use
@@ -2366,7 +2473,42 @@ It reads one observable column from a feature CSV through
 --observable <column-name>
 ```
 
-and writes the result under
+The `--observable` interface already exists. At the start of Chapter 4, the
+script does **not** yet filter electron and muon events. Add:
+
+```text
+--lepton-flavour all
+--lepton-flavour electron
+--lepton-flavour muon
+```
+
+with `all` as the default. Apply this filter to the `lepton_flavour` feature
+column after the existing train/validation/test split. Record the selected
+category and its event count in the output metadata.
+
+The intended implementation is equivalent to:
+
+```python
+parser.add_argument(
+    "--lepton-flavour",
+    choices=("all", "electron", "muon"),
+    default="all",
+)
+
+# Apply after the existing split filter.
+if args.lepton_flavour != "all":
+    if any("lepton_flavour" not in row for row in rows):
+        raise SystemExit("Feature table has no lepton_flavour column")
+    rows = [
+        row for row in rows
+        if row["lepton_flavour"] == args.lepton_flavour
+    ]
+```
+
+`--output-tag` changes only the filename. It does not select events. Never
+produce an `*_e_*` or `*_mu_*` file by changing only `--output-tag`.
+
+The script writes the result under
 
 ```text
 outputs/angular_lr/angular/<observable>/
@@ -2379,7 +2521,7 @@ outputs/angular_lr/angular/O_W/
 outputs/angular_lr/angular/O_lD/
 ```
 
-Expected bin files include:
+Inclusive bin files may be kept as smoke-test products:
 
 ```text
 O_W_all_gen_bins.csv
@@ -2397,18 +2539,45 @@ O_lD_all_sm_gen_bins.csv
 O_lD_all_sm_reco_bins.csv
 ```
 
-Separate electron and muon templates may either be written with explicit output
-tags, for example
+Write separate electron and muon templates with explicit output tags. Use the
+following frozen convention:
 
 ```text
 O_W_all_gen_e_bins.csv
 O_W_all_gen_mu_bins.csv
+O_W_all_reco_e_bins.csv
+O_W_all_reco_mu_bins.csv
+O_W_all_sm_gen_e_bins.csv
+O_W_all_sm_gen_mu_bins.csv
+O_W_all_sm_reco_e_bins.csv
+O_W_all_sm_reco_mu_bins.csv
 ```
 
-or placed in separate category directories.
+and the corresponding eight files for `O_lD`.
 
-Choose one convention and document it. Do not rely on file appearance to infer
-which category was used.
+For example, the two `O_lD` generator interference templates are:
+
+```bash
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
+  --observable O_lD \
+  --lepton-flavour electron \
+  --split all \
+  --output-tag gen_e
+
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
+  --observable O_lD \
+  --lepton-flavour muon \
+  --split all \
+  --output-tag gen_mu
+```
+
+Repeat this pair for `O_W`, for reco, and for SM. Use `weight_sm` for the SM
+commands. The output metadata, not only the filename, must state
+`lepton_flavour: electron` or `lepton_flavour: muon`.
 
 ### 4.5.4 Fisher interface
 
@@ -2441,7 +2610,7 @@ python3 scripts/evaluate_fisher.py \
   --luminosity-scale 8000
 ```
 
-Run the Fisher calculation separately for:
+For each observable, run the Fisher calculation separately for:
 
 ```text
 electron gen
@@ -2452,6 +2621,12 @@ muon reco
 
 Then calculate the combined-category Fisher by adding the electron and muon
 results.
+
+The minimum headline result therefore contains eight Fisher JSON files:
+
+```text
+2 observables x 2 levels x 2 lepton categories
+```
 
 The machine-readable Fisher result is stored in
 
@@ -2701,7 +2876,8 @@ The Chapter 4 deliverable is:
 
 4. the LR Fisher-information summary table;
 
-5. the four minimum generator/reconstruction template plots;
+5. the four required generator/reconstruction comparison types, each with
+   separate electron and muon panels;
 
 6. a short explanation of the main reconstruction processes that can affect
    the down-type analyser;
