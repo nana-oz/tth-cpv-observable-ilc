@@ -24,6 +24,25 @@ CHARGED_LEPTONS = {11, 13, -11, -13}
 NEUTRINOS = {12, 14, -12, -14}
 GENERATOR_INTERNAL = {90, 91, 92, 93, 94, 95, 96, 97, 98, 99}
 
+W_QUARKS = {
+    1, 2, 3, 4, 5,
+    -1, -2, -3, -4, -5,
+}
+
+W_EMU_LEPTONS = {
+    11, 13,
+    -11, -13,
+}
+
+W_TAU_LEPTONS = {
+    15, -15,
+}
+
+W_NEUTRINOS = {
+    12, 14, 16,
+    -12, -14, -16,
+}
+
 # Ma2018 hadronic-W analyzer sets (sign-observable study only):
 WPLUS_DOWNTYPE_ANALYZER = {-1, -3}   # dbar, sbar from W+
 WMINUS_DOWNTYPE_ANALYZER = {1, 3}    # d, s from W-
@@ -72,22 +91,66 @@ def choose_direct_child(parent, target_pdg: int):
     return (with_daughters or children)[0]
 
 
-def w_direct_final_daughters(w) -> list:
-    """Follow W self-links and generator-internal codes to the real daughters."""
-    if w is None:
+def physical_children(parent, max_depth: int = 40) -> list:
+    """Return physical daughters after skipping self-copies and generator nodes."""
+    if parent is None:
         return []
-    out = []
-    for child in daughters(w):
-        child_pdg = pdg(child)
-        if child_pdg is None:
+
+    root_pdg = pdg(parent)
+    output = []
+    stack = [(parent, 0)]
+    seen = set()
+
+    while stack:
+        node, depth = stack.pop()
+        if node is None or depth > max_depth:
             continue
-        if abs(child_pdg) in GENERATOR_INTERNAL:
-            out.extend(w_direct_final_daughters(child))
-        elif child_pdg == pdg(w):
-            out.extend(w_direct_final_daughters(child))
-        else:
-            out.append(child)
-    return out
+
+        for child in daughters(node):
+            child_id = id(child)
+            if child_id in seen:
+                continue
+            seen.add(child_id)
+
+            child_pdg = pdg(child)
+            if child_pdg is None:
+                continue
+
+            node_pdg = pdg(node)
+            is_generator_internal = abs(child_pdg) in GENERATOR_INTERNAL
+            is_self_copy = (
+                child_pdg == node_pdg
+                or child_pdg == root_pdg
+            )
+
+            if is_generator_internal or is_self_copy:
+                stack.append((child, depth + 1))
+            else:
+                output.append(child)
+
+    return output
+
+
+def choose_physical_child(parent, target_pdg: int):
+    """Choose a physical daughter after skipping self-copies/internal nodes."""
+    candidates = [
+        child
+        for child in physical_children(parent)
+        if pdg(child) == target_pdg
+    ]
+    if not candidates:
+        return None
+
+    with_daughters = [
+        child for child in candidates
+        if daughters(child)
+    ]
+    return (with_daughters or candidates)[0]
+
+
+def w_direct_final_daughters(w) -> list:
+    """Follow W self-links and generator-internal codes to physical daughters."""
+    return physical_children(w)
 
 
 def choose_w_daughter(w, allowed_pdgs: set):
@@ -95,6 +158,129 @@ def choose_w_daughter(w, allowed_pdgs: set):
         child for child in w_direct_final_daughters(w) if pdg(child) in allowed_pdgs
     ]
     return candidates[0] if candidates else None
+
+
+def classify_higgs_decay(mc_list: list) -> str:
+    """Classify the physical Higgs decay mode."""
+    higgs = find_hard_particle(mc_list, 25)
+    if higgs is None:
+        return "H->none"
+
+    child_pdgs = [
+        pdg(child)
+        for child in physical_children(higgs)
+        if pdg(child) is not None
+    ]
+    abs_child_pdgs = [abs(value) for value in child_pdgs]
+
+    # Physsim STDHEP may encode a two-body decay as
+    # H -> H copy -> one decay seed -> generator node 94 -> both daughters.
+    # The absolute PDG of the first physical seed therefore identifies the
+    # mode even when only one member of the pair is directly visible here.
+    if 5 in abs_child_pdgs:
+        return "H->bb"
+
+    if 24 in abs_child_pdgs:
+        return "H->WW"
+
+    if 15 in abs_child_pdgs:
+        return "H->tautau"
+
+    if 21 in abs_child_pdgs:
+        return "H->gg"
+
+    return "H->other"
+
+
+def classify_w_decay(w) -> str:
+    """Classify W as hadronic, direct e/mu, tau, or unknown."""
+    if w is None:
+        return "unknown"
+
+    final_pdgs = {
+        pdg(child)
+        for child in physical_children(w)
+        if pdg(child) is not None
+    }
+
+    n_quarks = sum(
+        1 for value in final_pdgs
+        if value in W_QUARKS
+    )
+
+    has_any_charged_lepton = bool(
+        final_pdgs & (W_EMU_LEPTONS | W_TAU_LEPTONS)
+    )
+    has_any_neutrino = bool(final_pdgs & W_NEUTRINOS)
+
+    if (
+        n_quarks >= 2
+        and not has_any_charged_lepton
+        and not has_any_neutrino
+    ):
+        return "hadronic"
+
+    w_pdg = pdg(w)
+
+    if w_pdg == 24:
+        # W+ -> l+ nu, where l+ has negative PDG code.
+        has_emu = bool(final_pdgs & {-11, -13})
+        has_tau = -15 in final_pdgs
+        has_matching_neutrino = bool(final_pdgs & {12, 14, 16})
+
+    elif w_pdg == -24:
+        # W- -> l- anti-nu, where l- has positive PDG code.
+        has_emu = bool(final_pdgs & {11, 13})
+        has_tau = 15 in final_pdgs
+        has_matching_neutrino = bool(final_pdgs & {-12, -14, -16})
+
+    else:
+        return "unknown"
+
+    if has_emu and has_matching_neutrino:
+        return "leptonic_emu"
+
+    if has_tau and has_matching_neutrino:
+        return "leptonic_tau"
+
+    return "unknown"
+
+
+def classify_ttbar_decay(mc_list: list) -> str:
+    """Classify the ttbar decay topology."""
+    top = find_hard_particle(mc_list, 6)
+    antitop = find_hard_particle(mc_list, -6)
+
+    if top is None or antitop is None:
+        return "ttbar_unknown"
+
+    w_plus = choose_physical_child(top, 24)
+    w_minus = choose_physical_child(antitop, -24)
+
+    w_plus_mode = classify_w_decay(w_plus)
+    w_minus_mode = classify_w_decay(w_minus)
+
+    modes = {w_plus_mode, w_minus_mode}
+
+    if "unknown" in modes:
+        return "ttbar_unknown"
+
+    if w_plus_mode == "hadronic" and w_minus_mode == "hadronic":
+        return "hadronic"
+
+    if (
+        w_plus_mode.startswith("leptonic_")
+        and w_minus_mode.startswith("leptonic_")
+    ):
+        return "dileptonic"
+
+    if modes == {"hadronic", "leptonic_emu"}:
+        return "semileptonic_emu"
+
+    if modes == {"hadronic", "leptonic_tau"}:
+        return "semileptonic_tau"
+
+    return "ttbar_unknown"
 
 
 @dataclass
@@ -126,10 +312,10 @@ def identify_semileptonic_truth(mc_list: list) -> SemileptonicTruth:
     truth.higgs = find_hard_particle(mc_list, 25)
     truth.top = find_hard_particle(mc_list, 6)
     truth.antitop = find_hard_particle(mc_list, -6)
-    truth.top_b = choose_direct_child(truth.top, 5)
-    truth.antitop_bbar = choose_direct_child(truth.antitop, -5)
-    truth.w_plus = choose_direct_child(truth.top, 24)
-    truth.w_minus = choose_direct_child(truth.antitop, -24)
+    truth.top_b = choose_physical_child(truth.top, 5)
+    truth.antitop_bbar = choose_physical_child(truth.antitop, -5)
+    truth.w_plus = choose_physical_child(truth.top, 24)
+    truth.w_minus = choose_physical_child(truth.antitop, -24)
 
     for w in (truth.w_plus, truth.w_minus):
         if w is None:
