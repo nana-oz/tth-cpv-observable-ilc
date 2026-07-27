@@ -1580,14 +1580,20 @@ semileptonic $e/\mu$ truth population.
 All generator-to-reconstruction comparisons later in this chapter must use
 this same physics-channel definition.
 
-### 4.1.4 Rerun the Chapter 3 generator export
+### 4.1.4 Chapter completion order
 
-After the strict semileptonic truth selection and the `O_lD` feature column have
-been implemented, repeat the generator part of Chapter 3 Step 5.
+The commands in this section are **post-implementation validation commands**,
+not an immediately runnable Quick Start. `build_angular_observable.py` does not
+calculate `O_lD`; it only reads an `O_lD` column that must already exist in the
+feature CSV.
 
-Do not overwrite the frozen Chapter 3 products.
+There is no separate preliminary rerun of Chapter 3 Step 5. The Chapter 4
+exports below replace that rerun and write to a new output directory. Keep the
+old Chapter 3 products only as historical validation records.
 
-Create the Chapter 4 config by copying the complete frozen LR config:
+**Step 1 — create the complete Chapter 4 config.**
+
+Copy the frozen LR config:
 
 ```bash
 cp configs/analysis_ow_lr.yaml configs/analysis_angular_lr.yaml
@@ -1606,10 +1612,17 @@ outputs:
   base_dir: outputs/angular_lr
 ```
 
-`observable_family: O_W` remains the default only. The commands below select
+`observable_family: O_W` remains the default only. The template commands select
 either feature-table column explicitly through `--observable`.
 
-The CPV-interference generator export is
+**Step 2 — implement the new observable.**
+
+Modify `objects.py`, `flavor.py`, and `export_features.py` as specified in
+§4.2. After this work, both the generator and reconstruction feature exporters
+must write `O_W` and `O_lD`. Before this implementation is complete, a command
+with `--observable O_lD` is expected to fail with no finite `O_lD` entries.
+
+**Step 3 — export the CPV-interference generator features.**
 
 ```bash
 python3 scripts/export_features.py \
@@ -1618,25 +1631,14 @@ python3 scripts/export_features.py \
   --chunk 0
 ```
 
-Build the two signed CPV-interference templates from the same feature table:
+This writes:
 
-```bash
-python3 scripts/build_angular_observable.py \
-  --config configs/analysis_angular_lr.yaml \
-  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
-  --observable O_W \
-  --split all \
-  --output-tag gen
-
-python3 scripts/build_angular_observable.py \
-  --config configs/analysis_angular_lr.yaml \
-  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
-  --observable O_lD \
-  --split all \
-  --output-tag gen
+```text
+outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv
+outputs/angular_lr/features/features_gen_higgs_rest_chunk0.meta.json
 ```
 
-Export the corresponding SM generator table:
+**Step 4 — export the SM generator features.**
 
 ```bash
 python3 scripts/export_features.py \
@@ -1646,7 +1648,36 @@ python3 scripts/export_features.py \
   --chunk 0
 ```
 
-Build the two SM templates:
+This writes:
+
+```text
+outputs/angular_lr/features/features_sm_gen_higgs_rest_chunk0.csv
+outputs/angular_lr/features/features_sm_gen_higgs_rest_chunk0.meta.json
+```
+
+Both feature CSVs must contain the `O_W` and `O_lD` columns before continuing.
+
+**Step 5 — build the four generator-level templates.**
+
+Build the two signed CPV-interference templates from the CPV feature table:
+
+```bash
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
+  --observable O_W \
+  --split all \
+  --output-tag gen
+
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
+  --observable O_lD \
+  --split all \
+  --output-tag gen
+```
+
+Build the two SM templates from the SM feature table:
 
 ```bash
 python3 scripts/build_angular_observable.py \
@@ -1666,14 +1697,64 @@ python3 scripts/build_angular_observable.py \
   --output-tag sm_gen
 ```
 
-Check that $O_{jj}$ and $O_{\ell D}$ have the same number of valid
-generator events.
+The complete output prefix is:
 
-Any difference must be explained by an explicit validity condition. Do not
-silently filter different event populations for the two observables.
+```text
+outputs/angular_lr/
+```
 
-The old Chapter 3 plots may remain as historical validation products, but they
-are not part of the final common-topology comparison in this chapter.
+The four template stems are:
+
+| Input feature table | Observable | Output stem below `outputs/angular_lr/` |
+| --- | --- | --- |
+| CPV interference | `O_W` | `angular/O_W/O_W_all_gen` |
+| CPV interference | `O_lD` | `angular/O_lD/O_lD_all_gen` |
+| SM | `O_W` | `angular/O_W/O_W_all_sm_gen` |
+| SM | `O_lD` | `angular/O_lD/O_lD_all_sm_gen` |
+
+Each stem produces:
+
+```text
+<stem>.png
+<stem>_bins.csv
+<stem>_bins.meta.json
+```
+
+For the CPV templates, the default `weight_template` is
+`weight_interference_signed`, so the histogram represents the signed
+interference template $f_1$. For the SM templates, the `weight_sm` column is
+
+```math
+w_{\mathrm{SM}}
+=
+\frac{\sigma_{\mathrm{SM}}}{N_{\mathrm{written}}},
+```
+
+so the histogram provides the physical SM denominator $f_0$. These templates
+are in cross-section units and have not yet been multiplied by the total
+luminosity. The later Fisher command applies luminosity through
+`--luminosity-scale`.
+
+These four all-category templates provide the first generator-level closure.
+The electron/muon-separated templates required for the headline Fisher result
+are built later through the category interface in §4.5.
+
+**Important truth-selection update.** The current generator exporter now
+requires $H\to b\bar b$ and the strict direct-$e/\mu$ semileptonic topology.
+Therefore, rerunning the generator export changes the selected event count,
+template bin contents, template integrals, and Fisher information relative to
+older Chapter 3 products made before this truth selection was added. Do not
+mix old Chapter 3 templates with the new Chapter 4 templates.
+
+For an event that remains selected, the truth selection alone should not
+change its existing `O_W` value because the $O_W$ definition is unchanged. If
+the same retained event receives a different `O_W`, investigate the object
+selection or ordering rather than attributing the difference to the channel
+filter.
+
+Finally, check that $O_{jj}$ and $O_{\ell D}$ have the documented number of
+finite generator entries. Any difference must be explained by an explicit
+validity condition; do not silently filter different event populations.
 
 ---
 
