@@ -1313,83 +1313,1455 @@ polarization-matched SM denominator before combining running scenarios.
 
 ---
 
-# Chapter 4 — The full $O_W$ angular–ML baseline (main milestone)
+# Chapter 4 — Comparing two angular observables at generator and reconstruction level
 
-**This is the core of the project** — expect roughly two to three effective weeks including debugging. Everything later reuses this machinery. Chapter 3 has already exercised the frozen reco W orientation on one chunk; Chapter 4 scales it out and quantifies its physics performance.
+**Current scope: pure LR only.**
 
-## 4.1 Observable
+In Chapter 3, we found that an angular observable with strong CPV-interference
+sensitivity at generator level retains almost no information in the current
+reconstruction baseline.
+
+Two issues may contribute to this loss:
+
+- **Reconstructing and ordering two light-quark jets is difficult.**
+  The current diagnostics indicate approximately $75\%$ correct W-jet
+  assignment, about $67\%$ performance in the relatively favourable
+  $c/\bar c$ category, and substantially weaker signed-flavour identification
+  for $u,d,s$ jets and their antiquarks.
+
+  **Question:** can we construct an alternative observable using one
+  well-reconstructed charged lepton and only one selected hadronic analyser
+  jet?
+
+- **The current quark-versus-antiquark ordering may not be the most suitable
+  ordering for the physics information that we want to retain.**
+
+  **Question:** can a down-type/up-type assignment, a W-decay pair constraint,
+  or a better-identified subset preserve more information than the current
+  inclusive quark-versus-antiquark decision?
+
+This chapter therefore introduces a second angular observable,
+$O_{\ell D}$, and compares it with the existing same-W observable $O_{jj}$.
+
+The aim is not to assume that either observable must be better. The aim is to
+measure:
+
+1. how much CPV-interference information each observable contains at generator
+   level;
+2. how much of that information survives reconstruction;
+3. which reconstruction decision causes the dominant loss;
+4. whether using the charged lepton as a stable analyser makes
+   $O_{\ell D}$ more robust than $O_{jj}$.
+
+The quoted W-assignment and flavour-tagging numbers above are approximate
+Chapter 3 diagnostics. Update them if the frozen Chapter 3 validation table
+changes.
+
+---
+
+## 4.1 Observable definitions and common truth topology
+
+### 4.1.1 Same-W jet-pair observable
+
+The existing observable is
 
 ```math
-O_W=\Delta\phi(j_{W,q},\,j_{W,\bar q})
+O_{jj}
+\equiv
+O_W
+=
+\Delta\phi(j_{W,q},j_{W,\bar q})
+=
+\mathrm{wrap}
+\left(
+\phi_{j_{W,q}}-\phi_{j_{W,\bar q}}
+\right).
 ```
 
-at gen and reco level, using the ParT-assisted pair assignment, a validated
-quark-antiquark orientation for the selected reco pair, and the
-inclusive-gen/full-reco event populations defined in §2.8. The orientation is
-the Weaver $P(q)-P(\bar q)$ rule of §2.3; always report its status and margin
-distributions alongside the result.
+Here:
 
-## 4.2 Frame study
+* $j_{W,q}$ is the quark jet from the hadronic W decay;
+* $j_{W,\bar q}$ is the antiquark jet from the same W decay;
+* $\phi$ is the azimuthal angle in the selected reference frame;
+* `wrap` maps the angular difference to $[-\pi,\pi)$.
 
-Evaluate $O_W$ in the laboratory frame, the Higgs rest frame, and the $t\bar{t}$ rest frame (§2.4). Pick a default frame based on the results and freeze it (Appendix C).
+The existing feature-table column remains
 
-## 4.3 Feature schemes
+```text
+O_W
+```
 
-Train with the minimal set $F_W^{\mathrm{min}}$ and the extended set $F_W^{\mathrm{ext}}$ of §2.6 (respecting the current raw-variables decision of §2.5).
+because this name is already used throughout the repository. In this chapter,
+the notation $O_{jj}$ is used when comparing it with the lepton–jet
+observable.
 
-## 4.4 Models — deliberately simple
+### 4.1.2 Lepton–down-type-jet observable
 
-1. a BDT (e.g. CatBoost) as the baseline;
-2. a small MLP as a cross-check.
-
-> This is a *stability* study, not an architecture search. If the BDT and the MLP disagree strongly, the interesting question is *why* — not which is bigger.
-
-## 4.5 Required comparisons
-
-Compute (per §2.10, with the rules of §2.12):
+Let
 
 ```math
-I_{\mathrm{angle}}^{\mathrm{gen}},\quad
-I_{\mathrm{angle}}^{\mathrm{reco}},\quad
-I_{\mathrm{ML}}^{\mathrm{gen}},\quad
-I_{\mathrm{ML}}^{\mathrm{reco}},
+U\in\{u,c\},
+\qquad
+D\in\{d,s\},
 ```
 
-plus $R_{\mathrm{reco}}$ and $G_{\mathrm{ML/angle}}$ — **separately for pure LR and pure RL**.
+where $U$ denotes an up-type light quark and $D$ denotes a down-type light
+quark.
 
-For the headline $R_{\mathrm{reco}}$, build $I_{\mathrm{gen}}$ from the
-inclusive generated population and $I_{\mathrm{reco}}$ from the full
-reconstructed baseline. Use the same LR/RL sample, chunk scope, luminosity,
-coupling convention, weight normalisation, observable definition, and bin
-edges, but do not intersect event IDs (§2.8). The optional common-event
-$R_{\mathrm{migration}}$ may be added as a diagnostic, clearly labelled and
-kept separate from the total-retention result.
+The allowed hadronic W decays are
 
-## 4.6 Student checkpoint: orient the top sides before Chapter 5
+```math
+W^+\to U\bar D,
+\qquad
+W^-\to D\bar U.
+```
 
-The exporter already supplies the selected hadronic and leptonic sides, the
-isolated-lepton charge, and the fitted neutrino. Before calling the existing
-hadronic-minus-leptonic columns $O_b$ or $O_{\mathrm{top}}$, answer and test:
+Let
 
-1. For each lepton sign, which side is $t$ and which is $\bar t$ under
-   $t\to W^+b$ and $\bar t\to W^-\bar b$?
-2. Which selected b slot must therefore become $b_t$ and which must become
-   $b_{\bar t}$?
-3. Does the reconstructed top composite include the fitted neutrino on the
-   leptonic side, and does swapping the lepton sign swap the expected labels?
-4. On a truth-labelled diagnostic subset only, what are the orientation
-   accuracy, failure count, and sign-flip rate for $O_b$ and $O_{\mathrm{top}}$?
+```math
+Q_\ell
+```
 
-Write unit tests with one positive- and one negative-lepton toy event, then
-show the supervisor the mapping table and truth diagnostic before Chapter 5.
-Until this checkpoint passes, the exported `O_b`/`O_top` columns are selected
-hadronic-minus-leptonic diagnostics, not physics-labelled signed observables.
+denote the electric charge of the isolated charged lepton.
+
+The charged-lepton sign determines which top decayed leptonically and which W
+decayed hadronically.
+
+For a positive charged lepton,
+
+```math
+Q_\ell>0:
+\qquad
+t\to bW^+\to b\ell^+\nu,
+```
+
+so the other side is
+
+```math
+\bar t\to\bar bW^-,
+\qquad
+W^-\to D\bar U.
+```
+
+The required hadronic spin analyser is therefore the down-type quark
+$D=d,s$.
+
+For a negative charged lepton,
+
+```math
+Q_\ell<0:
+\qquad
+\bar t\to\bar bW^-\to\bar b\ell^-\bar\nu,
+```
+
+so the other side is
+
+```math
+t\to bW^+,
+\qquad
+W^+\to U\bar D.
+```
+
+The required hadronic spin analyser is therefore the down-type antiquark
+$\bar D=\bar d,\bar s$.
+
+Define the top-side analyser $a_t$ and antitop-side analyser
+$a_{\bar t}$ by
+
+```math
+(a_t,a_{\bar t})
+=
+\begin{cases}
+(\ell^+,j_D),&Q_\ell>0,\\[1mm]
+(j_{\bar D},\ell^-),&Q_\ell<0.
+\end{cases}
+```
+
+The new observable is
+
+```math
+O_{\ell D}
+=
+\Delta\phi(a_t,a_{\bar t})
+=
+\mathrm{wrap}
+\left(
+\phi_{a_t}-\phi_{a_{\bar t}}
+\right).
+```
+
+Explicitly,
+
+```math
+O_{\ell D}
+=
+\begin{cases}
+\mathrm{wrap}
+\left(
+\phi_{\ell^+}-\phi_{j_D}
+\right),&Q_\ell>0,\\[2mm]
+\mathrm{wrap}
+\left(
+\phi_{j_{\bar D}}-\phi_{\ell^-}
+\right),&Q_\ell<0.
+\end{cases}
+```
+
+The ordering is always
+
+```text
+top-side analyser minus antitop-side analyser
+```
+
+and not “lepton minus jet” for both lepton charges.
+
+The new feature-table column should be called
+
+```text
+O_lD
+```
+
+to avoid special characters in CSV column names and command-line arguments.
+
+### 4.1.3 Common generator-level topology
+
+The strict generator-level topology selection is implemented across
+
+```text
+src/ilc_tth_cpv/objects.py
+scripts/export_features.py
+```
+
+Chapter 4 must extend this same code path with the analyser metadata and
+`O_lD` column. The current selection requires a strict direct-electron or
+direct-muon semileptonic topology:
+
+```math
+N_{W,\mathrm{had}}=1,
+\qquad
+N_{W,e/\mu}=1.
+```
+
+Here:
+
+* $N_{W,\mathrm{had}}$ is the number of W bosons with a direct light-quark
+  decay;
+* $N_{W,e/\mu}$ is the number of W bosons with a direct electron or muon
+  decay.
+
+The truth selection must exclude fully hadronic events, dilepton events, and
+events in which the charged lepton is produced through a tau decay.
+
+The generator feature table should record at least:
+
+```text
+truth_topology
+hadronic_W_charge
+lepton_charge
+lepton_flavour
+down_type_daughter_pdg
+```
+
+Both $O_{jj}$ and $O_{\ell D}$ must be calculated from the same strict
+semileptonic $e/\mu$ truth population.
+
+All generator-to-reconstruction comparisons later in this chapter must use
+this same physics-channel definition.
+
+### 4.1.4 Rerun the Chapter 3 generator export
+
+After the strict semileptonic truth selection and the `O_lD` feature column have
+been implemented, repeat the generator part of Chapter 3 Step 5.
+
+Do not overwrite the frozen Chapter 3 products.
+
+Create a new Chapter 4 config, for example
+
+```text
+configs/analysis_angular_lr.yaml
+```
+
+with a separate output directory:
+
+```yaml
+analysis:
+  name: angular_lr_comparison
+  helicity: LR
+  observable_family: O_W
+
+observable:
+  default_frame: higgs_rest
+
+outputs:
+  base_dir: outputs/angular_lr
+```
+
+The CPV-interference generator export is
+
+```bash
+python3 scripts/export_features.py \
+  --config configs/analysis_angular_lr.yaml \
+  --level gen \
+  --chunk 0
+```
+
+Build the two signed CPV-interference templates from the same feature table:
+
+```bash
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
+  --observable O_W \
+  --split all \
+  --output-tag gen
+
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
+  --observable O_lD \
+  --split all \
+  --output-tag gen
+```
+
+Export the corresponding SM generator table:
+
+```bash
+python3 scripts/export_features.py \
+  --config configs/analysis_angular_lr.yaml \
+  --level gen \
+  --component sm \
+  --chunk 0
+```
+
+Build the two SM templates:
+
+```bash
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_sm_gen_higgs_rest_chunk0.csv \
+  --observable O_W \
+  --split all \
+  --weight-column weight_sm \
+  --output-tag sm_gen
+
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_sm_gen_higgs_rest_chunk0.csv \
+  --observable O_lD \
+  --split all \
+  --weight-column weight_sm \
+  --output-tag sm_gen
+```
+
+Check that $O_{jj}$ and $O_{\ell D}$ have the same number of valid
+generator events.
+
+Any difference must be explained by an explicit validity condition. Do not
+silently filter different event populations for the two observables.
+
+The old Chapter 3 plots may remain as historical validation products, but they
+are not part of the final common-topology comparison in this chapter.
+
+---
+
+## 4.2 Where to implement the new observable
+
+Use the existing feature-export, histogram, and Fisher framework.
+
+Do not create a second independent analysis chain.
+
+### 4.2.1 Truth object identification
+
+Relevant file:
+
+```text
+src/ilc_tth_cpv/objects.py
+```
+
+The existing function
+
+```python
+identify_semileptonic_truth(mc_list)
+```
+
+currently locates the Higgs, top, antitop, W bosons, W daughters, charged
+lepton, and neutrino.
+
+The file already defines the down-type analyser PDG sets:
+
+```python
+WPLUS_DOWNTYPE_ANALYZER = {-1, -3}  # dbar, sbar from W+
+WMINUS_DOWNTYPE_ANALYZER = {1, 3}   # d, s from W-
+```
+
+Extend the existing returned truth structure rather than independently
+re-reading the complete MCParticle tree inside `export_features.py`.
+
+The truth object should provide enough information to determine:
+
+```text
+number of hadronic W decays
+number of direct electron/muon W decays
+hadronic W charge
+lepton PDG and charge
+lepton flavour
+quark daughter
+antiquark daughter
+down-type analyser daughter
+truth topology label
+```
+
+A possible function-level structure is:
+
+```python
+@dataclass
+class SemileptonicTruth:
+    # Existing objects
+    higgs: object = None
+    top: object = None
+    antitop: object = None
+    top_b: object = None
+    antitop_bbar: object = None
+    w_plus: object = None
+    w_minus: object = None
+    wjet_quark: object = None
+    wjet_antiquark: object = None
+    lepton: object = None
+    neutrino: object = None
+
+    # New topology and analyser information
+    truth_topology: str = "invalid"
+    hadronic_w_pdg: int | None = None
+    lepton_pdg: int | None = None
+    lepton_flavour: str | None = None
+    down_type_daughter: object = None
+```
+
+The exact implementation may differ, but the topology and analyser information
+must be returned from one common truth-navigation function.
+
+### 4.2.2 Reconstructed W-pair orientation
+
+Relevant file:
+
+```text
+src/ilc_tth_cpv/flavor.py
+```
+
+The existing functions are
+
+```python
+light_charge_scores(scores)
+orient_w_pair(w1_scores, w2_scores)
+```
+
+`orient_w_pair()` returns:
+
+```text
+quark_slot
+antiquark_slot
+margin
+status
+```
+
+for the two W jets selected by the kinematic fit.
+
+The current reconstructed baseline first identifies
+
+```text
+wjet_quark
+wjet_antiquark
+```
+
+and then uses the isolated-lepton charge to select the down-type candidate.
+
+The mapping is:
+
+```text
+Q_l > 0:
+    the leptonic side is t -> b l+ nu
+    the hadronic side is anti-t -> anti-b W-
+    W- -> D + anti-U
+    wjet_quark is the down-type candidate j_D
+
+Q_l < 0:
+    the leptonic side is anti-t -> anti-b l- anti-nu
+    the hadronic side is t -> b W+
+    W+ -> U + anti-D
+    wjet_antiquark is the down-type candidate j_anti-D
+```
+
+Add one reusable function for this charge-dependent analyser ordering.
+
+For example:
+
+```python
+def semileptonic_down_type_order(
+    lepton_charge: float,
+) -> tuple[str, str] | None:
+    """Return the top-side and antitop-side analyzer object names."""
+    if lepton_charge > 0.0:
+        return "lepton", "wjet_quark"
+
+    if lepton_charge < 0.0:
+        return "wjet_antiquark", "lepton"
+
+    return None
+```
+
+This function does not decide which physical jets form the W pair. The
+kinematic fit and `orient_w_pair()` have already done that.
+
+It only converts
+
+```text
+lepton charge + q/qbar-oriented W pair
+```
+
+into
+
+```text
+top-side analyser + antitop-side analyser.
+```
+
+### 4.2.3 Feature export
+
+Relevant file:
+
+```text
+scripts/export_features.py
+```
+
+At generator level, `export_gen()` already calls
+
+```python
+truth = identify_semileptonic_truth(mc_list)
+```
+
+and constructs existing observables through the local helper
+
+```python
+def dphi(a: str, b: str) -> float:
+    ...
+```
+
+Add `O_lD` after the object angles have been filled.
+
+At reconstruction level, `export_reco()` already reads:
+
+```text
+idx_W1
+idx_W2
+lepton_charge
+OutputErrorFlowJets6 four-momenta
+RefinedJets6 Weaver probabilities
+```
+
+and calls
+
+```python
+flavor.orient_w_pair(...)
+```
+
+to define
+
+```text
+wjet_quark
+wjet_antiquark
+```
+
+After the object angles have been filled, construct the new observable through
+the common ordering function:
+
+```python
+ordered_names = flavor.semileptonic_down_type_order(lepton_charge)
+
+if ordered_names is None:
+    record["O_lD"] = NAN
+else:
+    object_a, object_b = ordered_names
+    record["O_lD"] = dphi(object_a, object_b)
+```
+
+Save enough information to diagnose the reconstructed choice:
+
+```text
+idx_W_down_candidate
+down_candidate_source
+hadronic_W_charge
+lepton_charge
+lepton_flavour
+```
+
+A possible value of `down_candidate_source` is
+
+```text
+qbar_orientation_plus_lepton_charge
+```
+
+for the initial baseline.
+
+### 4.2.4 Reconstructed lepton flavour
+
+The current helper
+
+```python
+first_isolated_lepton(evt)
+```
+
+returns the first object found in
+
+```text
+ISOElectrons
+ISOMuons
+```
+
+but does not preserve the source collection.
+
+Modify the interface so that it returns both the reconstructed object and its
+category, for example:
+
+```python
+def first_isolated_lepton(evt):
+    """Return the isolated lepton and its reconstruction category."""
+    for collection_name, flavour in (
+        ("ISOElectrons", "electron"),
+        ("ISOMuons", "muon"),
+    ):
+        collection = get_collection(evt, collection_name)
+
+        if collection is None:
+            continue
+
+        if collection.getNumberOfElements() > 0:
+            return collection.getElementAt(0), flavour
+
+    return None, None
+```
+
+The reconstructed `lepton_flavour` must come from the source collection.
+
+Do not infer electron versus muon from the reconstructed four-momentum.
+
+### 4.2.5 Data and sample locations
+
+Do not hard-code data paths inside the feature exporter or plotting scripts.
+
+The LR samples are registered in
+
+```text
+configs/samples.yaml
+```
+
+under the following keys:
+
+```text
+tthcpv_gen_elpr
+tthcpv_reco_elpr
+tth_sm_gen_elpr
+tth_sm_reco_elpr
+```
+
+These entries provide the registered locations of:
+
+```text
+generator STDHEP files
+signed-interference sidecars
+reconstructed SLCIO files
+SM cross-section normalisation
+```
+
+The analysis config selects the sample keys. `configs/samples.yaml` remains the
+single source of truth for sample locations and normalisation.
+
+### 4.2.6 Minimal convention tests
+
+These tests protect the object mapping and angle convention. They are not
+physics-performance tests.
+
+Check that:
+
+1. a positive-lepton event returns
+
+   ```python
+   delta_phi(lepton, wjet_quark)
+   ```
+
+2. a negative-lepton event returns
+
+   ```python
+   delta_phi(wjet_antiquark, lepton)
+   ```
+
+3. exchanging the input labels `W1` and `W2` does not change the final physical
+   result after the W pair has been oriented;
+
+4. missing, zero, or non-finite lepton charge produces an invalid `O_lD`
+   rather than selecting a default ordering;
+
+5. away from the $\pm\pi$ wrapping boundary, reversing the ordered analyser
+   pair reverses the sign:
+
+   ```math
+   \Delta\phi(a,b)=-\Delta\phi(b,a).
+   ```
+
+For the W-slot exchange test, the important statement is not that the raw slot
+indices remain unchanged. The important statement is that the same physical
+quark, antiquark, and down-type candidate are recovered after the input slot
+order is exchanged.
+
+---
+
+## 4.3 Generator-to-reconstruction comparison
+
+The primary comparison uses:
+
+```text
+gen:
+    strict direct-e/mu semileptonic events for which the observable is valid
+
+reco:
+    full accepted reconstruction baseline
+```
+
+Here, **full accepted reconstruction baseline** means every reconstructed event
+that satisfies
+
+```text
+accepted == 1
+fit_success == 1
+```
+
+in the canonical kinematic-fit ROOT file and has a finite value of the
+observable being studied.
+
+It does not mean a truth-matched subset.
+
+For the headline generator-to-reconstruction comparison, do not intersect the
+generator and reconstruction event IDs.
+
+The following effects are intentionally included in the total information
+loss:
+
+```text
+events lost before or during reconstruction
+failed kinematic fits
+wrong W-pair assignments
+wrong W-jet orientations
+invalid reconstructed objects
+angular resolution and migration
+```
+
+A matched-event study may be made later as a diagnostic, but it must not
+replace the total-retention result.
+
+Use the same analysis conditions for $O_{jj}$ and $O_{\ell D}$:
+
+```text
+pure LR sample
+strict direct-e/mu semileptonic channel
+Higgs rest frame
+boost-only lab-axes convention
+36 angular bins
+same luminosity scale
+same generator and SM normalisation
+same chunk scope
+```
+
+---
+
+## 4.4 Fisher-information summary
+
+Use the default absolute-yield Fisher information:
+
+```math
+I
+=
+\sum_i
+\frac{\nu_{1,i}^2}{\nu_{0,i}}.
+```
+
+Here:
+
+* $\nu_{0,i}$ is the SM yield in angular bin $i$;
+* $\nu_{1,i}$ is the signed CPV-interference yield in angular bin $i$;
+* $I$ is the Fisher information for the local CPV parameter.
+
+The central generator-to-reconstruction retention is
+
+```math
+R_{\mathrm{reco}}
+=
+\frac{I_{\mathrm{reco}}}{I_{\mathrm{gen}}}.
+```
+
+It measures the total fraction of the observable information that survives the
+current reconstruction chain.
+
+### 4.4.1 Electron and muon categories
+
+Electron and muon events are different reconstruction categories.
+
+Keep them separate throughout the detector-level statistical calculation.
+
+For lepton category
+
+```math
+c\in\{e,\mu\},
+```
+
+define
+
+```math
+\nu_{0,ci}
+```
+
+as the SM yield and
+
+```math
+\nu_{1,ci}
+```
+
+as the signed CPV-interference yield in category $c$ and angular bin $i$.
+
+Calculate
+
+```math
+I_e
+=
+\sum_i
+\frac{\nu_{1,ei}^2}{\nu_{0,ei}},
+```
+
+and
+
+```math
+I_\mu
+=
+\sum_i
+\frac{\nu_{1,\mu i}^2}{\nu_{0,\mu i}}.
+```
+
+For statistically independent electron and muon categories, the combined
+result is
+
+```math
+I_{e+\mu}
+=
+I_e+I_\mu.
+```
+
+This is equivalent to multiplying the two category likelihoods.
+
+Do not merge electron and muon bin yields before evaluating the headline
+Fisher information.
+
+A yield-summed $e+\mu$ histogram may be shown as an optional visualisation,
+but it must not replace the separate-category likelihood combination.
+
+### 4.4.2 Required LR result table
+
+Produce the following table:
+
+| Observable            | Lepton category     | Gen population            | Reco population          | Frame        | $N_{\rm gen}$ | $N_{\rm reco}$ | $I_{\rm gen}$ | $I_{\rm reco}$ | $I_{\rm reco}/I_{\rm gen}$ |
+| --------------------- | ------------------- | ------------------------- | ------------------------ | ------------ | ------------: | -------------: | ------------: | -------------: | -------------------------: |
+| $O_{jj}$ (`O_W`)      | electron            | strict semileptonic $e$   | full accepted reco $e$   | `higgs_rest` |               |                |               |                |                            |
+| $O_{jj}$ (`O_W`)      | muon                | strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |               |                |               |                |                            |
+| $O_{jj}$ (`O_W`)      | combined likelihood | $e+\mu$ categories        | $e+\mu$ categories       | `higgs_rest` |               |                |   $I_e+I_\mu$ |    $I_e+I_\mu$ |                            |
+| $O_{\ell D}$ (`O_lD`) | electron            | strict semileptonic $e$   | full accepted reco $e$   | `higgs_rest` |               |                |               |                |                            |
+| $O_{\ell D}$ (`O_lD`) | muon                | strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |               |                |               |                |                            |
+| $O_{\ell D}$ (`O_lD`) | combined likelihood | $e+\mu$ categories        | $e+\mu$ categories       | `higgs_rest` |               |                |   $I_e+I_\mu$ |    $I_e+I_\mu$ |                            |
+
+For the combined rows:
+
+```math
+I_{\mathrm{gen}}^{e+\mu}
+=
+I_{\mathrm{gen}}^e
++
+I_{\mathrm{gen}}^\mu,
+```
+
+```math
+I_{\mathrm{reco}}^{e+\mu}
+=
+I_{\mathrm{reco}}^e
++
+I_{\mathrm{reco}}^\mu,
+```
+
+and therefore
+
+```math
+R_{\mathrm{reco}}^{e+\mu}
+=
+\frac{
+I_{\mathrm{reco}}^e+I_{\mathrm{reco}}^\mu
+}{
+I_{\mathrm{gen}}^e+I_{\mathrm{gen}}^\mu
+}.
+```
+
+The event counts in the combined rows may be reported as
+
+```math
+N^{e+\mu}=N^e+N^\mu,
+```
+
+but the Fisher information must be combined from the independent category
+results.
+
+### 4.4.3 Optional frame study
+
+The default frame in this chapter is
+
+```text
+higgs_rest
+```
+
+using the current boost-only `lab_axes` convention.
+
+With additional time, repeat the comparison in
+
+```text
+lab
+ttbar_rest
+```
+
+by copying the config, changing
+
+```yaml
+observable:
+  default_frame: lab
+```
+
+or
+
+```yaml
+observable:
+  default_frame: ttbar_rest
+```
+
+and using a separate output directory.
+
+For example:
+
+```text
+outputs/angular_lr_lab/
+outputs/angular_lr_ttbar_rest/
+```
+
+The current exporter measures angles against the fixed laboratory axes after
+the Lorentz boost.
+
+Changing the YAML text
+
+```yaml
+basis: production_plane
+```
+
+does not by itself change the calculation.
+
+A production-plane coordinate system requires an explicit implementation using
+the relevant functions in
+
+```text
+src/ilc_tth_cpv/frames.py
+```
+
+and should be treated as a separate optional study.
+
+---
+
+## 4.5 Plots and data interfaces
+
+Use the same terminology throughout this chapter:
+
+```text
+SM template
+signed CPV-interference template
+```
+
+Do not switch between several different names for the same template.
+
+### 4.5.1 Minimum required plots
+
+The minimum required plots are:
+
+1. $O_{jj}$: signed CPV-interference template, generator versus
+   reconstruction level;
+
+2. $O_{\ell D}$: signed CPV-interference template, generator versus
+   reconstruction level;
+
+3. $O_{jj}$: SM template, generator versus reconstruction level;
+
+4. $O_{\ell D}$: SM template, generator versus reconstruction level.
+
+For the primary statistical result, electron and muon remain separate
+categories.
+
+A combined $e+\mu$ curve may be shown for visual comparison, but the combined
+Fisher result must still use
+
+```math
+I_{e+\mu}=I_e+I_\mu.
+```
+
+### 4.5.2 Event-level feature tables
+
+The event-level inputs are under
+
+```text
+outputs/angular_lr/features/
+```
+
+Expected files include:
+
+```text
+features_gen_higgs_rest_chunk0.csv
+features_sm_gen_higgs_rest_chunk0.csv
+features_reco_higgs_rest_chunk0.csv
+features_sm_reco_higgs_rest_chunk0.csv
+```
+
+Each table should contain both observable columns:
+
+```text
+O_W
+O_lD
+```
+
+and the category and diagnostic columns:
+
+```text
+lepton_charge
+lepton_flavour
+hadronic_W_charge
+w_orientation_status
+w_orientation_margin
+idx_W_down_candidate
+down_candidate_source
+```
+
+The exact truth-only and reco-only diagnostic columns may differ, but all
+columns must be documented in
+
+```text
+docs/DATA_SCHEMA.md
+```
+
+### 4.5.3 Angular-template interface
+
+The histogram script is
+
+```text
+scripts/build_angular_observable.py
+```
+
+It reads one observable column from a feature CSV through
+
+```bash
+--observable <column-name>
+```
+
+and writes the result under
+
+```text
+outputs/angular_lr/angular/<observable>/
+```
+
+For example:
+
+```text
+outputs/angular_lr/angular/O_W/
+outputs/angular_lr/angular/O_lD/
+```
+
+Expected bin files include:
+
+```text
+O_W_all_gen_bins.csv
+O_W_all_reco_bins.csv
+O_W_all_sm_gen_bins.csv
+O_W_all_sm_reco_bins.csv
+```
+
+and
+
+```text
+O_lD_all_gen_bins.csv
+O_lD_all_reco_bins.csv
+O_lD_all_sm_gen_bins.csv
+O_lD_all_sm_reco_bins.csv
+```
+
+Separate electron and muon templates may either be written with explicit output
+tags, for example
+
+```text
+O_W_all_gen_e_bins.csv
+O_W_all_gen_mu_bins.csv
+```
+
+or placed in separate category directories.
+
+Choose one convention and document it. Do not rely on file appearance to infer
+which category was used.
+
+### 4.5.4 Fisher interface
+
+The Fisher driver is
+
+```text
+scripts/evaluate_fisher.py
+```
+
+It requires:
+
+```text
+--template
+```
+
+for the signed CPV-interference template and
+
+```text
+--sm-template
+```
+
+for the corresponding SM denominator.
+
+For example:
+
+```bash
+python3 scripts/evaluate_fisher.py \
+  --template outputs/angular_lr/angular/O_lD/O_lD_all_reco_e_bins.csv \
+  --sm-template outputs/angular_lr/angular/O_lD/O_lD_all_sm_reco_e_bins.csv \
+  --luminosity-scale 8000
+```
+
+Run the Fisher calculation separately for:
+
+```text
+electron gen
+electron reco
+muon gen
+muon reco
+```
+
+Then calculate the combined-category Fisher by adding the electron and muon
+results.
+
+The machine-readable Fisher result is stored in
+
+```text
+*.fisher.json
+```
+
+Use these JSON files when building the Chapter 4 summary table.
+
+Do not copy Fisher values manually from terminal output when a JSON result is
+available.
+
+### 4.5.5 Additional plots
+
+You are welcome to plot any further comparison that helps explain the
+observation.
+
+Choose the comparisons that are most useful rather than producing every
+possible plot.
+
+Possible examples are:
+
+* reco SM template and reco signed CPV-interference template on the same
+  observable axis;
+
+* gen SM template and gen signed CPV-interference template on the same
+  observable axis;
+
+* $O_{jj}$ and $O_{\ell D}$ at generator level;
+
+* $O_{jj}$ and $O_{\ell D}$ at reconstruction level;
+
+* per-bin Fisher contribution
+
+  ```math
+  I_i
+  =
+  \frac{\nu_{1,i}^2}{\nu_{0,i}};
+  ```
+
+* cumulative Fisher information as a function of the angular-bin ordering;
+
+* electron and muon category comparison;
+
+* W-orientation-status comparison;
+
+* high- and low-orientation-margin categories;
+
+* gen/reco angular migration for a matched diagnostic subset;
+
+* correct and incorrect W-assignment categories on truth-labelled diagnostic
+  events;
+
+* correct and incorrect down-type-candidate categories on truth-labelled
+  diagnostic events.
+
+Comparison scripts should normally read the feature CSVs or binned angular
+CSVs.
+
+They should not reopen the original STDHEP or SLCIO files unless the required
+diagnostic quantity was not exported.
+
+---
+
+## 4.6 Think about the reconstructed down-type jet
+
+No additional reconstruction optimisation is compulsory in the first Chapter
+4 result.
+
+After producing the baseline comparison, explain which reconstruction stages
+can affect the final down-type analyser:
+
+* selection of the correct two W jets;
+
+* jet four-momentum and angular resolution;
+
+* quark-versus-antiquark orientation;
+
+* up-type-versus-down-type identification;
+
+* isolated-lepton charge and flavour reconstruction;
+
+* low-confidence or internally inconsistent pair decisions.
+
+The current baseline determines the down-type candidate through
+
+```text
+existing q/qbar orientation + isolated-lepton charge.
+```
+
+This provides a well-defined first result, but it is not guaranteed to be the
+optimal estimator.
+
+In particular, the signed flavour information is much weaker for several
+$u,d,s$ and antiquark categories than for the relatively favourable charm
+categories.
+
+With additional time, choose **one** of the following studies according to
+your interest.
+
+It is not necessary to complete all three.
+
+### Option A — better-identified flavour subset
+
+Test whether a restricted, better-identified event subset retains more
+reconstruction-level Fisher information.
+
+A possible example is a charm-enriched subset.
+
+For a reconstructed $W^+$,
+
+```text
+a high-confidence c candidate identifies the other W jet as anti-D.
+```
+
+For a reconstructed $W^-$,
+
+```text
+a high-confidence anti-c candidate identifies the other W jet as D.
+```
+
+Compare at least:
+
+```text
+retained event fraction
+down-type-candidate purity
+I_reco
+```
+
+Do not judge the method from flavour accuracy alone.
+
+A tighter category may have better purity but lower total Fisher information
+because many events have been removed.
+
+### Option B — direct up-type/down-type pair assignment
+
+Instead of first reducing all light flavours to a single quark-versus-antiquark
+score, define
+
+```math
+P_D(j)
+=
+P_d(j)+P_s(j),
+```
+
+```math
+P_U(j)
+=
+P_u(j)+P_c(j),
+```
+
+```math
+P_{\bar D}(j)
+=
+P_{\bar d}(j)+P_{\bar s}(j),
+```
+
+```math
+P_{\bar U}(j)
+=
+P_{\bar u}(j)+P_{\bar c}(j).
+```
+
+For a reconstructed $W^-$, compare the two allowed assignments:
+
+```math
+L_1^{W^-}
+=
+P_D(j_1)P_{\bar U}(j_2),
+```
+
+```math
+L_2^{W^-}
+=
+P_D(j_2)P_{\bar U}(j_1).
+```
+
+If
+
+```math
+L_1^{W^-}>L_2^{W^-},
+```
+
+select $j_1$ as the down-type candidate.
+
+Otherwise select $j_2$.
+
+For a reconstructed $W^+$, compare
+
+```math
+L_1^{W^+}
+=
+P_U(j_1)P_{\bar D}(j_2),
+```
+
+```math
+L_2^{W^+}
+=
+P_U(j_2)P_{\bar D}(j_1).
+```
+
+This pair-level test uses the complete allowed W-decay structure:
+
+```text
+W- -> D + anti-U
+W+ -> U + anti-D
+```
+
+rather than treating the two jets as independent charge classifications.
+
+### Option C — confidence categories
+
+Do not immediately discard every ambiguous event.
+
+Divide the events into a small number of non-overlapping orientation-confidence
+categories, for example:
+
+```text
+high confidence
+low confidence
+```
+
+Calculate the Fisher information in each category and combine the independent
+category results.
+
+Compare this with:
+
+```text
+one inclusive category
+one hard confidence cut
+```
+
+A hard cut is justified only if it improves the final combined Fisher
+information, not only the orientation accuracy.
+
+---
 
 ## 4.7 Deliverable
 
-One result matrix (template: Appendix A) covering: frame dependence; angle vs ML; BDT vs MLP; minimal vs extended features; gen→reco retention; LR vs RL.
+The Chapter 4 deliverable is:
 
-Configs and driver: [../configs/analysis_ow_lr.yaml](../configs/analysis_ow_lr.yaml), [../configs/analysis_ow_rl.yaml](../configs/analysis_ow_rl.yaml), [../scripts/run_baseline.sh](../scripts/run_baseline.sh).
+1. a new `O_lD` observable column at generator and reconstruction level;
+
+2. a strict common-topology comparison of `O_W` and `O_lD`;
+
+3. separately validated electron and muon reconstruction categories;
+
+4. the LR Fisher-information summary table;
+
+5. the four minimum generator/reconstruction template plots;
+
+6. a short explanation of the main reconstruction processes that can affect
+   the down-type analyser;
+
+7. any optional plot or reconstruction test that helped explain the result.
+
+The written conclusion should answer:
+
+```text
+Which observable is stronger at generator level?
+
+Which observable retains more information at reconstruction level?
+
+Where does the largest information loss occur?
+
+Does using the charged lepton as a stable analyser make O_lD more robust
+than O_jj?
+
+Is the current q/qbar-based down-type assignment sufficient for the first
+baseline?
+
+Which optional improvement would be most motivated by the observed
+diagnostics?
+```
+
+---
+
+## 4.8 Next week — angular–ML comparison
+
+**Status: in development.**
+
+The angle-versus-ML comparison will be added next week, after the following
+parts have been frozen:
+
+```text
+strict semileptonic truth topology
+O_jj and O_lD definitions
+reconstructed analyser mapping
+electron and muon category handling
+SM and signed CPV-interference templates
+generator-to-reconstruction Fisher comparison
+```
+
+Do not start the ML comparison before the angular baseline is validated.
+
+The future ML comparison should use the same physical objects as the
+corresponding angular observable:
+
+```text
+O_jj branch:
+    two selected W jets
+    information used to select and orient the pair
+
+O_lD branch:
+    isolated charged lepton
+    selected down-type-jet candidate
+    information used to select that candidate
+```
+
+Branch fusion is not part of the present Chapter 4 scope.
 
 ---
 
