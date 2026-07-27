@@ -1525,15 +1525,14 @@ to avoid special characters in CSV column names and command-line arguments.
 
 ### 4.1.3 Common generator-level topology
 
-The strict generator-level topology selection is implemented across
+The following scripts **has been updated!** from the last week.
 
 ```text
 src/ilc_tth_cpv/objects.py
 scripts/export_features.py
 ```
 
-Chapter 4 must extend this same code path with the analyser metadata and
-`O_lD` column. The current generator selection requires both
+For implementing the generator-level topology selection. Now, it requires both
 
 ```math
 H\to b\bar b
@@ -1554,8 +1553,13 @@ Here:
 * $N_{W,e/\mu}$ is the number of W bosons with a direct electron or muon
   decay.
 
-The truth selection must exclude fully hadronic events, dilepton events, and
-events in which the charged lepton is produced through a tau decay.
+However, last week, the generator level results was calculated by **the whole** 
+population of the different tth decay channels. So, the total Fisher information
+looks even larger. (We should always compare the same thing, so that was my mistake)
+
+The truth selection now must exclude fully hadronic events, dilepton events, and
+events in which the charged lepton is produced through a tau decay. The detail
+explaination on the code is in the 4.2.1.
 
 The baseline hadronic-W analyser is restricted to $u,d,s,c$ and their
 antiquarks. A physical $W^+\to c\bar b$ or $W^-\to b\bar c$ decay is currently
@@ -1580,16 +1584,18 @@ semileptonic $e/\mu$ truth population.
 All generator-to-reconstruction comparisons later in this chapter must use
 this same physics-channel definition.
 
+But you can keep the old Chapter 3 products as historical validation records.
+
 ### 4.1.4 Chapter completion order
 
-The commands in this section are **post-implementation validation commands**,
-not an immediately runnable Quick Start. `build_angular_observable.py` does not
-calculate `O_lD`; it only reads an `O_lD` column that must already exist in the
-feature CSV.
+Specifically, the core task in this chapter is to modify the `/src/ilc-tth-cpv/
+objects.py`, `flavor.py` to construct the observable `O_lD` and then write it
+into a csv file by the `export_features.py`, then plot them by reading the csv 
+file by `build_angular_observable.py` .
 
-There is no separate preliminary rerun of Chapter 3 Step 5. The Chapter 4
-exports below replace that rerun and write to a new output directory. Keep the
-old Chapter 3 products only as historical validation records.
+The commands below are what you need to execute for each step. But you should modify
+the scripts mentioned above first. I also provided some hints to do this in the following
+subchapters, but feel free to code by your own thoughts.
 
 **Step 1 — create the complete Chapter 4 config.**
 
