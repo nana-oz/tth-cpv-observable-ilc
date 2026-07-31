@@ -12,16 +12,22 @@ LIGHT_ANTIQUARK_KEYS = ("mc_ubar", "mc_dbar", "mc_sbar", "mc_cbar")
 
 def light_charge_scores(scores: Mapping[str, float]) -> dict[str, float]:
     """Return summed q/qbar probabilities and their signed discriminator."""
+
     required = LIGHT_QUARK_KEYS + LIGHT_ANTIQUARK_KEYS
     missing = [key for key in required if key not in scores]
+
     if missing:
         raise ValueError(f"missing Weaver light-flavor scores: {', '.join(missing)}")
+
     values = {key: float(scores[key]) for key in required}
     nonfinite = [key for key, value in values.items() if not math.isfinite(value)]
+
     if nonfinite:
         raise ValueError(f"non-finite Weaver light-flavor scores: {', '.join(nonfinite)}")
+
     p_quark = sum(values[key] for key in LIGHT_QUARK_KEYS)
     p_antiquark = sum(values[key] for key in LIGHT_ANTIQUARK_KEYS)
+
     return {
         "p_quark": p_quark,
         "p_antiquark": p_antiquark,
@@ -33,7 +39,7 @@ def orient_w_pair(
     w1_scores: Mapping[str, float],
     w2_scores: Mapping[str, float],
     tie_tolerance: float = 1.0e-12,
-) -> dict:
+    ) -> dict:
     """Orient selected W slots as q/qbar using signed light-flavor scores.
 
     Opposite q/qbar preferences are used directly. If both jets are q-like,
@@ -45,11 +51,13 @@ def orient_w_pair(
     second = light_charge_scores(w2_scores)
     first_q_like = first["signed_score"] >= 0.0
     second_q_like = second["signed_score"] >= 0.0
+
+    # One jet has +ve signed score (q-like) and the other has a -ve score (qbar-like)
     if first_q_like != second_q_like:
         quark_slot, antiquark_slot = ((0, 1) if first_q_like else (1, 0))
         status = "opposite_preferences"
         margin = min(abs(first["signed_score"]), abs(second["signed_score"]))
-    elif first_q_like:
+    elif first_q_like: # Both jets have +ve score
         delta = first["p_quark"] - second["p_quark"]
         if abs(delta) <= tie_tolerance:
             quark_slot, antiquark_slot = 0, 1
@@ -75,3 +83,19 @@ def orient_w_pair(
         "w1": first,
         "w2": second,
     }
+
+def semileptonic_down_type_order(
+    lepton_charge: float | None,
+    ) -> tuple[str, str] | None:
+    """Return the top-side and antitop-side analyzer object names."""
+
+    if lepton_charge is None:
+        return None
+
+    if lepton_charge > 0.0:
+        return "lepton", "wjet_quark"
+
+    if lepton_charge < 0.0:
+        return "wjet_antiquark", "lepton"
+
+    return None

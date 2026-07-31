@@ -144,7 +144,7 @@ Things to check about Pass condition:
 
 ## Peronal Memo
 - `configs/analysis_ow_lr.yaml`
-  - 
+
 check: <br>
 - `scripts/export_features.py`
 - `scripts/build_angular_observable.py`

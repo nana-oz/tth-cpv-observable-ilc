@@ -163,6 +163,7 @@ def choose_w_daughter(w, allowed_pdgs: set):
 def classify_higgs_decay(mc_list: list) -> str:
     """Classify the physical Higgs decay mode."""
     higgs = find_hard_particle(mc_list, 25)
+
     if higgs is None:
         return "H->none"
 
@@ -171,6 +172,7 @@ def classify_higgs_decay(mc_list: list) -> str:
         for child in physical_children(higgs)
         if pdg(child) is not None
     ]
+
     abs_child_pdgs = [abs(value) for value in child_pdgs]
 
     # Physsim STDHEP may encode a two-body decay as
@@ -268,10 +270,9 @@ def classify_ttbar_decay(mc_list: list) -> str:
     if w_plus_mode == "hadronic" and w_minus_mode == "hadronic":
         return "hadronic"
 
-    if (
-        w_plus_mode.startswith("leptonic_")
+    if (w_plus_mode.startswith("leptonic_")
         and w_minus_mode.startswith("leptonic_")
-    ):
+        ):
         return "dileptonic"
 
     if modes == {"hadronic", "leptonic_emu"}:
@@ -299,6 +300,13 @@ class SemileptonicTruth:
     lepton: object = None
     neutrino: object = None
 
+    # New topology and analyser information
+    truth_topology: str = "invalid"
+    hadronic_w_pdg: int | None = None
+    lepton_pdg: int | None = None
+    lepton_flavour: str | None = None
+    down_type_daughter: object = None
+
 
 def identify_semileptonic_truth(mc_list: list) -> SemileptonicTruth:
     """Identify H, t, tbar, b, bbar, W daughters, lepton, neutrino.
@@ -320,12 +328,39 @@ def identify_semileptonic_truth(mc_list: list) -> SemileptonicTruth:
     for w in (truth.w_plus, truth.w_minus):
         if w is None:
             continue
+            
         finals = w_direct_final_daughters(w)
         final_pdgs = {pdg(child) for child in finals}
+
+        # Hadronic Decay
         if final_pdgs & LIGHT_PDGS:
             truth.wjet_quark = choose_w_daughter(w, LIGHT_QUARKS)
             truth.wjet_antiquark = choose_w_daughter(w, LIGHT_ANTIQUARKS)
+            truth.hadronic_w_pdg = pdg(w)
+
+            # Check W+- Decay
+            if truth.hadronic_w_pdg == 24:
+                Analyzer = WPLUS_DOWNTYPE_ANALYZER
+            elif truth.hadronic_w_pdg == -24:
+                Analyzer = WMINUS_DOWNTYPE_ANALYZER
+
+            if truth.wjet_antiquark and pdg(truth.wjet_antiquark) in Analyzer:
+                truth.down_type_daughter = truth.wjet_antiquark
+            
+        # Leptonic Decay
         elif final_pdgs & CHARGED_LEPTONS:
             truth.lepton = choose_w_daughter(w, CHARGED_LEPTONS)
             truth.neutrino = choose_w_daughter(w, NEUTRINOS)
+
+            if truth.lepton is None:
+                continue
+            
+            truth.lepton_pdg = pdg(truth.lepton)
+
+            # Store lepton flavour info
+            if abs(truth.lepton_pdg) == 11:
+                truth.lepton_flavour = "e"
+            elif abs(truth.lepton_pdg) == 13:
+                truth.lepton_flavour = "mu"
+
     return truth

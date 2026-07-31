@@ -182,6 +182,13 @@ def safe_theta(cos_theta: float) -> float:
 
 
 def configured_sample_key(cfg: dict, level: str, component: str) -> str:
+    """
+    sample lookup key generator. 
+    Figure out which dataset name to retrieve from your configuration file 
+    based on two settings:
+    - level: whether you are reading gen (truth) reco (reconstructed)
+    - component: whether you are reading sm or interference (CPV)
+    """
     prefix = "sm_" if component == "sm" else ""
     key = f"{prefix}{level}_sample"
     if key not in cfg["samples"]:
@@ -231,14 +238,21 @@ def kinfit_root_path(cfg: dict, sample_key: str, chunk_id: str) -> Path:
 
 
 def first_isolated_lepton(evt):
+    """Return the isolated lepton and its reconstruction category."""
     # Same collection order as TTHSemiLepKinFit::collectLeptons.
-    for name in ("ISOElectrons", "ISOMuons"):
-        col = get_collection(evt, name)
-        if col is None:
+    for collection_name, flavour in (
+        ("ISOElectrons", "electron"),
+        ("ISOMuons", "muon"),):
+
+        collection = get_collection(evt, collection_name)
+    
+        if collection is None:
             continue
-        if col.getNumberOfElements() > 0:
-            return col.getElementAt(0)
-    return None
+
+        if collection.getNumberOfElements() > 0:
+            return collection.getElementAt(0), flavour
+
+    return None, None
 
 
 def read_reco_snapshots(slcio_path: Path, needed_indices: set[int]) -> dict:
@@ -402,20 +416,28 @@ def export_gen(
     chunk_id: str,
     max_events: int,
     component: str,
-) -> Path:
+    ) -> Path:
+
+    # Reads yaml files and convert it into python dict
     manifest = load_yaml(repo_root() / cfg["samples"]["manifest"])
+
+    # Specify that this is gen, and component is user input (sm or interference)
     sample_key = configured_sample_key(cfg, "gen", component)
+
     sample = manifest["signals"][sample_key]
+    
     if component == "interference":
         chunk = resolve_gen_chunk(sample, chunk_id)
         sidecar = weights.read_sidecar(chunk["sidecar"])
         skipped = weights.parse_skipped_events_from_log(chunk.get("physsim_log"))
         event_records = weights.align_sidecar_to_stdhep(sidecar, skipped)
         weight_report = weights.validate_signed_weights(event_records)
+        
         if not weight_report["ok"]:
             raise SystemExit(
                 f"Sidecar validation failed: {weight_report['problems']}"
             )
+
         sm_weights = None
     else:
         chunk = resolve_sm_gen_chunk(sample, chunk_id)
@@ -435,12 +457,16 @@ def export_gen(
     rows = []
     n_read = 0
     selection_counts = Counter()
+
     for event_record in event_records:
         if max_events and n_read >= max_events:
             break
+
         col = reader.readEvent()
+
         if col is None:
             break
+
         n_read += 1
         row_meta = event_record if component == "interference" else None
         mc_list = [
@@ -552,17 +578,38 @@ def export_gen(
             return NAN
 
         # pair ordering: particle - antiparticle (PHYSICS_CONVENTIONS §4)
-        record["O_W"] = dphi("wjet_quark", "wjet_antiquark")
-        record["O_b"] = dphi("top_b", "antitop_bbar")
+        record["O_W"]   = dphi("wjet_quark", "wjet_antiquark")
+        record["O_b"]   = dphi("top_b", "antitop_bbar")
         record["O_top"] = dphi("top", "antitop")
+
         # O_lnu is CP-ordered: W-: phi(l-) - phi(anti-nu); W+: phi(nu) - phi(l+)
         lepton_pdg = pdg(truth.lepton)
+        record["lepton_pdg"] = int(lepton_pdg) if lepton_pdg is not None else 0
+
         if lepton_pdg is not None and lepton_pdg > 0:      # l- from W-
             record["O_lnu"] = dphi("lepton", "neutrino")
         else:                                              # l+ from W+
             record["O_lnu"] = dphi("neutrino", "lepton")
-        rows.append(record)
+        
+        # O_lD
+        lepton_charge_gen = -1.0 if (lepton_pdg is not None and lepton_pdg > 0) else 1.0
+        analyzer_order = flavor.semileptonic_down_type_order(lepton_charge_gen)
 
+        if analyzer_order is not None:
+            record["O_lD"] = dphi(analyzer_order[0], analyzer_order[1])
+        else:
+            record["O_lD"] = NAN
+        
+        # Determine gen level lepton_flavour
+        if abs(lepton_pdg) == 11:
+            record["lepton_flavour"] == "electron"
+        elif abs(lepton_pdg) == 13:
+            record["lepton_flavour"] == "muon"
+        else:
+            record["lepton_flavour"] == "other"
+        
+        rows.append(record)
+       
     report = validate_table(rows)
     out_dir = repo_root() / cfg["outputs"]["base_dir"] / "features"
     component_prefix = "sm_" if component == "sm" else ""
@@ -618,13 +665,15 @@ def export_reco(
     chunk_id: str,
     max_events: int,
     component: str,
-) -> Path:
+    ) -> Path:
+    
     manifest = load_yaml(repo_root() / cfg["samples"]["manifest"])
     reco = resolve_reco_chunk(cfg, chunk_id, component)
     sample_key = reco["sample_key"]
     root_path = kinfit_root_path(cfg, sample_key, reco["chunk"])
 
     kinfit_rows, kinfit_report = read_selected_kinfit_rows(root_path, max_events)
+
     if not kinfit_rows:
         raise SystemExit(
             f"No accepted && fit_success rows in {root_path}"
@@ -663,6 +712,7 @@ def export_reco(
     rows = []
     n_event_number_mismatch = 0
     orientation_counts = Counter()
+
     for fit_row in kinfit_rows:
         event_index = int(fit_row["event_index"])
         if aligned is not None and (
@@ -732,6 +782,7 @@ def export_reco(
             "W2_weaver_pqbar": orientation["w2"]["p_antiquark"],
             "W2_weaver_qminusqbar": orientation["w2"]["signed_score"],
         })
+
         bhad = jet_by_index(jets, fit_row["idx_bhad"])
         blep = jet_by_index(jets, fit_row["idx_blep"])
         h1 = jet_by_index(jets, fit_row["idx_H1"])
@@ -768,13 +819,47 @@ def export_reco(
         record["O_W"] = dphi("wjet_quark", "wjet_antiquark")
         record["O_b"] = dphi("top_b", "antitop_bbar")
         record["O_top"] = dphi("top", "antitop")
+
         lepton_charge = float(fit_row.get("lepton_charge", NAN))
+        record["lepton_charge"] = lepton_charge
+
         if lepton_charge < 0.0:
             record["O_lnu"] = dphi("lepton", "neutrino")
         elif lepton_charge > 0.0:
             record["O_lnu"] = dphi("neutrino", "lepton")
         else:
             record["O_lnu"] = NAN
+
+        # Get analyzer
+        ordered_names = flavor.semileptonic_down_type_order(lepton_charge)
+
+        # O_lD observable
+        if ordered_names is None:
+            record["O_lD"] = NAN
+        else:
+            object_a, object_b = ordered_names
+            record["O_lD"] = dphi(object_a, object_b)
+
+        # Diagnose the reconstructed choice
+        if lepton_charge > 0:
+            hadronic_W_charge = -1
+            idx_W_down_candidate = idx_W_quark
+        elif lepton_charge < 0:
+            hadronic_W_charge = +1
+            idx_W_down_candidate = idx_W_antiquark
+        else:
+            hadronic_W_charge = NAN
+            idx_W_down_candidate = -1
+
+        lepton_pdg = int(fit_row.get("lepton_pdg", 0))
+
+        record["idx_W_down_candidate"] = idx_W_down_candidate
+        record["down_candidate_source"] = qqbar_orientation_plus_lepton_charge
+        record["hadronic_W_charge"] = hadronic_W_charge
+        record["lepton_flavour"] = ("electron" if abs(lepton_pdg == 11) 
+                                    else ("muon" if abs(lepton_pdg) == 13 
+                                    else  fit_row.get("lepton_flavour", NAN))
+                                    )
 
         yth = snapshot["yth"]
         for key in ("y45", "y56", "y67"):
