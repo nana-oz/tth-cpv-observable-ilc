@@ -240,7 +240,7 @@ def kinfit_root_path(cfg: dict, sample_key: str, chunk_id: str) -> Path:
 def first_isolated_lepton(evt):
     """Return the isolated lepton and its reconstruction category."""
     # Same collection order as TTHSemiLepKinFit::collectLeptons.
-    for collection_name, flavour in (
+    for collection_name, flavor in (
         ("ISOElectrons", "electron"),
         ("ISOMuons", "muon"),):
 
@@ -250,7 +250,7 @@ def first_isolated_lepton(evt):
             continue
 
         if collection.getNumberOfElements() > 0:
-            return collection.getElementAt(0), flavour
+            return collection.getElementAt(0), flavor
 
     return None, None
 
@@ -272,14 +272,17 @@ def read_reco_snapshots(slcio_path: Path, needed_indices: set[int]) -> dict:
             four_momentum(jets.getElementAt(k))
             for k in range(jets.getNumberOfElements())
         ]
-        lepton = first_isolated_lepton(evt)
+
+        lepton, lepton_flavor = first_isolated_lepton(evt)  # Both lepton and lepton flavor info is extracted
         yth = get_pid_parameters(evt, "RefinedJets6", "yth")
         weaver = get_pid_parameters(evt, "RefinedJets6", "weaver")
+
         snapshots[idx] = {
             "run_number": int(evt.getRunNumber()),
             "event_number": int(evt.getEventNumber()),
             "jets": jet_p4s,
             "lepton": four_momentum(lepton),
+            "lepton_flavor": lepton_flavor,
             "yth": next((row for row in yth if row), {}),
             "weaver": weaver,
         }
@@ -600,14 +603,14 @@ def export_gen(
         else:
             record["O_lD"] = NAN
         
-        # Determine gen level lepton_flavour
+        # Determine gen level lepton_flavor
         if abs(lepton_pdg) == 11:
-            record["lepton_flavour"] == "electron"
+            record["lepton_flavor"] = "electron"
         elif abs(lepton_pdg) == 13:
-            record["lepton_flavour"] == "muon"
+            record["lepton_flavor"] = "muon"
         else:
-            record["lepton_flavour"] == "other"
-        
+            record["lepton_flavor"] = "other"
+
         rows.append(record)
        
     report = validate_table(rows)
@@ -843,23 +846,20 @@ def export_reco(
         # Diagnose the reconstructed choice
         if lepton_charge > 0:
             hadronic_W_charge = -1
-            idx_W_down_candidate = idx_W_quark
+            idx_W_down_candidate = wq_index
         elif lepton_charge < 0:
             hadronic_W_charge = +1
-            idx_W_down_candidate = idx_W_antiquark
+            idx_W_down_candidate = wqbar_index
         else:
             hadronic_W_charge = NAN
             idx_W_down_candidate = -1
 
-        lepton_pdg = int(fit_row.get("lepton_pdg", 0))
+        lepton_flavor = fit_row.get("lepton_flavor", "other")
 
         record["idx_W_down_candidate"] = idx_W_down_candidate
-        record["down_candidate_source"] = qqbar_orientation_plus_lepton_charge
+        record["down_candidate_source"] = "qqbar_orientation_plus_lepton_charge"
         record["hadronic_W_charge"] = hadronic_W_charge
-        record["lepton_flavour"] = ("electron" if abs(lepton_pdg == 11) 
-                                    else ("muon" if abs(lepton_pdg) == 13 
-                                    else  fit_row.get("lepton_flavour", NAN))
-                                    )
+        record["lepton_flavor"] = snapshot.get("lepton_flavor", "other")
 
         yth = snapshot["yth"]
         for key in ("y45", "y56", "y67"):

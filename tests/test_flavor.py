@@ -75,7 +75,6 @@ def test_positive_lepton_returns():
 
 def test_negative_lepton_returns():
     """a negative-lepton event must return delta_phi(wjet_antiquark, lepton)"""
-
     assert semileptonic_down_type_order(-1.0) == ("wjet_antiquark", "lepton")
 
 def test_invalid_lepton_charge():
@@ -83,7 +82,3 @@ def test_invalid_lepton_charge():
     assert semileptonic_down_type_order(0.0) is None
     assert semileptonic_down_type_order(float("nan")) is None
     assert semileptonic_down_type_order(None) is None 
-
-def test_exchange_input_labels_w():
-    """exchanging the input labels W1 and W2 does not change the final physical result after the W pair has been oriented"""
-    # Still working on this

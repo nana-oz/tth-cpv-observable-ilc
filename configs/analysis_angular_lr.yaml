@@ -34,9 +34,9 @@ observable:
   # Theory-study primary convention (docs/PHYSICS_CONVENTIONS.md §3–§5):
   # pairs ordered particle - antiparticle, angles measured with the
   # lab-axes basis (boost only, phi = atan2(py, px) vs fixed lab axes).
-  definition: "O_W = wrap(phi_quark - phi_antiquark)"
-  object_a: wjet_quark
-  object_b: wjet_antiquark
+  definition: "O_W = wrap(wjet_downtype - lepton)"
+  object_a: wjet_downtype
+  object_b: lepton
   basis: lab_axes                # production_plane is reserved for Ma2018 sign observables
   frames: [lab, higgs_rest, ttbar_rest]
   default_frame: higgs_rest      # strongest O_W frame in the theory study

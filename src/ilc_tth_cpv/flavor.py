@@ -83,7 +83,7 @@ def orient_w_pair(
         "w1": first,
         "w2": second,
     }
-
+    
 def semileptonic_down_type_order(
     lepton_charge: float | None,
     ) -> tuple[str, str] | None:
