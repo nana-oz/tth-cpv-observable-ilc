@@ -1,8 +1,8 @@
-## Confirmation of .csv file and .json file 
+## Confirmation of output files (.csv and .json file)
 
-Running the code (from Ch 4.1.4):
+**Running the code (from Ch 4.1.4):**
 
-#### Export the CPV-interference generator features
+### Export the CPV-interference generator features
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -48,7 +48,7 @@ Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
 
 
-#### Export the SM generator features
+### Export the SM generator features
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -93,3 +93,13 @@ Confirmed that `.csv` file contains (only first few rows are checked):
 
 Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
+
+
+### Build the four generator-level templates
+Produced:
+```
+outputs/angular_lr/angular/O_lD/O_lD_all_gen.png
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen.png
+outputs/angular_lr/angular/O_W/O_W_all_gen.png
+outputs/angular_lr/angular/O_W/O_W_all_sm_gen.png
+```
