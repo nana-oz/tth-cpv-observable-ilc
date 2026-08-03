@@ -2,7 +2,7 @@
 
 **Running the code (from Ch 4.1.4):**
 
-### Export the CPV-interference generator features
+### 1. Export the CPV-interference generator features
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -48,7 +48,7 @@ Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
 
 
-### Export the SM generator features
+### 2. Export the SM generator features
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -95,7 +95,7 @@ Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
 
 
-### Build the four generator-level templates
+### 3. Build the four generator-level templates
 Produced:
 ```
 outputs/angular_lr/angular/O_lD/O_lD_all_gen.png
