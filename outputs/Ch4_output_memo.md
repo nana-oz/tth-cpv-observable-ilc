@@ -4,7 +4,7 @@
 
 ### 1. Export the CPV-interference features
 #### 1.1 Both electron and muon combined
-##### 1.1.1 Gen Level
+##### 1.1.1 gen level
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -49,7 +49,7 @@ Confirmed that `.csv` file contains (only first few rows are checked):
 Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
 
-##### 1.1.2 Reco level
+##### 1.1.2 reco level
 
 Produced:
 ```
@@ -277,7 +277,7 @@ outputs/angular_lr/angular/O_lD/O_lD_all_reco_electron_bins.fisher.json
 outputs/angular_lr/angular/O_lD/O_lD_all_reco_muon_bins.fisher.json
 
 ```
-
+### Fisher Information Summary Table
 | Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 2407 | 8.495167899547766 | 1.2397771189978357 | 0.1459390955 |
@@ -286,3 +286,37 @@ outputs/angular_lr/angular/O_lD/O_lD_all_reco_muon_bins.fisher.json
 | $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 2407 | 8.576818452904579 | 1.444664681847666 | 0.1684382956 |
 | $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 2248 | 9.42454726292643 | 2.0646261290260095 | 0.2190689984 |
 | $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 4655 | $I_e + I_\mu =$ 18.00136572 | $I_e + I_\mu =$ 3.509290811 | 0.1949458094 |
+
+## Updated W-daughter Orient Method Based on the Likelihood
+### 1. Modification made
+Modified the file `flavor.py` and changed the function `orient_w_pair()` according to `docs/W_DAUGHTER_ORDERING.md`.
+
+### 2. Output file paths
+Produced all files (`O_W` and `O_lD` for electron, muon, and electron+muon for both gen and reco level) under:
+`outputs/angular_lr/angular/O_W/joint_likelihood`,
+`outputs/angular_lr/angular/O_lD/joint_likelihood`, and
+`outputs/angular_lr/features/joint_likelihood`
+
+The files with old method (naive q / q¯ orientation) is moved to:
+`outputs/angular_lr/angular/O_W/signed_score`,
+`outputs/angular_lr/angular/O_lD/signed_score`, and
+`outputs/angular_lr/features/signed_score`
+
+### 3. Fisher Information Summary Table
+| Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 2407 | 8.495167899547766 | 1.0590559984659491 | 0.1246656936 |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 2248 | 8.883643187780406 | 1.3631981225429635 | 0.1534503462 |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 4655 | $I_e + I_\mu =$ 17.37881109 | $I_e + I_\mu =$ 2.422254121 | 0.1393797371 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 2407 | 8.576818452904579 | 1.6218601301773248 | 0.1890981066 |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 2248 | 9.42454726292643 | 1.8430384993458193 | 0.1955572451 |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 4655 | $I_e + I_\mu =$ 18.00136572 | $I_e + I_\mu =$ 3.46489863 | 0.1924797643 |
+
+
+
+## Frame Study (Ch. 4.4.3)
+All output above used the default frame, `higgs_rest`.
+### 1. `lab` frame
+
+
+### 2. `ttbar_rest` frame
