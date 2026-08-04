@@ -3,6 +3,7 @@
 **Running the code (from Ch 4.1.4):**
 
 ### 1. Export the CPV-interference generator features
+#### 1.1 Both electron and muon combined
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -46,6 +47,34 @@ Confirmed that `.csv` file contains (only first few rows are checked):
 
 Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
+
+#### 1.2 electron only (O_lD)
+```
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_gen_higgs/rest-chunk0.csv \
+  --observable O_lD \
+  --split all \
+  --lepton-flavor electron \
+  --output-tag gen_electron
+```
+
+Produced:
+`outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron.png`
+
+#### 1.3 muon only (O_lD)
+```
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_gen_higgs/rest-chunk0.csv \
+  --observable O_lD \
+  --split all \
+  --lepton-flavor muon \
+  --output-tag gen_muon
+```
+
+Produced:
+`outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon.png`
 
 
 ### 2. Export the SM generator features
@@ -103,3 +132,5 @@ outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen.png
 outputs/angular_lr/angular/O_W/O_W_all_gen.png
 outputs/angular_lr/angular/O_W/O_W_all_sm_gen.png
 ```
+
+## Fisher Information Calculation (Ch 4.4)
