@@ -371,7 +371,7 @@ def identify_semileptonic_truth(mc_list: list) -> SemileptonicTruth:
                 truth.lepton_flavour = "mu"
 
     h_daughters = physical_children(truth.higgs) if truth.higgs else []
-    h_bb = {pdg(d) for d in h_daughters} == {5, -5}
+    h_bb = (classify_higgs_decay(mc_list) == "H->bb")
 
 
     # Confirm the decay is semileptonic
