@@ -106,7 +106,45 @@ ISOElectrons: n=0
 
 
 ## Ch.3 Step 4 - Run a 50-event kinfit smoke in a separate directory
+### Inspecting
 > Memo: <br> Since running <br>`bash scripts/run_kinfit_assignment.sh \` <br> `--config configs/analysis_ow_lr.yaml \` <br> `--chunk 0 \ <br> --max-events 50 \` <br>  `--out-dir outputs/ow_lr/kinfit_smoke` <br> gave me an error: `Refusing to overwrite /data/dust/user/ozakinan/analysis/tth-cpv-observable-ilc/outputs/ow_lr/kinfit_smoke/kinfit_tthcpv_reco_elpr_chunk0.root`, <br> so I run `--out-dir outputs/ow_lr/kinfit_smoke_2` instead.
+
+
+### Replace the generator smoke table with the complete chunk-0 table, export the full reco baseline, and build one `O_W` example at each level
+```
+python3 scripts/export_features.py \
+  --config configs/analysis_ow_lr.yaml --level gen --chunk 0
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_ow_lr.yaml \
+  --features outputs/ow_lr/features/features_gen_higgs_rest_chunk0.csv \
+  --split all --output-tag gen
+
+python3 scripts/export_features.py \
+  --config configs/analysis_ow_lr.yaml --level gen --component sm --chunk 0
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_ow_lr.yaml \
+  --features outputs/ow_lr/features/features_sm_gen_higgs_rest_chunk0.csv \
+  --split all --weight-column weight_sm --output-tag sm_gen
+
+python3 scripts/export_features.py \
+  --config configs/analysis_ow_lr.yaml --level reco --chunk 0
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_ow_lr.yaml \
+  --features outputs/ow_lr/features/features_reco_higgs_rest_chunk0.csv \
+  --split all --output-tag reco
+
+python3 scripts/export_features.py \
+  --config configs/analysis_ow_lr.yaml --level reco --component sm --chunk 0
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_ow_lr.yaml \
+  --features outputs/ow_lr/features/features_sm_reco_higgs_rest_chunk0.csv \
+  --split all --weight-column weight_sm --output-tag sm_reco
+
+python3 scripts/evaluate_fisher.py \
+  --template outputs/ow_lr/angular/O_W/O_W_all_reco_bins.csv \
+  --sm-template outputs/ow_lr/angular/O_W/O_W_all_sm_reco_bins.csv \
+  --luminosity-scale 8000
+```
 
 ## Ch.3 Step 5 - Run one complete CPV chunk and its SM denominator through HTCondor
 Things to check about Pass condition:
@@ -140,14 +178,3 @@ Things to check about Pass condition:
    - a
 5. Where are the event table, metadata, validation JSON, histogram CSV, and plot?
    - a
-  
-
-## Peronal Memo
-- `configs/analysis_ow_lr.yaml`
-
-check: <br>
-- `scripts/export_features.py`
-- `scripts/build_angular_observable.py`
-- `configs/analysis_ow_lr.yaml`
-- 
-
