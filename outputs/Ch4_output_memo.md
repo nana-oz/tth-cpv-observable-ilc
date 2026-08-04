@@ -292,14 +292,14 @@ outputs/angular_lr/angular/O_lD/O_lD_all_reco_muon_bins.fisher.json
 Modified the file `flavor.py` and changed the function `orient_w_pair()` according to `docs/W_DAUGHTER_ORDERING.md`.
 
 ### 2. Output file paths
-Produced all files (`O_W` and `O_lD` for electron, muon, and electron+muon for both gen and reco level) under:
-`outputs/angular_lr/angular/O_W/joint_likelihood`,
-`outputs/angular_lr/angular/O_lD/joint_likelihood`, and
+Produced all files (`O_W` and `O_lD` for electron, muon, and electron+muon for both gen and reco level) under: <br>
+`outputs/angular_lr/angular/O_W/joint_likelihood`, <br>
+`outputs/angular_lr/angular/O_lD/joint_likelihood`, and <br>
 `outputs/angular_lr/features/joint_likelihood`
 
-The files with old method (naive q / q¯ orientation) is moved to:
-`outputs/angular_lr/angular/O_W/signed_score`,
-`outputs/angular_lr/angular/O_lD/signed_score`, and
+The files with old method (naive q / q¯ orientation) is moved to: <br>
+`outputs/angular_lr/angular/O_W/signed_score`, <br>
+`outputs/angular_lr/angular/O_lD/signed_score`, and <br>
 `outputs/angular_lr/features/signed_score`
 
 ### 3. Fisher Information Summary Table
