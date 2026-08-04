@@ -48,11 +48,12 @@ Confirmed that `.csv` file contains (only first few rows are checked):
 Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
 
-#### 1.2 electron only (O_lD)
+#### 1.2 electron only (O_W, O_lD)
+Base Input:
 ```
 python3 scripts/build_angular_observable.py \
   --config configs/analysis_angular_lr.yaml \
-  --features outputs/angular_lr/features/features_gen_higgs/rest-chunk0.csv \
+  --features outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv \
   --observable O_lD \
   --split all \
   --lepton-flavor electron \
@@ -60,24 +61,31 @@ python3 scripts/build_angular_observable.py \
 ```
 
 Produced:
-`outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron.png`
-
-#### 1.3 muon only (O_lD)
 ```
-python3 scripts/build_angular_observable.py \
-  --config configs/analysis_angular_lr.yaml \
-  --features outputs/angular_lr/features/features_gen_higgs/rest-chunk0.csv \
-  --observable O_lD \
-  --split all \
-  --lepton-flavor muon \
-  --output-tag gen_muon
+outputs/angular_lr/angular/O_W/O_W_all_gen_electron_bins.csv
+outputs/angular_lr/angular/O_W/O_W_all_gen_electron_bins.meta.json
+outputs/angular_lr/angular/O_W/O_W_all_gen_electron.png
+
+outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron_bins.csv
+outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron_bins.meta.json
+outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron.png
 ```
 
+#### 1.3 muon only (O_W, O_lD)
 Produced:
-`outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon.png`
+```
+outputs/angular_lr/angular/O_W/O_W_all_gen_muon_bins.csv
+outputs/angular_lr/angular/O_W/O_W_all_gen_muon_bins.meta.json
+outputs/angular_lr/angular/O_W/O_W_all_gen_muon.png
+
+outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon_bins.csv
+outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon_bins.meta.json
+outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon.png
+```
 
 
 ### 2. Export the SM generator features
+#### 2.1 Both electron and muon combined
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -123,6 +131,42 @@ Confirmed that `.csv` file contains (only first few rows are checked):
 Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
 
+#### 2.2 electron only (O_W, O_lD)
+Base Input:
+```
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr.yaml \
+  --features outputs/angular_lr/features/features_sm_gen_higgs_rest_chunk0.csv \
+  --observable O_W \
+  --split all \
+  --weight-column weight_sm \
+  --lepton-flavor electron \
+  --output-tag sm_gen_electron
+```
+
+Produced:
+```
+outputs/angular_lr/angular/O_W/O_W_all_sm_gen_electron_bins.csv
+outputs/angular_lr/angular/O_W/O_W_all_sm_gen_electron_bins.meta.json
+outputs/angular_lr/angular/O_W/O_W_all_sm_gen_electron.png
+
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_electron_bins.csv
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_electron_bins.meta.json
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_electron.png
+```
+
+#### 2.3 muon only (O_W, O_lD)
+
+Produced:
+```
+outputs/angular_lr/angular/O_W/O_W_all_sm_gen_muon_bins.csv
+outputs/angular_lr/angular/O_W/O_W_all_sm_gen_muon_bins.meta.json
+outputs/angular_lr/angular/O_W/O_W_all_sm_gen_muon.png
+
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_muon_bins.csv
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_muon_bins.meta.json
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_muon.png
+```
 
 ### 3. Build the four generator-level templates
 Produced:
@@ -134,3 +178,31 @@ outputs/angular_lr/angular/O_W/O_W_all_sm_gen.png
 ```
 
 ## Fisher Information Calculation (Ch 4.4)
+Base input code:
+```
+python3 scripts/evaluate_fisher.py \
+  --template outputs/angular_lr/angular/O_W/O_W_all_gen_electron_bins.csv \
+  --sm-template outputs/angular_lr/angular/O_W/O_W_all_sm_gen_electron_bins.csv \
+  --luminosity-scale 8000
+```
+
+Produced:
+```
+outputs/angular_lr/angular/O_W/O_W_all_gen_electron_bins.fisher.json
+outputs/angular_lr/angular/O_W/O_W_all_gen_muon_bins.fisher.json
+
+outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron_bins.fisher.json
+
+```
+
+
+Here is your formatted Markdown table:
+
+| Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  | 8.495167899547766 |  |  |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |  |  | 8.883643187780406 |  |  |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu$ | $I_e + I_\mu$ |  |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  |  |  |  |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |  |  |  |  |  |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu$ | $I_e + I_\mu$ |  |
