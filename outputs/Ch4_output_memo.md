@@ -313,6 +313,8 @@ The files with old method (naive q / q¯ orientation) is moved to: <br>
 | $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 4655 | $I_e + I_\mu =$ 18.00136572 | $I_e + I_\mu =$ 3.46489863 | 0.1924797643 |
 
 
+## Additional Comparison Plots (Ch. 4.5.5)
+
 
 ## Frame Study (Ch. 4.4.3)
 All output above used the default frame, `higgs_rest`.
