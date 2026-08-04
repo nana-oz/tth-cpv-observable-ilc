@@ -192,17 +192,15 @@ outputs/angular_lr/angular/O_W/O_W_all_gen_electron_bins.fisher.json
 outputs/angular_lr/angular/O_W/O_W_all_gen_muon_bins.fisher.json
 
 outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron_bins.fisher.json
+outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon_bins.fisher.json
 
 ```
 
-
-Here is your formatted Markdown table:
-
 | Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  | 8.495167899547766 |  |  |
-| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |  |  | 8.883643187780406 |  |  |
-| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu$ | $I_e + I_\mu$ |  |
-| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  |  |  |  |
-| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |  |  |  |  |  |
-| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu$ | $I_e + I_\mu$ |  |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 |  | 8.495167899547766 |  |  |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 |  | 8.883643187780406 |  |  |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 |  | $I_e + I_\mu$ | $I_e + I_\mu$ |  |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 |  | 8.576818452904579 |  |  |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 |  | 9.42454726292643 |  |  |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 |  | $I_e + I_\mu$ | $I_e + I_\mu$ |  |
