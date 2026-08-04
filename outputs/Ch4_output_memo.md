@@ -2,8 +2,9 @@
 
 **Running the code (from Ch 4.1.4):**
 
-### 1. Export the CPV-interference generator features
+### 1. Export the CPV-interference features
 #### 1.1 Both electron and muon combined
+##### 1.1.1 Gen Level
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -48,7 +49,21 @@ Confirmed that `.csv` file contains (only first few rows are checked):
 Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
 
+##### 1.1.2 Reco level
+
+Produced:
+```
+outputs/angular_lr/features/features_reco_higgs_rest_chunk0.csv
+outputs/angular_lr/features/features_reco_higgs_rest_chunk0.meta.json
+```
+
+Confirmed that `.csv` file contains (only first few rows are checked):
+- `O_W` and `O_lD` columns with finite values (not all-NaN)
+- `lepton_flavor` column with `sm_reco_electronelectron` or `muon`
+
+
 #### 1.2 electron only (O_W, O_lD)
+##### 1.2.1 gen level
 Base Input:
 ```
 python3 scripts/build_angular_observable.py \
@@ -71,7 +86,20 @@ outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron_bins.meta.json
 outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron.png
 ```
 
+##### 1.2.2 reco level
+Produced:
+```
+outputs/angular_lr/angular/O_W/O_W_all_reco_electron_bins.csv
+outputs/angular_lr/angular/O_W/O_W_all_reco_electron_bins.meta.json
+outputs/angular_lr/angular/O_W/O_W_all_reco_electron.png
+
+outputs/angular_lr/angular/O_lD/O_lD_all_reco_electron_bins.csv
+outputs/angular_lr/angular/O_lD/O_lD_all_reco_electron_bins.meta.json
+outputs/angular_lr/angular/O_lD/O_lD_all_reco_electron.png
+```
+
 #### 1.3 muon only (O_W, O_lD)
+##### 1.3.1 gen level
 Produced:
 ```
 outputs/angular_lr/angular/O_W/O_W_all_gen_muon_bins.csv
@@ -82,10 +110,21 @@ outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon_bins.csv
 outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon_bins.meta.json
 outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon.png
 ```
+##### 1.3.2 reco level
+Produced:
+```
+outputs/angular_lr/angular/O_W/O_W_all_reco_muon_bins.csv
+outputs/angular_lr/angular/O_W/O_W_all_reco_muon_bins.meta.json
+outputs/angular_lr/angular/O_W/O_W_all_reco_muon.png
 
+outputs/angular_lr/angular/O_lD/O_lD_all_reco_muon_bins.csv
+outputs/angular_lr/angular/O_lD/O_lD_all_reco_muon_bins.meta.json
+outputs/angular_lr/angular/O_lD/O_lD_all_reco_muon.png
+```
 
-### 2. Export the SM generator features
+### 2. Export the SM features
 #### 2.1 Both electron and muon combined
+##### 2.1.1 gen level
 ```
 python3 scripts/export_features.py \
   --config configs/analysis_angular_lr.yaml \
@@ -131,7 +170,20 @@ Confirmed that `.csv` file contains (only first few rows are checked):
 Confirmed that `.json` file contains (reflects):
 - truth_selection (`"higgs_decay": "H->bb"`, `"ttbar_decay": "semileptonic_emu"`)
 
+##### 2.1.2 reco level
+
+Produced:
+```
+outputs/angular_lr/features/features_sm_reco_higgs_rest_chunk0.csv
+outputs/angular_lr/features/features_sm_reco_higgs_rest_chunk0.meta.json
+```
+
+Confirmed that `.csv` file contains (only first few rows are checked):
+- `O_W` and `O_lD` columns with finite values (not all-NaN)
+- `lepton_flavor` column with `electron` or `muon`
+
 #### 2.2 electron only (O_W, O_lD)
+##### 2.2.1 gen level
 Base Input:
 ```
 python3 scripts/build_angular_observable.py \
@@ -155,8 +207,20 @@ outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_electron_bins.meta.json
 outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_electron.png
 ```
 
-#### 2.3 muon only (O_W, O_lD)
+##### 2.2.2 reco level
+Produced:
+```
+outputs/angular_lr/angular/O_W/O_W_all_sm_reco_electron_bins.csv
+outputs/angular_lr/angular/O_W/O_W_all_sm_reco_electron_bins.meta.json
+outputs/angular_lr/angular/O_W/O_W_all_sm_reco_electron.png
 
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_reco_electron_bins.csv
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_reco_electron_bins.meta.json
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_reco_electron.png
+```
+
+#### 2.3 muon only (O_W, O_lD)
+##### 2.3.1 gen level
 Produced:
 ```
 outputs/angular_lr/angular/O_W/O_W_all_sm_gen_muon_bins.csv
@@ -166,6 +230,18 @@ outputs/angular_lr/angular/O_W/O_W_all_sm_gen_muon.png
 outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_muon_bins.csv
 outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_muon_bins.meta.json
 outputs/angular_lr/angular/O_lD/O_lD_all_sm_gen_muon.png
+```
+
+##### 2.3.2 reco level
+Produced:
+```
+outputs/angular_lr/angular/O_W/O_W_all_sm_reco_muon_bins.csv
+outputs/angular_lr/angular/O_W/O_W_all_sm_reco_muon_bins.meta.json
+outputs/angular_lr/angular/O_W/O_W_all_sm_reco_muon.png
+
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_reco_muon_bins.csv
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_reco_muon_bins.meta.json
+outputs/angular_lr/angular/O_lD/O_lD_all_sm_reco_muon.png
 ```
 
 ### 3. Build the four generator-level templates
@@ -186,7 +262,7 @@ python3 scripts/evaluate_fisher.py \
   --luminosity-scale 8000
 ```
 
-Produced:
+Produced :
 ```
 outputs/angular_lr/angular/O_W/O_W_all_gen_electron_bins.fisher.json
 outputs/angular_lr/angular/O_W/O_W_all_gen_muon_bins.fisher.json
@@ -194,13 +270,19 @@ outputs/angular_lr/angular/O_W/O_W_all_gen_muon_bins.fisher.json
 outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron_bins.fisher.json
 outputs/angular_lr/angular/O_lD/O_lD_all_gen_muon_bins.fisher.json
 
+outputs/angular_lr/angular/O_W/O_W_all_reco_electron_bins.fisher.json
+outputs/angular_lr/angular/O_W/O_W_all_reco_muon_bins.fisher.json
+
+outputs/angular_lr/angular/O_lD/O_lD_all_reco_electron_bins.fisher.json
+outputs/angular_lr/angular/O_lD/O_lD_all_reco_muon_bins.fisher.json
+
 ```
 
 | Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 |  | 8.495167899547766 |  |  |
-| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 |  | 8.883643187780406 |  |  |
-| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 |  | $I_e + I_\mu$ | $I_e + I_\mu$ |  |
-| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 |  | 8.576818452904579 |  |  |
-| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 |  | 9.42454726292643 |  |  |
-| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 |  | $I_e + I_\mu$ | $I_e + I_\mu$ |  |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 2407 | 8.495167899547766 | 1.2397771189978357 | 0.1459390955 |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 2248 | 8.883643187780406 | 1.1993601792646105 | 0.1350076938 |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 4655 | $I_e + I_\mu =$ 17.37881109 | $I_e + I_\mu =$ 2.439137298 | 0.1403512177 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 2407 | 8.576818452904579 | 1.444664681847666 | 0.1684382956 |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 2248 | 9.42454726292643 | 2.0646261290260095 | 0.2190689984 |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 4655 | $I_e + I_\mu =$ 18.00136572 | $I_e + I_\mu =$ 3.509290811 | 0.1949458094 |
