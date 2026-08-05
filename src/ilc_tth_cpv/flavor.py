@@ -61,14 +61,15 @@ def orient_w_pair(
     L21 = prob_q_jet2 * prob_qbar_jet1
 
     delta_L = L12 - L21
-    margin = abs(delta_L)
+    L_ratio = L12 / L21
+    margin = abs(L_ratio - 1.0)
 
     # Determine the assignment of jets based on L12 and L21
-    if abs(delta_L) <= tie_tolerance: 
+    if abs(L_ratio - 1) <= tie_tolerance: 
         # Case 1: the difference between L12 and L21 are smaller than or equal to 'tie_tolerance'
         quark_slot, antiquark_slot = 0, 1
         status = "tie_slot_order"
-    elif delta_L > 0:
+    elif abs(L_ratio) > 1:
         # Case 2: L12 > L21
         quark_slot, antiquark_slot = 0, 1
         status = "L12_preferred"

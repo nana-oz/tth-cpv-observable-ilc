@@ -273,6 +273,18 @@ def read_reco_snapshots(slcio_path: Path, needed_indices: set[int]) -> dict:
             for k in range(jets.getNumberOfElements())
         ]
 
+        mc_collection = get_collection(evt, "MCParticlesSkimmed")
+        if mc_collection is None:
+            raise RuntimeError(f"Missing MCParticlesSkimmed in event index {idx}")
+
+        mc_list = [
+            mc_collection.getElementAt(k)
+            for k in range(mc_collection.getNumberOfElements())
+        ]
+
+        truth_higgs_mode = classify_higgs_decay(mc_list)
+        truth_ttbar_mode = classify_ttbar_decay(mc_list)
+
         lepton, lepton_flavor = first_isolated_lepton(evt)  # Both lepton and lepton flavor info is extracted
         yth = get_pid_parameters(evt, "RefinedJets6", "yth")
         weaver = get_pid_parameters(evt, "RefinedJets6", "weaver")
@@ -285,6 +297,8 @@ def read_reco_snapshots(slcio_path: Path, needed_indices: set[int]) -> dict:
             "lepton_flavor": lepton_flavor,
             "yth": next((row for row in yth if row), {}),
             "weaver": weaver,
+            "truth_higgs_mode": truth_higgs_mode,
+            "truth_ttbar_mode": truth_ttbar_mode,
         }
         if len(snapshots) == len(needed_indices):
             break
@@ -715,20 +729,25 @@ def export_reco(
     rows = []
     n_event_number_mismatch = 0
     orientation_counts = Counter()
+    truth_selection_counts = Counter()
 
     for fit_row in kinfit_rows:
         event_index = int(fit_row["event_index"])
         if aligned is not None and (
             event_index < 0 or event_index >= len(aligned)
-        ):
+            ):
             raise SystemExit(
                 f"Kinfit event_index {event_index} is outside aligned sidecar "
                 f"length {len(aligned)}"
             )
+
         snapshot = snapshots[event_index]
+        
         if int(fit_row["event_number"]) != int(snapshot["event_number"]):
             n_event_number_mismatch += 1
+
         row_meta = aligned[event_index] if aligned is not None else None
+
         event_id = id_offset + (
             int(row_meta["event"]) if row_meta else event_index + 1
         )
@@ -753,8 +772,21 @@ def export_reco(
         for key, value in fit_row.items():
             record[key] = value
 
-        jets = snapshot["jets"]
+        truth_higgs_mode = snapshot["truth_higgs_mode"]
+        truth_ttbar_mode = snapshot["truth_ttbar_mode"]
+
+        truth_selection_counts[f"higgs_mode::{truth_higgs_mode}"] += 1
+        truth_selection_counts[f"ttbar_mode::{truth_ttbar_mode}"] += 1
+
+        if truth_higgs_mode != "H->bb":
+            truth_selection_counts["rejected_non_hbb"] += 1
+            continue
+
+        truth_selection_counts["selected_hbb"] += 1
+
+        jets   = snapshot["jets"]
         weaver = snapshot["weaver"]
+
         w1_index = int(fit_row["idx_W1"])
         w2_index = int(fit_row["idx_W2"])
         try:
@@ -766,6 +798,7 @@ def export_reco(
             raise RuntimeError(
                 f"Cannot orient selected W pair in event_index={event_index}: {exc}"
             ) from exc
+
         selected_w_indices = (w1_index, w2_index)
         wq_index = selected_w_indices[orientation["quark_slot"]]
         wqbar_index = selected_w_indices[orientation["antiquark_slot"]]
@@ -784,6 +817,9 @@ def export_reco(
             "W2_weaver_pq": orientation["w2"]["p_quark"],
             "W2_weaver_pqbar": orientation["w2"]["p_antiquark"],
             "W2_weaver_qminusqbar": orientation["w2"]["signed_score"],
+            "truth_higgs_decay": truth_higgs_mode,
+            "truth_ttbar_decay": truth_ttbar_mode,
+            "pass_truth_hbb": 1,
         })
 
         bhad = jet_by_index(jets, fit_row["idx_bhad"])
@@ -903,6 +939,16 @@ def export_reco(
             "rule": "opposite preferences direct; both q-like compare P(q); both qbar-like compare P(qbar)",
             "counts": dict(sorted(orientation_counts.items())),
         },
+        "truth_selection": {
+            "enabled": True,
+            "collection": "MCParticlesSkimmed",
+            "higgs_decay": "H->bb",
+            "classifier": "classify_higgs_decay",
+            "ttbar_decay": "not filtered; recorded for diagnostics",
+            "purpose": "MC-only signal definition for the current observable study",
+        },
+        "truth_selection_counts": dict(sorted(truth_selection_counts.items())),
+        "n_kinfit_selected_before_truth_hbb": len(kinfit_rows),
         "feature_policy": "raw variables only (E, theta, phi, mass)",
         "kinfit_root": root_path,
         "reco_slcio": reco["slcio"],
@@ -929,12 +975,19 @@ def export_reco(
         "schema_report": report,
         "created": datetime.datetime.now().isoformat(),
     })
+
     print(f"wrote {len(rows)} rows -> {out_path}")
     print(f"schema check: ok={report['ok']}")
+
     for problem in report["problems"]:
         print(f"  NOTE: {problem}")
     if n_event_number_mismatch:
         print(f"  NOTE: event_number mismatches vs SLCIO: {n_event_number_mismatch}")
+        
+    print("reco truth-Higgs selection:")
+    for key, value in sorted(truth_selection_counts.items()):
+        print(f" {key}: {value}")
+        
     return out_path
 
 
