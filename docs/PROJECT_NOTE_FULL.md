@@ -3041,7 +3041,7 @@ observable constructed from reconstruction-level inputs **IN HIGGS REST FRAME**.
 The supervised ML target is
 
 $$
-y=\operatorname{sign}(w_{\mathrm{int}})\in\{-1,+1\},
+y=\mathrm{sign}(w_{\mathrm{int}})\in\{-1,+1\}.
 $$
 
 with $|w_{\mathrm{int}}|$ used as the non-negative training weight. The final
@@ -3072,12 +3072,39 @@ are performed as time permits.
 
 ## 5.1 Data preparation
 
+We will use one validated superset feature table for each physical sample and select
+the inputs of each model through named YAML feature sets. Auxiliary inputs are
+restricted to two groups: W-daughter assignment or ordering quantities,
+including the kinematic-fit final-selection score, and reconstructed
+invariant-mass combinations.
+
 Prepare and validate the complete LR CPV-interference and SM all-chunk datasets
 in the Higgs rest frame, correct the reconstructed top and antitop charge
 ordering and down-type-object mapping, export the event weights, interference
 sign, lepton, fitted neutrino, both W daughters, top-decay $b/\bar b$ objects,
 assignment information, final-selection score, and invariant-mass variables,
 and provide the HTCondor export and chunk-normalisation workflow.
+
+**Update the export_features.py and test it with one chunk**
+
+1. Check the reconstructed top/anti-top slot in export_features.py and fix it
+2. Get lepton charge come from the lepton.getCharge() in slcio rather than root
+3. Output the kinematics of the selected down-type quark of W into the row
+4. Try with the current chunk 0 data, make sure in the output csv, there is the following
+   quantities. 
+
+**Link all chunks root file with the corresponding  resolve_root_path()**
+
+1. Run bash and check the /data
+2. Modify the resolve_root_path() in export_feature.py by
+   
+**Create the Supersets with the training weight**
+1. Export the feature of the tth-cpv chunk 1, and see if it really come from this
+   chunk and the output variables looks normal. Be aware of how much time one job need.
+2. Run the condorworkflow to get all ML dataset for the tth-cpv and tth-sm eLpR.
+   Be aware of how many ill events(If any variables of some events get none output).
+3. Merge the effective events of the CPV and SM separately, calculate the training weights
+   and split ratio.
 
 ## 5.2 BDT baseline comparison
 
