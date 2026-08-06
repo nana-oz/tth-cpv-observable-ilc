@@ -2738,7 +2738,7 @@ Necessary for us to deliver to others:
 * reco/gen SM/CPV vs each other, muon/electron separately:
     * For the same observable, for curves on the same observable axis or comparing two by two(depends on how you feel about the layout);
     * $O_{jj}$ and $O_{\ell D}$ can also be compared on the same plot. 
-
+* Supervisor: Compare the ratio of |w| and signed-weighted histogram between gen/reco, evaluate how many w-daughter is mis-ordered.
 
 Some examples you might try for your own interest:
 
