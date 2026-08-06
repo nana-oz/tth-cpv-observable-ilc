@@ -1,8 +1,18 @@
-## Confirmation of output files (.csv and .json file)
+## Confirmation of output files
+### 0. NOTE
+Added `scripts/run_pipeline.sh` to run the complete angular observable pipeline in one step.
 
-**Running the code (from Ch 4.1.4):**
+Executing `./scripts/run_pipeline.sh` performs the following:
+- Exports features using export_features.py for both CPV and SM (across gen and reco levels).
+- Builds observables using `build_angular_observable.py` across all combinations of observables (O_W, O_lD), levels (gen, reco), and leptons (electron, muon, all).
+- Calculates Fisher information using `evaluate_fisher.py` for all built histograms at $\mathcal{L} = 8000\text{ fb}^{-1}$.
+
+Usage:
+- Default frame (higgs_rest): `./scripts/run_pipeline.sh`.
+- Specify frame: `./scripts/run_angular_obasevable_pipeline.sh lab` or `./scripts/run_angular_obasevable_pipeline.sh ttbar_rest`.
 
 ### 1. Export the CPV-interference features
+**Running the code (from Ch 4.1.4):**
 #### 1.1 Both electron and muon combined
 ##### 1.1.1 gen level
 ```
@@ -17,7 +27,7 @@ Produced:
 outputs/angular_lr/features/features_gen_higgs_rest_chunk0.csv
 outputs/angular_lr/features/features_gen_higgs_rest_chunk0.meta.json
 ```
-
+default_frame: lab    
 Output Message:
 ```
 generator truth-channel selection:
@@ -38,7 +48,7 @@ generator truth-channel selection:
   ttbar_mode::hadronic: 5676
   ttbar_mode::semileptonic_emu: 3638
   ttbar_mode::semileptonic_tau: 1853
-wrote 2072 rows
+wrote 2072 rowsdefault_frame: lab    
 ```
 
 Confirmed that `.csv` file contains (only first few rows are checked):
@@ -58,7 +68,7 @@ outputs/angular_lr/features/features_reco_higgs_rest_chunk0.meta.json
 ```
 
 Confirmed that `.csv` file contains (only first few rows are checked):
-- `O_W` and `O_lD` columns with finite values (not all-NaN)
+- `O_W` and `O_lD` columns with finidefault_frame: lab    te values (not all-NaN)
 - `lepton_flavor` column with `sm_reco_electronelectron` or `muon`
 
 
@@ -83,7 +93,7 @@ outputs/angular_lr/angular/O_W/O_W_all_gen_electron.png
 
 outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron_bins.csv
 outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron_bins.meta.json
-outputs/angular_lr/angular/O_lD/O_lD_all_gen_electron.png
+outputs/angular_lr/angular/O_lD/O_lDdefault_frame: lab    _all_gen_electron.png
 ```
 
 ##### 1.2.2 reco level
@@ -126,7 +136,7 @@ outputs/angular_lr/angular/O_lD/O_lD_all_reco_muon.png
 #### 2.1 Both electron and muon combined
 ##### 2.1.1 gen level
 ```
-python3 scripts/export_features.py \
+python3 scripts/export_features.py \   
   --config configs/analysis_angular_lr.yaml \
   --level gen \
   --component sm \
@@ -150,7 +160,7 @@ generator truth-channel selection:
   higgs_mode::H->bb: 6653
   higgs_mode::H->gg: 992
   higgs_mode::H->other: 653
-  higgs_mode::H->tautau: 768
+  higgs_mode::H->tautau: 768default_frame: lab    
   missing_truth_object::wjet_antiquark: 3
   rejected_incomplete_truth_objects: 3
   rejected_non_hbb: 4852
@@ -262,7 +272,7 @@ python3 scripts/evaluate_fisher.py \
   --luminosity-scale 8000
 ```
 
-Produced :
+Produced:
 ```
 outputs/angular_lr/angular/O_W/O_W_all_gen_electron_bins.fisher.json
 outputs/angular_lr/angular/O_W/O_W_all_gen_muon_bins.fisher.json
@@ -328,10 +338,13 @@ SM bins are scaled by 0.1 (SM/10) for better visibility and make it easier to co
 
 Separate plots are generated for electron and muon categories in each execution. The observable (O_W or O_lD) can be specified via command-line arguments.
 
+Frame (higgs_rest, lab, ttbar_rest) can also be specified via command-line arguments.
+
 To run:
 ```
 python3 src/ilc_tth_cpv/plot_four_hist.py \
-  --observable O_W
+  --observable O_W \
+  --frame higgs_rest
 ```
 
 Output:
@@ -346,6 +359,97 @@ outputs/angular_lr/angular/O_lD/joint_likelihood/O_lD_all_sm_vs_cpv_gen_vs_reco_
 ## Frame Study (Ch. 4.4.3)
 All output above used the default frame, `higgs_rest`.
 ### 1. `lab` frame
+#### 1.1 Export Features
+Created `configs/analysis_angular_lr_lab.yaml` and set `default_frame: lab`.
 
+Base input:
+```
+python3 scripts/export_features.py \
+  --config configs/analysis_angular_lr_lab.yaml \
+  --level gen \
+  --component sm \
+  --chunk 0
+```
+
+Produced (CPV):
+```
+outputs/angular_lr_lab/features/features_gen_higgs_rest_chunk0.csv
+outputs/angular_lr_lab/features/features_gen_higgs_rest_chunk0.meta.json
+
+outputs/angular_lr_lab/features/features_reco_higgs_rest_chunk0.csv
+outputs/angular_lr_lab/features/features_reco_higgs_rest_chunk0.meta.json
+```
+
+Produced (SM):
+```
+outputs/angular_lr_lab/features/features_sm_gen_lab_chunk0.csv
+outputs/angular_lr_lab/features/features_sm_gen_lab_chunk0.meta.json
+
+outputs/angular_lr_lab/features/features_sm_reco_lab_chunk0.csv
+outputs/angular_lr_lab/features/features_sm_reco_lab_chunk0.meta.json
+```
+
+#### 1.2 Build angular observables
+Base Input (CPV):
+```
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr_lab.yaml \
+  --features outputs/angular_lr_lab/features/features_gen_lab_chunk0.csv \
+  --observable O_W \
+  --split all \
+  --lepton-flavor electron \
+  --output-tag gen_electron
+```
+
+Base Input (SM):
+```
+python3 scripts/build_angular_observable.py \
+  --config configs/analysis_angular_lr_lab.yaml \
+  --features outputs/angular_lr_lab/features/features_sm_gen_lab_chunk0.csv \
+  --observable O_W \
+  --split all \
+  --weight-column weight_sm \
+  --lepton-flavor electron \
+  --output-tag sm_gen_electron
+```
+
+Produced: <br>
+All files are on 
+- O_W: `outputs/angular_lr_lab/angular/O_W`
+- O_lD: `outputs/angular_lr_lab/angular/O_lD`
+
+#### 1.3 Calculate Fisher Information
+
+| Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `lab` | 1064 | 1323 | 3.4739567161702447 | 1.3866406525629114 | 0.3991531173 |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `lab` | 1008 | 1215 | 4.2117530909483065 | 1.2584917076540516 | 0.2988047211 |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `lab` | 2072 | 2538 | $I_e + I_\mu =$ 7.685709807 | $I_e + I_\mu =$ 2.64513236 | 0.3441624035 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `lab` | 1064 | 1323 |  1.886180439729501 | 0.9299193474038754 | 0.4930171726 |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `lab` | 1008 | 1215 |  1.8638692419128255 | 1.4025894528999923  | 0.7525149412 |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `lab` | 2072 | 2538 | $I_e + I_\mu =$ 3.750049682 | $I_e + I_\mu =$ 2.3325088 | 0.6219941062 |
 
 ### 2. `ttbar_rest` frame
+Produced: <br>
+All files are on 
+- O_W: `outputs/angular_lr_ttbar_rest/angular/O_W`
+- O_lD: `outputs/angular_lr_ttbar_rest/angular/O_lD`
+
+| Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `ttbar_rest` | 1064 | 1323 | 1.8096434531980166 | 0.8180989115551697 | 0.4520774024 |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `ttbar_rest` | 1008 | 1215 | 2.1305163901406736 | 1.37752157362855 | 0.6465669919 |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `ttbar_rest` | 2072 | 2538 | $I_e + I_\mu =$ 3.940159843 | $I_e + I_\mu =$ 2.195620485 | 0.5572414756 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `ttbar_rest` | 1064 | 1323 | 1.4632860464897457 | 0.9007705483003049 | 0.6155806313 |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `ttbar_rest` | 1008 | 1215 | 1.8800197000334817 | 1.1422979981077648 | 0.6075989513 |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `ttbar_rest` | 2072 | 2538 | $I_e + I_\mu =$ 3.343305747 | $I_e + I_\mu =$ 2.043068546 | 0.6110923441 |
+
+
+### 3. Comparison of All Frames (Fisher Information)
+
+| Observable | Lepton category | `higgs_rest`: $I_{\text{reco}} / I_{\text{gen}}$ | `lab`: $I_{\text{reco}} / I_{\text{gen}}$ | `ttbar_rest`: $I_{\text{reco}} / I_{\text{gen}}$ |
+| --- | --- | --- | --- | --- |
+| $O_{jj}\ (O_W)$ | electron | 0.1403406073 | 0.3991531173 | 0.4520774024 |
+| $O_{jj}\ (O_W)$ | muon | 0.1534503462 | 0.2988047211 | 0.6465669919 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | 0.2568165681 | 0.4930171726 | 0.6155806313 |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | 0.3550933051 | 0.7525149412 | 0.6075989513 |
