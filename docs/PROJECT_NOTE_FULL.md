@@ -3018,15 +3018,13 @@ A compact table identifying the strongest and the most *complementary* secondary
 ---
 
 
-# Chapter 5 — ML observable.
-
-
-## 5.1 angular–ML comparison
+# Chapter 5 — ML-learned CP observable in the $O_{\ell D}$ branch
 
 **Status: in development.**
 
-The angle-versus-ML comparison will be added next week, after the following
-parts have been frozen:
+After Chapter 4 establishing the better reconstructed angular observable $O_{\ell D}$ 
+using the charged lepton and the selected down-type jet, the following parts have been 
+frozen:
 
 ```text
 strict semileptonic truth topology
@@ -3037,26 +3035,87 @@ SM and signed CPV-interference templates
 generator-to-reconstruction Fisher comparison
 ```
 
-Do not start the ML comparison before the angular baseline is validated.
+Chapter 5 replaces this one-dimensional angular compression with a learned
+observable constructed from reconstruction-level inputs **IN HIGGS REST FRAME**.
 
-The future ML comparison should use the same physical objects as the
-corresponding angular observable:
+The supervised ML target is
 
-```text
-O_jj branch:
-    two selected W jets
-    information used to select and orient the pair
+$$
+y=\operatorname{sign}(w_{\mathrm{int}})\in\{-1,+1\},
+$$
 
-O_lD branch:
-    isolated charged lepton
-    selected down-type-jet candidate
-    information used to select that candidate
-```
+with $|w_{\mathrm{int}}|$ used as the non-negative training weight. The final
+learned CP observable is
 
-Branch fusion is not part of the present Chapter 4 scope.
+$$
+O_{\mathrm{ML}}(x)=P(+\mid x)-P(-\mid x),
+$$
 
+which is evaluated on the CPV-interference and SM samples and compared through
+Fisher information,
 
+$$
+I=\sum_i\frac{\nu_{1,i}^2}{\nu_{0,i}}.
+$$
 
+The purpose of this chapter is to determine how much CP information is retained by 
+different reconstruction-level feature representations and hopefully to maximize it. 
+Loss, AUC, and overtraining checks are model diagnostics, while Fisher information 
+is the final physics metric.
+
+We will start from a naive baseline with the least lepton, selected-down-type jets
+kinematics by XGBoost(BDT) with further add-ons with auxiliary variables, permutation 
+and likelihood-weighted, CatBoost, more jets and neutrino involvement...
+
+Sections 5.1–5.4 form the two-week main study; the extensions in Section 5.5
+are performed as time permits.
+
+## 5.1 Data preparation
+
+Prepare and validate the complete LR CPV-interference and SM all-chunk datasets
+in the Higgs rest frame, correct the reconstructed top and antitop charge
+ordering and down-type-object mapping, export the event weights, interference
+sign, lepton, fitted neutrino, both W daughters, top-decay $b/\bar b$ objects,
+assignment information, final-selection score, and invariant-mass variables,
+and provide the HTCondor export and chunk-normalisation workflow.
+
+## 5.2 BDT baseline comparison
+
+Starting from the reconstructed lepton and selected down-type jet, compare
+XGBoost and CatBoost using no auxiliary variables, W-assignment and ordering
+variables plus the kinematic-fit final-selection score, invariant-mass
+combinations, and the union of the two auxiliary groups, selecting the baseline
+with validation Fisher information together with the train–validation loss
+behaviour.
+
+## 5.3 W-daughter representation and assignment study
+
+Using the selected BDT setup, compare the current hard-selected down-type jet
+with representations that preserve both reconstructed W daughters and their
+two possible assignments, including assignment-likelihood and
+permutation-based approaches, while producing only one final
+$O_{\mathrm{ML}}$ value per physical event.
+
+## 5.4 Adding the fitted neutrino
+
+Add the fitted-neutrino kinematics to the selected $O_{\ell D}$-branch feature
+set and test whether the learned observable retains more Fisher information
+than the lepton-plus-down-type-jet baseline.
+
+## 5.5 Optional studies
+
+As time permits, repeat the selected setup with a neural network and revisit
+the W-daughter permutation problem, train using the two W jets alone to test
+whether ML can avoid or resolve the jet-ordering problem, enlarge the input to
+the complete reconstructed W products and top-decay $b/\bar b$ objects to test
+whether additional physical information helps or confuses the model, and study
+an SM-inclusive three-class model while retaining
+
+$$
+O_{\mathrm{ML}}=P(+)-P(-)
+$$
+
+as the final learned CP observable.
 
 ---
 
