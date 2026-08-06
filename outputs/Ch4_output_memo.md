@@ -321,6 +321,26 @@ The files with old method (naive q / q¯ orientation) is moved to: <br>
 
 
 ## Additional Comparison Plots (Ch. 4.5.5)
+Created a new script `plot_four_hist.py` in `src/ilc_tth_cpv/` to plot four curves in a single figure:
+- reco SM vs reco signed CPV-interference
+- gen SM vs gen signed CPV-interference
+
+Separate plots are generated for electron and muon categories in each execution. The observable (O_W or O_lD) can be specified via command-line arguments.
+
+To run:
+```
+python3 src/ilc_tth_cpv/plot_four_hist.py \
+  --observable O_W
+```
+
+Output:
+```
+outputs/angular_lr/angular/O_W/joint_likelihood/O_W_all_sm_vs_cpv_gen_vs_reco_electron_bins.png
+outputs/angular_lr/angular/O_W/joint_likelihood/O_W_all_sm_vs_cpv_gen_vs_reco_muon_bins.png
+
+outputs/angular_lr/angular/O_lD/joint_likelihood/O_lD_all_sm_vs_cpv_gen_vs_reco_electron_bins.png
+outputs/angular_lr/angular/O_lD/joint_likelihood/O_lD_all_sm_vs_cpv_gen_vs_reco_muon_bins.png
+```
 
 ## Frame Study (Ch. 4.4.3)
 All output above used the default frame, `higgs_rest`.
