@@ -2729,22 +2729,18 @@ available.
 ### 4.5.5 Additional plots
 
 You are welcome to plot any further comparison that helps explain the
-observation.
+observation. The scripts should normally read the feature CSVs or binned angular
+CSVs. They should not reopen the original STDHEP or SLCIO files unless the required
+diagnostic quantity was not exported.
 
-Choose the comparisons that are most useful rather than producing every
-possible plot.
+Necessary for us to deliver to others:
 
-Possible examples are:
+* reco/gen SM/CPV vs each other, muon/electron separately:
+    * For the same observable, for curves on the same observable axis or comparing two by two(depends on how you feel about the layout);
+    * $O_{jj}$ and $O_{\ell D}$ can also be compared on the same plot. 
 
-* reco SM template and reco signed CPV-interference template on the same
-  observable axis;
 
-* gen SM template and gen signed CPV-interference template on the same
-  observable axis;
-
-* $O_{jj}$ and $O_{\ell D}$ at generator level;
-
-* $O_{jj}$ and $O_{\ell D}$ at reconstruction level;
+Some examples you might try for your own interest:
 
 * per-bin Fisher contribution
 
@@ -2770,18 +2766,15 @@ Possible examples are:
 * correct and incorrect down-type-candidate categories on truth-labelled
   diagnostic events.
 
-Comparison scripts should normally read the feature CSVs or binned angular
-CSVs.
 
-They should not reopen the original STDHEP or SLCIO files unless the required
-diagnostic quantity was not exported.
 
 ---
 
 ## 4.6 Think about the reconstructed down-type jet
 
 No additional reconstruction optimisation is compulsory in the first Chapter
-4 result.
+4 result. **Any further improvements of the angular observable beyond the student's 
+limited time will be done by the supervisor.**
 
 After producing the baseline comparison, explain which reconstruction stages
 can affect the final down-type analyser:
@@ -2811,12 +2804,11 @@ In particular, the signed flavour information is much weaker for several
 $u,d,s$ and antiquark categories than for the relatively favourable charm
 categories.
 
-With additional time, choose **one** of the following studies according to
-your interest.
+Several optional studies can be done from following ideas and further idea can be accessed from the /docs/W-DAUGHTER-ODERING.md
 
-It is not necessary to complete all three.
+### Option A — Based on the HIGH CONFIDENCE SUBSET
 
-### Option A — better-identified flavour subset
+**Better-identified flavour subset**
 
 Test whether a restricted, better-identified event subset retains more
 reconstruction-level Fisher information.
@@ -2848,9 +2840,34 @@ Do not judge the method from flavour accuracy alone.
 A tighter category may have better purity but lower total Fisher information
 because many events have been removed.
 
+**Confidence Categories**
+
+Do not immediately discard every ambiguous event.
+
+Divide the events into a small number of non-overlapping orientation-confidence
+categories, for example:
+
+```text
+high confidence
+low confidence
+```
+
+Calculate the Fisher information in each category and combine the independent
+category results.
+
+Compare this with:
+
+```text
+one inclusive category
+one hard confidence cut
+```
+
+A hard cut is justified only if it improves the final combined Fisher
+information, not only the orientation accuracy.
+
 ### Option B — direct up-type/down-type pair assignment
 
-Instead of first reducing all light flavours to a single quark-versus-antiquark
+It turns out the up/down-type quark identification accuracy of the ParT At ILC is higher than the quark/antiquark. (Check out the flavor_accuracy_confusion_matrix.png) So, instead of first reducing all light flavours to a single quark-versus-antiquark
 score, define
 
 ```math
@@ -2924,30 +2941,6 @@ W+ -> U + anti-D
 
 rather than treating the two jets as independent charge classifications.
 
-### Option C — confidence categories
-
-Do not immediately discard every ambiguous event.
-
-Divide the events into a small number of non-overlapping orientation-confidence
-categories, for example:
-
-```text
-high confidence
-low confidence
-```
-
-Calculate the Fisher information in each category and combine the independent
-category results.
-
-Compare this with:
-
-```text
-one inclusive category
-one hard confidence cut
-```
-
-A hard cut is justified only if it improves the final combined Fisher
-information, not only the orientation accuracy.
 
 ---
 
@@ -2991,8 +2984,44 @@ diagnostics?
 ```
 
 ---
+## 4.8 Other optional angular observable
 
-## 4.8 Next week — angular–ML comparison
+Check out after we complete chapter 5, if there's time and any neccessity.
+
+**Start only after the $O_W$ framework is stable and the above top-side
+checkpoint has passed.** Reuse the frozen default frame and model
+configuration — the point is a *quick, uniform* survey, not three new projects.
+
+* $O_b=\Delta\phi(b_t,b_{\bar{t}})$
+
+Ordering from signed ParT $b/\bar{b}$ scores + top-side assignment + lepton-charge consistency.
+
+* $O_{\ell\nu}$
+
+The generator definition is the charge-dependent CP ordering in §2.3. Reco
+uses the selected fit's persisted `nu_fit_{E,px,py,pz}` and the isolated-lepton
+charge. Do not silently substitute a different missing-momentum estimator.
+
+* $O_{\mathrm{top}}$
+
+The definition is $\Delta\phi(t,\bar t)$. At reco level, use the isolated
+lepton charge to identify which reconstructed side is top and which is
+antitop, and include the fitted neutrino in the leptonic-side composite.
+
+**Interesting comparison (identical recipe for each) and Deliverable**
+
+Gen/reco angle; one fixed BDT; Fisher at gen and reco; retention $R_{\mathrm{reco}}$; and the **correlation with $s_W$** — a strong branch that is highly correlated with $s_W$ adds little in fusion; a moderately strong but complementary one may add more.
+
+A compact table identifying the strongest and the most *complementary* secondary observable → this selects $X$ for Chapter 7.
+
+
+---
+
+
+# Chapter 5 — ML observable.
+
+
+## 5.1 angular–ML comparison
 
 **Status: in development.**
 
@@ -3026,37 +3055,8 @@ O_lD branch:
 
 Branch fusion is not part of the present Chapter 4 scope.
 
----
 
-# Chapter 5 — Secondary-observable baselines (fast, by reuse)
 
-**Start only after the $O_W$ framework is stable and the Chapter 4 top-side
-checkpoint has passed.** Reuse the frozen default frame and model
-configuration — the point is a *quick, uniform* survey, not three new projects.
-
-## 5.1 $O_b=\Delta\phi(b_t,b_{\bar{t}})$
-
-Ordering from signed ParT $b/\bar{b}$ scores + top-side assignment + lepton-charge consistency.
-
-## 5.2 $O_{\ell\nu}$
-
-The generator definition is the charge-dependent CP ordering in §2.3. Reco
-uses the selected fit's persisted `nu_fit_{E,px,py,pz}` and the isolated-lepton
-charge. Do not silently substitute a different missing-momentum estimator.
-
-## 5.3 $O_{\mathrm{top}}$
-
-The definition is $\Delta\phi(t,\bar t)$. At reco level, use the isolated
-lepton charge to identify which reconstructed side is top and which is
-antitop, and include the fitted neutrino in the leptonic-side composite.
-
-## 5.4 Required comparison (identical recipe for each)
-
-Gen/reco angle; one fixed BDT; Fisher at gen and reco; retention $R_{\mathrm{reco}}$; and the **correlation with $s_W$** — a strong branch that is highly correlated with $s_W$ adds little in fusion; a moderately strong but complementary one may add more.
-
-## 5.5 Deliverable
-
-A compact table identifying the strongest and the most *complementary* secondary observable → this selects $X$ for Chapter 7.
 
 ---
 
