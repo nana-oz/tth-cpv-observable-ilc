@@ -145,7 +145,7 @@ def event_weight_fields(
     component: str,
     interference_weight: float = NAN,
     sm_weights: dict | None = None,
-) -> dict:
+    ) -> dict:
     if component == "interference":
         signed = float(interference_weight)
         return {
