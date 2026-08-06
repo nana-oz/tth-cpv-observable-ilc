@@ -315,15 +315,16 @@ The files with old method (naive q / q¯ orientation) is moved to: <br>
 | $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 1323 | 8.495167899547766 | 1.1922170218389185 | 0.1403406073 |
 | $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 1215 | 8.883643187780406 | 1.3631981225429635 | 0.1534503462 |
 | $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 2538 | $I_e + I_\mu =$ 17.37881109 | $I_e + I_\mu =$ 2.555415144 | 0.1470420002 |
-| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 2407 | 8.576818452904579 | 2.202669080356562 | 0.2568165681 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 1064 | 8.576818452904579 | 2.202669080356562 | 0.2568165681 |
 | $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 2248 | 9.42454726292643 | 3.346593636322913 | 0.3550933051 |
-| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 2538 | $I_e + I_\mu =$ 18.00136572 | $I_e + I_\mu =$ 5.549262717 | 0.3082689838 |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 1215 | $I_e + I_\mu =$ 18.00136572 | $I_e + I_\mu =$ 5.549262717 | 0.3082689838 |
 
 
 ## Additional Comparison Plots (Ch. 4.5.5)
 Created a new script `plot_four_hist.py` in `src/ilc_tth_cpv/` to plot four curves in a single figure:
 - reco SM vs reco signed CPV-interference
 - gen SM vs gen signed CPV-interference
+SM bins are scaled by 0.1 (SM/10) for better visibility and make it easier to compare with CPV-interference.
 
 Separate plots are generated for electron and muon categories in each execution. The observable (O_W or O_lD) can be specified via command-line arguments.
 
