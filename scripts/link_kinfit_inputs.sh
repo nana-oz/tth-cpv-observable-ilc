@@ -58,6 +58,24 @@ canonical_root_name() {
         return 0
     fi
 
+    # Handle raw batch job filenames:
+    #   kinfit_physsim__tth-cpv__eL.pR__I01234_0_1.root
+    #   physsim__ttbb__eR.pL__I01234_0_56.root
+    if [[ "$basename" =~ ^(kinfit_)?[a-zA-Z0-9]+__([^_]+)__([^_]+)__.*_([0-9]+)\.root$ ]]; then
+        local raw_sample="${BASH_REMATCH[2]}"
+        local raw_pol="${BASH_REMATCH[3]}"
+        local chunk="${BASH_REMATCH[4]}"
+
+        local sample_clean
+        sample_clean="$(echo "$raw_sample" | tr -d '-')"
+
+        local pol_clean
+        pol_clean="$(echo "$raw_pol" | tr -d '.' | tr '[:upper:]' '[:lower:]')"
+
+        printf 'kinfit_%s_reco_%s_chunk%s.root\n' "$sample_clean" "$pol_clean" "$chunk"
+        return 0
+    fi
+
     echo "[link_kinfit_inputs] ERROR: cannot infer canonical name from:" >&2
     echo "  $source_path" >&2
     echo "Expected one of:" >&2
@@ -138,6 +156,11 @@ link_root_directory() {
     declare -A claimed_names=()
 
     while IFS= read -r -d '' source_file; do
+        # SKIP failed job artifacts and temporary work folders:
+        if [[ "$source_file" =~ /(failed|runner_output|work_)/ ]]; then
+            continue
+        fi
+
         source_real="$(readlink -f "$source_file")"
         canonical_name="$(canonical_root_name "$source_file")"
         canonical_path="$destination_dir/$canonical_name"
