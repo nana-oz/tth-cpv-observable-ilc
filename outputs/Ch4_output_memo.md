@@ -491,3 +491,6 @@ I used AI to create a script (`scripts/summarize_fisher_info_per_chunk.py`) to e
 | **10** | O_lD | electron | higgs_rest | 1102 | 1312 | 10.6737 | 2.8081 | 0.2631 |
 | **10** | O_lD | muon | higgs_rest | 1052 | 1311 | 11.1689 | 2.0441 | 0.1830 |
 | **10** | O_lD | combined likelihood (e+mu) | higgs_rest | 2154 | 2623 | 21.8426 | 4.8522 | 0.2221 |
+
+Still need to check other frames (chunk 1-10)...ongoing
+
