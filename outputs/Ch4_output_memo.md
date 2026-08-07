@@ -8,8 +8,8 @@ Executing `./scripts/run_pipeline.sh` performs the following:
 - Calculates Fisher information using `evaluate_fisher.py` for all built histograms at $\mathcal{L} = 8000\text{ fb}^{-1}$.
 
 Usage:
-- Default frame (higgs_rest): `./scripts/run_pipeline.sh`.
-- Specify frame: `./scripts/run_angular_obasevable_pipeline.sh lab` or `./scripts/run_angular_obasevable_pipeline.sh ttbar_rest`.
+- Default frame (higgs_rest): `./scripts/run_angular_observable_pipeline.sh`.
+- Specify frame: `./scripts/run_angular_observable_pipeline.sh lab` or `./scripts/run_angular_observable_pipeline.sh ttbar_rest`.
 
 ### 1. Export the CPV-interference features
 **Running the code (from Ch 4.1.4):**
@@ -453,3 +453,6 @@ All files are on
 | $O_{jj}\ (O_W)$ | muon | 0.1534503462 | 0.2988047211 | 0.6465669919 |
 | $O_{\ell D}\ (O_{\ell D})$ | electron | 0.2568165681 | 0.4930171726 | 0.6155806313 |
 | $O_{\ell D}\ (O_{\ell D})$ | muon | 0.3550933051 | 0.7525149412 | 0.6075989513 |
+
+
+## More Chunks (1~10)
