@@ -3088,10 +3088,27 @@ and provide the HTCondor export and chunk-normalisation workflow.
 **Update the export_features.py and test it with one chunk**
 
 1. Check the reconstructed top/anti-top slot in export_features.py and fix it
-2. Output the kinematics of the selected down-type quark of W into the row
-3. Other input features
-4. Try with the current chunk 0 data, make sure in the output csv, there is the following
-   quantities. 
+2. Delete :
+    * O_b, O_top, O_lnu (They just output from old template, but didn't be ordered carefully, and not in using)
+    * y45,y56,y67(used in MVA for S/B)
+    * Other information for kinfit, not useful,such as: top_n,n_constraint,n_unmeasured...But you can keep them if you don't want to work more.
+3. Check what is already in the output "row" **at reconstruction level** in the export_feature, what haven't added
+   based on the following list:
+   * Event Infomration: event_id, chunk_id,split, weight(signed,abs,training),co_sign(label)
+   * Lepton information:lepton_px/py/pz/E/p_t/eta/phi/mass
+   * W_daughter information:W1_E/theta/phi/mass,W2_E/theta/phi/mass,down_type_index,
+     down_assignment_probablity(L12 or L21),margin
+   * Neutrino information: nu_fit_px/py/pz/E/pt/eta/phi
+   * bbar from top: b_had_E/theta/phi/mass, b_lep_E/theta/phi/mass
+   * Auxiliary variables:
+       * Invariant mass: m_W_had,m_top_had,m_top_lep,m_ttbar,m_H (some in the kinfit root, m_ttbar need to calculate by the two tops)
+       * Flavor tagging/assginment/KinFit score:fit_chi2,final_selection_score,final_fit_score, final flavor score
+   * Hepful for debugging:idx_W1,idx_W2,idx_W_quark,idx_W_antiquark
+  
+    If haven't output, check what is included in the Kinfit Root first(use postfit one), then if it in the reco slcio collection, or calculate them by yourself.
+   
+5. Try with the current chunk 0 data, make sure in the output csv, all features above included.
+   
 
 **Link all chunks root file with the corresponding  resolve_root_path()**
 
