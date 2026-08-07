@@ -3088,8 +3088,8 @@ and provide the HTCondor export and chunk-normalisation workflow.
 **Update the export_features.py and test it with one chunk**
 
 1. Check the reconstructed top/anti-top slot in export_features.py and fix it
-2. Get lepton charge come from the lepton.getCharge() in slcio rather than root
-3. Output the kinematics of the selected down-type quark of W into the row
+2. Output the kinematics of the selected down-type quark of W into the row
+3. Other input features
 4. Try with the current chunk 0 data, make sure in the output csv, there is the following
    quantities. 
 
