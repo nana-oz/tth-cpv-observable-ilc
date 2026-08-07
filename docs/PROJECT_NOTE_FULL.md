@@ -3094,20 +3094,22 @@ and provide the HTCondor export and chunk-normalisation workflow.
     * Other information for kinfit, not useful,such as: top_n,n_constraint,n_unmeasured...But you can keep them if you don't want to work more.
 3. Check what is already in the output "row" **at reconstruction level** in the export_feature, what haven't added
    based on the following list:
-   * Event Infomration: event_id, chunk_id,split, weight(signed,abs,training),co_sign(label)
-   * Lepton information:lepton_px/py/pz/E/p_t/eta/phi/mass
-   * W_daughter information:W1_E/theta/phi/mass,W2_E/theta/phi/mass,down_type_index,
-     down_assignment_probablity(L12 or L21),margin
-   * Neutrino information: nu_fit_px/py/pz/E/pt/eta/phi
-   * bbar from top: b_had_E/theta/phi/mass, b_lep_E/theta/phi/mass
+   * Event Infomration: event_id, chunk,split, weight(signed,abs,training),cp_sign(label)
+   * Lepton information:lepton_px/py/pz/E/p_t/theta/phi/mass
+   * W_daughter information:W1_E/theta/phi/mass,W2_E/theta/phi/mass(Existing name as wjet_quark/antiquark is fine),
+     down_type_slot（1 means W1 is down-type, 2 means W2),
+     down_assignment_likelihood(L12 and L21),margin
+   * Neutrino information: nu_fit_px/py/pz/E/pt/theta/phi
+   * b/bbar from top: b_had_E/theta/phi/mass, b_lep_E/theta/phi/mass
    * Auxiliary variables:
-       * Invariant mass: m_W_had,m_top_had,m_top_lep,m_ttbar,m_H (some in the kinfit root, m_ttbar need to calculate by the two tops)
-       * Flavor tagging/assginment/KinFit score:fit_chi2,final_selection_score,final_fit_score, final flavor score
+       * Invariant mass: m_W_had,m_top_had,m_top_lep,m_ttbar,m_H (some in the kinfit root（postfit）, m_ttbar need to calculate by the two tops)
+       * Flavor tagging/assginment/KinFit score:fitchi2,final_selection_score,final_fit_score, final flavor score
    * Hepful for debugging:idx_W1,idx_W2,idx_W_quark,idx_W_antiquark
   
-    If haven't output, check what is included in the Kinfit Root first(use postfit one), then if it in the reco slcio collection, or calculate them by yourself.
+    If haven't output, check what is included in the Kinfit Root first, then if it in the reco slcio collection, or calculate them by yourself.
+   Note and record which one comes from the "post-fit" in KinFit, and which one comes from the "prefit" or Reconstruction slcio directly. Keep the current data source, prior to use post fit one, except strong conflict with previous convention. Make sure any edit will not affect your current angular pipeline.
    
-5. Try with the current chunk 0 data, make sure in the output csv, all features above included.
+4. Try with the current chunk 0 data, make sure in the output csv, all features above included. Look at the csv, confirm: all number finite, mass are positive... 
    
 
 **Link all chunks root file with the corresponding  resolve_root_path()**
