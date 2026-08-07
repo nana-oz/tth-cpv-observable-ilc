@@ -3095,8 +3095,46 @@ and provide the HTCondor export and chunk-normalisation workflow.
 
 **Link all chunks root file with the corresponding  resolve_root_path()**
 
-1. Run bash and check the /data
-2. Modify the resolve_root_path() in export_feature.py by
+1. Run /scripts/link_kinfit_inputs.sh and check the eLpR of the tth-sm, tth-cpv in the /data/kinfit/physsim
+2. Modify the kinfit_root_path() in export_feature.py by
+   ```
+   def kinfit_root_path(cfg: dict, sample_key: str, chunk_id: str) -> Path:
+    """Resolve the canonical kinfit ROOT file.
+
+    Prefer the repo-local shared-data link created by
+    scripts/link_kinfit_inputs.sh. Fall back to the historical analysis-output
+    directory so locally produced kinfit files remain usable.
+    """
+    filename = f"kinfit_{sample_key}_chunk{chunk_id}.root"
+
+    family = cfg.get("kinfit", {}).get("input_family", "physsim")
+
+    shared_path = (
+        repo_root()
+        / "data"
+        / "kinfit"
+        / family
+        / filename
+    )
+
+    legacy_path = (
+        repo_root()
+        / cfg["outputs"]["base_dir"]
+        / "kinfit"
+        / filename
+    )
+
+    if shared_path.exists():
+        return shared_path
+
+    if legacy_path.exists():
+        return legacy_path
+
+    # Return the preferred path so the downstream error message tells the
+    # student exactly where the missing link should have been created.
+    return shared_path
+   ```
+   Check if the current root path match those under /data
    
 **Create the Supersets with the training weight**
 1. Export the feature of the tth-cpv chunk 1, and see if it really come from this
