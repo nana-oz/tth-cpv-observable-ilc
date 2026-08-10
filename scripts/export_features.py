@@ -872,6 +872,34 @@ def export_reco(
         lepton = snapshot["lepton"]
         neutrino = fitted_neutrino_p4(fit_row)
 
+        # Lepton Kinematics (Pre-Fit SLCIO)
+        if lepton is not None:
+            lepton_E, lepton_px, lepton_py, lepton_pz = lepton
+            record.update({
+                "lepton_px": lepton_px,
+                "lepton_py": lepton_py,
+                "lepton_pz": lepton_pz,
+                "lepton_pt": math.hypot(lepton_px, lepton_py),
+            })
+        else:
+            record.update({
+                "lepton_px": NAN, "lepton_py": NAN, "lepton_pz": NAN, "lepton_pt": NAN
+            })
+
+        # Neutrino Kinematics (Post-Fit KinFit ROOT)
+        if neutrino is not None:
+            nu_E, nu_px, nu_py, nu_pz = neutrino
+            nu_p = math.sqrt(nu_px**2 + nu_py**2 + nu_pz**2)
+            record.update({
+                "nu_fit_pt": math.hypot(nu_px, nu_py),
+                "nu_fit_theta": safe_theta(nu_pz / nu_p) if nu_p > 0 else NAN,
+                "nu_fit_phi": math.atan2(nu_py, nu_px),
+            })
+        else:
+            record.update({
+                "nu_fit_pt": NAN, "nu_fit_theta": NAN, "nu_fit_phi": NAN
+            })
+
         # Find and define lepton charge (Q_l)
         lepton_charge = float(fit_row.get("lepton_charge", NAN))
         record["lepton_charge"] = lepton_charge
