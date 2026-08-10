@@ -472,8 +472,10 @@ python3 scripts/combine_angular_templates.py \
         --tag O_W_electron
 ```
 
-Output (for electron only): <br>
-**Output files are under `chunk_1-10` folder in each angular observable folder. **
+Output (for electron only): 
+
+**Output files are under `chunk_1-10` folder in each angular observable folder.**
+
 ```
 outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_combined_bins.csv
 outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_combined_bins.meta.json
@@ -494,10 +496,10 @@ outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_vs_reco_cpv
 Base Input:
 ```
 python3 scripts/evaluate_fisher.py \
-        --template outputs/angular_lr/angular/O_W/O_W_electron_chunk1-10_reco_combined_bins.csv \
-        --sm-template outputs/angular_lr/angular/O_W/O_W_electron_chunk1-10_sm_reco_combined_bins.csv \
+        --template outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.csv \
         --luminosity-scale 8000 \
-        --out outputs/angular_lr/angular/O_W/O_W_electron_chunk1-10_reco.fisher.json
+        --out outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco.fisher.json
 ```
 
 Output:
