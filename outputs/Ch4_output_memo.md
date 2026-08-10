@@ -325,9 +325,9 @@ The files with old method (naive q / q¯ orientation) is moved to: <br>
 | $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 1323 | 8.495167899547766 | 1.1922170218389185 | 0.1403406073 |
 | $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 1215 | 8.883643187780406 | 1.3631981225429635 | 0.1534503462 |
 | $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 2538 | $I_e + I_\mu =$ 17.37881109 | $I_e + I_\mu =$ 2.555415144 | 0.1470420002 |
-| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 1064 | 8.576818452904579 | 2.202669080356562 | 0.2568165681 |
-| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 2248 | 9.42454726292643 | 3.346593636322913 | 0.3550933051 |
-| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 1215 | $I_e + I_\mu =$ 18.00136572 | $I_e + I_\mu =$ 5.549262717 | 0.3082689838 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 1064 | 1323 | 8.576818452904579 | 2.202669080356562 | 0.2568165681 |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 1008 | 1215 | 9.42454726292643 | 3.346593636322913 | 0.3550933051 |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` | 2072 | 2538 | $I_e + I_\mu =$ 18.00136572 | $I_e + I_\mu =$ 5.549262717 | 0.3082689838 |
 
 
 ## Additional Comparison Plots (Ch. 4.5.5)
@@ -455,42 +455,71 @@ All files are on
 | $O_{\ell D}\ (O_{\ell D})$ | muon | 0.3550933051 | 0.7525149412 | 0.6075989513 |
 
 
-## More Chunks (1~10)
-**IMPORTANT NOTE**
-I used AI to create a script (`scripts/summarize_fisher_info_per_chunk.py`) to extract the Fisher information and n_events_filled  from each chunk's JSON files, compiling them into a single summary CSV table. The table below displays this output; however, the script still requires code review, so these values are pending final verification.
+## More Chunks (1-10) Combined 
+### 1. Export files for combined chunk
+- Use `scripts/combine_angular_templates.py` to compute the O_W/O_lD plot, .csv, and .json files for combined chunks (1-10).
 
-| Chunk | Observable | Lepton Category | Frame | N_gen | N_reco | I_gen | I_reco | I_reco / I_gen |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **1** | O_lD | electron | higgs_rest | 1049 | 1311 | 8.0853 | 2.0869 | 0.2581 |
-| **1** | O_lD | muon | higgs_rest | 1058 | 1249 | 10.1370 | 2.8403 | 0.2802 |
-| **1** | O_lD | combined likelihood (e+mu) | higgs_rest | 2107 | 2560 | 18.2224 | 4.9272 | 0.2704 |
-| **2** | O_lD | electron | higgs_rest | 1106 | 1385 | 9.9692 | 1.8295 | 0.1835 |
-| **2** | O_lD | muon | higgs_rest | 1092 | 1294 | 11.1204 | 2.4675 | 0.2219 |
-| **2** | O_lD | combined likelihood (e+mu) | higgs_rest | 2198 | 2679 | 21.0896 | 4.2970 | 0.2037 |
-| **3** | O_lD | electron | higgs_rest | 1123 | 1389 | 10.9075 | 2.6797 | 0.2457 |
-| **3** | O_lD | muon | higgs_rest | 1115 | 1340 | 8.5179 | 2.9515 | 0.3465 |
-| **3** | O_lD | combined likelihood (e+mu) | higgs_rest | 2238 | 2729 | 19.4254 | 5.6312 | 0.2899 |
-| **4** | O_lD | electron | higgs_rest | 1026 | 1266 | 8.4859 | 1.6161 | 0.1904 |
-| **4** | O_lD | muon | higgs_rest | 1093 | 1319 | 10.0533 | 2.7349 | 0.2720 |
-| **4** | O_lD | combined likelihood (e+mu) | higgs_rest | 2119 | 2585 | 18.5392 | 4.3511 | 0.2347 |
-| **5** | O_lD | electron | higgs_rest | 1092 | 1335 | 8.5421 | 2.4869 | 0.2911 |
-| **5** | O_lD | muon | higgs_rest | 1008 | 1266 | 9.5455 | 2.3777 | 0.2491 |
-| **5** | O_lD | combined likelihood (e+mu) | higgs_rest | 2100 | 2601 | 18.0876 | 4.8646 | 0.2689 |
-| **6** | O_lD | electron | higgs_rest | 1104 | 1382 | 9.5162 | 2.1367 | 0.2245 |
-| **6** | O_lD | muon | higgs_rest | 1025 | 1245 | 8.1213 | 1.8252 | 0.2247 |
-| **6** | O_lD | combined likelihood (e+mu) | higgs_rest | 2129 | 2627 | 17.6376 | 3.9619 | 0.2246 |
-| **7** | O_lD | electron | higgs_rest | 1074 | 1343 | 10.3945 | 2.9801 | 0.2867 |
-| **7** | O_lD | muon | higgs_rest | 1024 | 1247 | 8.4316 | 2.0436 | 0.2424 |
-| **7** | O_lD | combined likelihood (e+mu) | higgs_rest | 2098 | 2590 | 18.8261 | 5.0237 | 0.2668 |
-| **8** | O_lD | electron | higgs_rest | 1049 | 1323 | 8.6405 | 2.3642 | 0.2736 |
-| **8** | O_lD | muon | higgs_rest | 1051 | 1267 | 10.0276 | 2.7159 | 0.2708 |
-| **8** | O_lD | combined likelihood (e+mu) | higgs_rest | 2100 | 2590 | 18.6682 | 5.0801 | 0.2721 |
-| **9** | O_lD | electron | higgs_rest | 1067 | 1297 | 9.6624 | 2.6085 | 0.2700 |
-| **9** | O_lD | muon | higgs_rest | 1040 | 1237 | 9.0090 | 2.0004 | 0.2220 |
-| **9** | O_lD | combined likelihood (e+mu) | higgs_rest | 2107 | 2534 | 18.6714 | 4.6089 | 0.2468 |
-| **10** | O_lD | electron | higgs_rest | 1102 | 1312 | 10.6737 | 2.8081 | 0.2631 |
-| **10** | O_lD | muon | higgs_rest | 1052 | 1311 | 11.1689 | 2.0441 | 0.1830 |
-| **10** | O_lD | combined likelihood (e+mu) | higgs_rest | 2154 | 2623 | 21.8426 | 4.8522 | 0.2221 |
+Base Input:
+```
+python3 scripts/combine_angular_templates.py \
+        --chunks 1-10 \
+        --compare-plot \
+        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --out-dir outputs/angular_lr/angular/O_W \
+        --tag O_W_electron
+```
 
-Still need to check other frames (chunk 1-10)...ongoing
+Output (for electron only): <br>
+**Output files are under `chunk_1-10` folder in each angular observable folder. **
+```
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_combined_bins.csv
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_combined_bins.meta.json
 
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.csv
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.meta.json
+
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco_combined_bins.csv
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco_combined_bins.meta.json
+
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.csv
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.meta.json
+
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_vs_reco_cpv_vs_sm_combined.png
+```
+
+### 2. Calculate Fisher Information
+Base Input:
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr/angular/O_W/O_W_electron_chunk1-10_reco_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_W/O_W_electron_chunk1-10_sm_reco_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr/angular/O_W/O_W_electron_chunk1-10_reco.fisher.json
+```
+
+Output:
+```
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen.fisher.json
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco.fisher.json
+
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_muon_chunk1-10_gen.fisher.json
+outputs/angular_lr/angular/O_W/chunk_1-10/O_W_muon_chunk1-10_reco.fisher.json
+
+outputs/angular_lr/angular/O_lD/chunk_1-10/O_lD_electron_chunk1-10_gen.fisher.json
+outputs/angular_lr/angular/O_lD/chunk_1-10/O_lD_electron_chunk1-10_reco.fisher.json
+
+outputs/angular_lr/angular/O_lD/chunk_1-10/O_lD_muon_chunk1-10_gen.fisher.json
+outputs/angular_lr/angular/O_lD/chunk_1-10/O_lD_muon_chunk1-10_reco.fisher.jso4+n
+```
+
+| Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 10792 | 13343 | 7.939889640132972 | 0.37445861335929403 | 0.04716168994 |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 10558 | 12775 | 7.749955641499908 | 0.26236694531429944 | 0.03385399316 |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 15.68984528 | $I_e + I_\mu =$ 0.6368255587 | 0.04058838996 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 10792 | 13343 | 8.046810158639751 | 1.329605740174029 | 0.1652338894 |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 10558 | 12775 | 8.139939998761534 | 1.3970787289695539 | 0.1716325586 |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 16.18675016 | $I_e + I_\mu =$ 2.726684469 | 0.1684516312 |
