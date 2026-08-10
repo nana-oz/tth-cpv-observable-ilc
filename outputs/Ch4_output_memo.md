@@ -462,14 +462,14 @@ All files are on
 Base Input:
 ```
 python3 scripts/combine_angular_templates.py \
-        --chunks 1-10 \
-        --compare-plot \
-        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
-        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
-        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
-        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
-        --out-dir outputs/angular_lr/angular/O_W \
-        --tag O_W_electron
+    --chunks 1-10 \
+    --compare-plot \
+    --reco-cpv-pattern "outputs/angular_lr/angular/O_lD/chunk{chunk}/O_lD_all_reco_electron_chunk{chunk}_bins.csv" \
+    --reco-sm-pattern  "outputs/angular_lr/angular/O_lD/chunk{chunk}/O_lD_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+    --gen-cpv-pattern  "outputs/angular_lr/angular/O_lD/chunk{chunk}/O_lD_all_gen_electron_chunk{chunk}_bins.csv" \
+    --gen-sm-pattern   "outputs/angular_lr/angular/O_lD/chunk{chunk}/O_lD_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+    --out-dir outputs/angular_lr/angular/O_lD \
+    --tag O_lD_electron
 ```
 
 Output (for electron only): 
@@ -493,6 +493,7 @@ outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_vs_reco_cpv
 ```
 
 ### 2. Calculate Fisher Information
+#### 2.1 `higgs_rest` frame
 Base Input:
 ```
 python3 scripts/evaluate_fisher.py \
@@ -525,3 +526,71 @@ outputs/angular_lr/angular/O_lD/chunk_1-10/O_lD_muon_chunk1-10_reco.fisher.jso4+
 | $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 10792 | 13343 | 8.046810158639751 | 1.329605740174029 | 0.1652338894 |
 | $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 10558 | 12775 | 8.139939998761534 | 1.3970787289695539 | 0.1716325586 |
 | $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 16.18675016 | $I_e + I_\mu =$ 2.726684469 | 0.1684516312 |
+
+#### 2.2 Other frames
+`lab` frame
+
+Base Input:
+```
+python3 scripts/combine_angular_templates.py \
+    --chunks 1-10 \
+    --compare-plot \
+    --reco-cpv-pattern "outputs/angular_lr_lab/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_reco_electron_chunk{chunk}_bins.csv" \
+    --reco-sm-pattern  "outputs/angular_lr_lab/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+    --gen-cpv-pattern  "outputs/angular_lr_lab/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_gen_electron_chunk{chunk}_bins.csv" \
+    --gen-sm-pattern   "outputs/angular_lr_lab/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+    --out-dir outputs/angular_lr_lab/angular/O_lD \
+    --tag O_lD_electron
+```
+
+Base Input (Fisher):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr_lab/angular/O_W/chunk_1-10/O_W_electron_chunk_1-10_reco_combined_bins.csv \
+        --sm-template outputs/angular_lr_lab/angular/O_W/chunk_1-10/O_W_electron_chunk_1-10_sm_reco_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr_lab/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco.fisher.json
+```
+
+
+| Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `lab` |  |  |  |  |  |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `lab` |  |  |  |  |  |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `lab` |  |  | $I_e + I_\mu =$  | $I_e + I_\mu =$ 0.6368255587 | 0.04058838996 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `lab` |  |  | 1.886180439729501 | 0.9299193474038754 |  |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `lab` |   |  | 1.8638692419128255 | 1.4025894528999923 |  |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `lab` |  |  | $I_e + I_\mu =$  | $I_e + I_\mu =$  |  |
+
+`ttbar_rest` frame
+Base Input:
+```
+python3 scripts/combine_angular_templates.py \
+    --chunks 1-10 \
+    --compare-plot \
+    --reco-cpv-pattern "outputs/angular_lr_ttbar_rest/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_reco_electron_chunk{chunk}_bins.csv" \
+    --reco-sm-pattern  "outputs/angular_lr_ttbar_rest/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+    --gen-cpv-pattern  "outputs/angular_lr_ttbar_rest/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_gen_electron_chunk{chunk}_bins.csv" \
+    --gen-sm-pattern   "outputs/angular_lr_ttbar_rest/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+    --out-dir outputs/angular_lr_lab/angular/O_lD \
+    --tag O_lD_electron
+```
+
+Base Input (Fisher):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr_ttbar_rest/angular/O_W/chunk_1-10/O_W_electron_chunk_1-10_reco_combined_bins.csv \
+        --sm-template outputs/angular_lr_ttbar_rest/angular/O_W/chunk_1-10/O_W_electron_chunk_1-10_sm_reco_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr_ttbar_rest/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco.fisher.json
+```
+
+**NOT UPDATED YET**
+| Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `ttbar_rest` |  |  |  |  |  |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `ttbar_rest` |  |  |  |  |  |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `ttbar_rest` |  |  | $I_e + I_\mu =$  | $I_e + I_\mu =$  |  |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `ttbar_rest` |  |  |  |  |  |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `ttbar_rest` |  |  |  |  |  |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `ttbar_rest` |  |  | $I_e + I_\mu =$  | $I_e + I_\mu =$  |  |
