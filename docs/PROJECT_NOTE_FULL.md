@@ -3103,7 +3103,12 @@ and provide the HTCondor export and chunk-normalisation workflow.
    * b/bbar from top: b_had_E/theta/phi/mass, b_lep_E/theta/phi/mass
    * Auxiliary variables:
        * Invariant mass: m_W_had,m_top_had,m_top_lep,m_ttbar,m_H (some in the kinfit root（postfit）, m_ttbar need to calculate by the two tops)
-       * Flavor tagging/assginment/KinFit score:fitchi2,final_selection_score,final_fit_score, final flavor score
+         Hint: The invariant mass function is in frames.py, you can calculate it by
+         ```
+         ttbar_p4 = frames.add_p4(top_p4, antitop_p4)
+          m_ttbar = frames.invariant_mass(ttbar_p4)
+         ```
+      * Flavor tagging/assginment/KinFit score:fitchi2,final_selection_score,final_fit_score, final flavor score
    * Hepful for debugging:idx_W1,idx_W2,idx_W_quark,idx_W_antiquark
   
     If haven't output, check what is included in the Kinfit Root first, then if it in the reco slcio collection, or calculate them by yourself.
@@ -3156,12 +3161,19 @@ and provide the HTCondor export and chunk-normalisation workflow.
    Check if the current root path match those under /data
    
 **Create the Supersets with the training weight**
-1. Export the feature of the tth-cpv chunk 1, and see if it really come from this
-   chunk and the output variables looks normal. Be aware of how much time one job need.
-2. Run the condorworkflow to get all ML dataset for the tth-cpv and tth-sm eLpR.
+1. Copy and make a new config file called "analysis_ml_superdataset_lr.yaml", check the sample, frame, split, weights,outputs.base_dir:outputs/ml_superdataset.
+2. cd to the condor/export_feature, read and understand what each file work for, and run a smoke test:
+   ```
+   cd condor/export_feature
+   python3 make_arguments.py \
+  --config ../../configs/<new_ml_yaml>.yaml \
+  --chunks 0
+
+  condor_submit submit_export_features.sub
+   ```
+3. Run the whole condorworkflow to get all ML dataset for the tth-cpv and tth-sm eLpR.
    Be aware of how many ill events(If any variables of some events get none output).
-3. Merge the effective events of the CPV and SM separately, calculate the training weights
-   and split ratio.
+4. Merge the effective events of the CPV and SM separately.
 
 ## 5.2 BDT baseline comparison
 
