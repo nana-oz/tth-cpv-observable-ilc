@@ -3103,7 +3103,12 @@ and provide the HTCondor export and chunk-normalisation workflow.
    * b/bbar from top: b_had_E/theta/phi/mass, b_lep_E/theta/phi/mass
    * Auxiliary variables:
        * Invariant mass: m_W_had,m_top_had,m_top_lep,m_ttbar,m_H (some in the kinfit root（postfit）, m_ttbar need to calculate by the two tops)
-       * Flavor tagging/assginment/KinFit score:fitchi2,final_selection_score,final_fit_score, final flavor score
+         Hint: The invariant mass function is in frames.py, you can calculate it by
+         ```
+         ttbar_p4 = frames.add_p4(top_p4, antitop_p4)
+          m_ttbar = frames.invariant_mass(ttbar_p4)
+         ```
+      * Flavor tagging/assginment/KinFit score:fitchi2,final_selection_score,final_fit_score, final flavor score
    * Hepful for debugging:idx_W1,idx_W2,idx_W_quark,idx_W_antiquark
   
     If haven't output, check what is included in the Kinfit Root first, then if it in the reco slcio collection, or calculate them by yourself.
