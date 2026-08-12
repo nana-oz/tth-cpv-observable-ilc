@@ -83,6 +83,8 @@ def orient_w_pair(
         "antiquark_slot": antiquark_slot,
         "margin": margin,
         "status": status,
+        "L12": L12,
+        "L21": L21,
         "w1": first,
         "w2": second,
     }

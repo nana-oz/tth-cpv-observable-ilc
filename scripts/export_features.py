@@ -942,12 +942,29 @@ def export_reco(
             "higgs": add_p4s(h1, h2),
         }
 
+        # Calculate m_ttbar
+        top_p4 = object_p4.get("top")
+        antitop_p4 = object_p4.get("antitop")
+
+        if top_p4 is not None and antitop_p4 is not None:
+            ttbar_p4 = frames.add_p4(top_p4, antitop_p4)
+            record["m_ttbar"] = frames.invariant_mass(ttbar_p4)
+        else:
+            record["m_ttbar"] = NAN
+
+        # Map postfit KinFit ROOT masses to standard alias names
+        record["m_W_had"]   = float(fit_row.get("mW_had_postfit", NAN))
+        record["m_top_had"] = float(fit_row.get("mt_had_postfit", NAN))
+        record["m_top_lep"] = float(fit_row.get("mt_lep_postfit", NAN))
+        record["m_H"]       = float(fit_row.get("mH_postfit", NAN))
+
         rest_p4 = frames.rest_p4_for_frame(
             frame_name,
             object_p4["top"],
             object_p4["antitop"],
             object_p4["higgs"],
         )
+
         phi_by_object = fill_object_features(record, object_p4, rest_p4)
 
         def dphi(a: str, b: str) -> float:
@@ -989,6 +1006,16 @@ def export_reco(
         else:
             hadronic_W_charge = NAN
             idx_W_down_candidate = -1
+
+        if idx_W_down_candidate == w1_index:
+            record["down_type_slot"] = 1
+        elif idx_W_down_candidate == w2_index:
+            record["down_type_slot"] = 2
+        else:
+            record["down_type_slot"] = 0
+
+        record["L12"] = orientation["L12"]
+        record["L21"] = orientation["L21"]
 
         lepton_flavor = fit_row.get("lepton_flavor", "other")
 

@@ -2,20 +2,22 @@
 """Combine per-chunk angular histogram templates into one pooled template,
 optionally producing a 4-curve (gen/reco x CPV/SM) comparison plot.
 
-Single-template usage (unchanged):
+Single-template usage:
     python3 scripts/combine_angular_templates.py \
-        --pattern "outputs/angular_lr/angular/O_W/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
+        --pattern "outputs/angular_lr/angular/O_W/chunk1-10/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
         --chunks 1-10 \
-        --out outputs/angular_lr/angular/O_W/O_W_all_gen_electron_combined_bins.csv
+        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --out outputs/angular_lr/angular/O_W/chunk1-10/O_W_all_gen_electron_combined_bins.csv
 
 4-curve comparison usage:
     python3 scripts/combine_angular_templates.py \
         --chunks 1-10 \
         --compare-plot \
-        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
-        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
-        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
-        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
         --out-dir outputs/angular_lr/angular/O_W \
         --tag O_W_electron
 """
@@ -36,8 +38,8 @@ from ilc_tth_cpv.plotting import import_plotting, plot_signed_histogram  # noqa:
 
 
 # Chunk range parsing 
-
 def parse_chunk_spec(spec: str) -> List[int]:
+    """Take the provided (input) chunk numbers and turns it into a sorted list"""
     chunks = set()
     for part in spec.split(","):
         part = part.strip()
@@ -56,7 +58,7 @@ def parse_chunk_spec(spec: str) -> List[int]:
     return sorted(chunks)
 
 def get_chunk_label(chunk_ids: List[int]) -> str:
-    """Format chunk list into a filename-friendly tag like 'chunk0-10' or 'chunk1_3_5'."""
+    """Format chunk list into a tag like 'chunk0-10' or 'chunk1_3_5'."""
     if len(chunk_ids) == 1:
         return f"chunk{chunk_ids[0]}"
     if chunk_ids == list(range(chunk_ids[0], chunk_ids[-1] + 1)):
@@ -64,47 +66,66 @@ def get_chunk_label(chunk_ids: List[int]) -> str:
     return "chunk" + "_".join(str(c) for c in chunk_ids)
 
 
-# Loading 
-
+# File loading 
 def meta_path_for(bins_csv_path: Path) -> Path:
+    """Takes the oath to a .csv file and derives the path to .meta.json file"""
     return Path(str(bins_csv_path).rsplit(".", 1)[0] + ".meta.json")
 
 
-def load_chunk_template(pattern: str, chunk: int) -> dict:
+def load_chunk_template(pattern: str, chunk: int, feature_meta_pattern: str) -> dict:
+    """Reads the csv table and json metadata for a given chunk number,
+       extracts the total generator event count (n_k) and put them into dictionary"""
+
     bins_path = Path(pattern.format(chunk=chunk))
     if not bins_path.exists():
         raise SystemExit(f"Missing chunk {chunk} bins CSV: {bins_path}")
 
-    meta_path = meta_path_for(bins_path)
-    if not meta_path.exists():
-        raise SystemExit(f"Missing chunk {chunk} metadata: {meta_path}")
+    bin_records = read_table(bins_path)
 
-    rows = read_table(bins_path)
-    with meta_path.open() as stream:
-        meta = json.load(stream)
+    # get .meta.json file from the corresponding .csv file
+    bins_meta_path = meta_path_for(bins_path)
+    meta = {}
+    if bins_meta_path.exists():
+        with bins_meta_path.open() as f:
+            meta = json.load(f)
+    else:
+        raise SystemExit(f"Missing chunk {chunk} metadata: {bins_meta_path}")
 
-    n_k = meta.get("n_read")
-    if n_k is None:
-        n_k = meta.get("n_events_filled")
-    if n_k is None:
-        kinfit_report = meta.get("kinfit_report") or {}
-        n_k = kinfit_report.get("n_read")
+    # Search for gen-level event counts (n_read or n_sidecar) from feature_meta.json
+    n_k = None
+    if feature_meta_pattern:
+        feature_meta_path = Path(feature_meta_pattern.format(chunk=chunk))
+        if not feature_meta_path.exists():
+            raise SystemExit(f"Chunk {chunk}: Missing feature metadata file at {feature_meta_path}")
+
+        with feature_meta_path.open() as f:
+            feature_meta = json.load(f)
+
+        n_k = feature_meta.get("n_read") or feature_meta.get("n_sidecar")
+
     if n_k is None:
         raise SystemExit(
-            f"Chunk {chunk}: could not find an event count in {meta_path}. "
-            f"Available top-level keys: {sorted(meta.keys())}"
+            f"Chunk {chunk}: could not find an event count in {feature_meta_path}. "
+            f"Available top-level keys: {sorted(feature_meta.keys())}"
         )
 
+    print(f"-> Loaded Chunk {chunk}: N_k = {int(n_k)} (from {feature_meta_path.name})")
+
     return {
-        "chunk": chunk, "bins_path": bins_path, "meta_path": meta_path,
-        "rows": rows, "meta": meta, "n_k": float(n_k),
+        "chunk": chunk, 
+        "bins_path": bins_path, 
+        "bins_meta_path": bins_meta_path,
+        "bin_records": bin_records, 
+        "meta": meta, 
+        "n_k": float(n_k),
     }
 
 
 def validate_consistent(templates: List[dict]) -> None:
+    """safety check"""
     first = templates[0]
     first_meta = first["meta"]
-    first_edges = _edges_from_rows(first["rows"])
+    first_edges = edges_from_rows(first["bin_records"])
     for tpl in templates[1:]:
         meta = tpl["meta"]
         for key in ("observable", "frame", "weight_column"):
@@ -113,7 +134,7 @@ def validate_consistent(templates: List[dict]) -> None:
                     f"Chunk {tpl['chunk']} metadata mismatch on '{key}': "
                     f"{meta.get(key)!r} != {first_meta.get(key)!r}"
                 )
-        edges = _edges_from_rows(tpl["rows"])
+        edges = edges_from_rows(tpl["bin_records"])
         if edges != first_edges:
             raise SystemExit(
                 f"Chunk {tpl['chunk']} has different binning than "
@@ -121,65 +142,81 @@ def validate_consistent(templates: List[dict]) -> None:
             )
 
 
-def _edges_from_rows(rows: list) -> List[float]:
-    edges = [float(r["bin_low"]) for r in rows]
-    edges.append(float(rows[-1]["bin_high"]))
+def edges_from_rows(bin_records: list) -> List[float]:
+    """Reconstructs the list of bin boundary edges (x-ranges) from the csv rows"""
+    edges = [float(row["bin_low"]) for row in bin_records]
+    edges.append(float(bin_records[-1]["bin_high"]))
     return edges
 
 
-# Combination (unchanged, now a reusable building block)
+# Combination 
+def combine_templates(chunk_hists: List[dict]) -> dict:
+    """Performs the mathematical pooling of per-chunk histograms into a single 
+       unified template"""
 
-def combine_templates(templates: List[dict]) -> dict:
-    n_total = sum(tpl["n_k"] for tpl in templates)
+    # Total number of events (n_total) for all chunks
+    n_total = sum(hist_per_chunk["n_k"] for hist_per_chunk in chunk_hists)
     if n_total <= 0.0:
         raise SystemExit("N_total <= 0; cannot combine (check n_read values)")
 
-    n_bins = len(templates[0]["rows"])
-    edges = _edges_from_rows(templates[0]["rows"])
+    # Get number of bins and edges from one of the chunks 
+    n_bins = len(chunk_hists[0]["bin_records"])
+    edges = edges_from_rows(chunk_hists[0]["bin_records"])
 
-    signed_combined = [0.0] * n_bins
-    abs_combined = [0.0] * n_bins
-    entries_combined = [0] * n_bins
+    # Creates empty lists for signed & absolute cross-section weights, and raw event counts 
+    signed_weight_tot = [0.0] * n_bins
+    abs_weight_tot    = [0.0] * n_bins
+    entries_tot       = [0] * n_bins
 
-    for tpl in templates:
-        weight = tpl["n_k"] / n_total
-        for i, row in enumerate(tpl["rows"]):
-            signed_combined[i] += weight * float(row["signed_weight_fb"])
-            abs_combined[i] += weight * float(row["abs_weight_fb"])
-            entries_combined[i] += int(row["entries"])
+    for hist_per_chunk in chunk_hists:
+        for i, bin_data in enumerate(hist_per_chunk["bin_records"]):
+            sigma_signed = float(bin_data["signed_weight_fb"]) * hist_per_chunk["n_k"]
+            sigma_abs    = float(bin_data["abs_weight_fb"]) * hist_per_chunk["n_k"]
+
+            signed_weight_tot[i] += sigma_signed / n_total
+            abs_weight_tot[i]    += sigma_abs / n_total
+            entries_tot[i]       += int(bin_data["entries"])
 
     local_signed_fraction = [
         (s / a) if a > 0.0 else 0.0
-        for s, a in zip(signed_combined, abs_combined)
+        for s, a in zip(signed_weight_tot, abs_weight_tot)
     ]
 
-    frame = templates[0]["meta"].get("frame", "")
-    observable = templates[0]["meta"].get("observable", "")
+    frame = chunk_hists[0]["meta"].get("frame", "")
+    observable = chunk_hists[0]["meta"].get("observable", "")
 
-    rows = []
+    bin_records = []
     for i in range(n_bins):
-        rows.append({
-            "frame": frame, "observable": observable, "bin_index": i,
-            "bin_low": edges[i], "bin_high": edges[i + 1],
+        bin_records.append({
+            "frame": frame, 
+            "observable": observable, 
+            "bin_index": i,
+            "bin_low": edges[i], 
+            "bin_high": edges[i + 1],
             "bin_center": 0.5 * (edges[i] + edges[i + 1]),
-            "signed_weight_fb": signed_combined[i],
-            "abs_weight_fb": abs_combined[i],
+            "signed_weight_fb": signed_weight_tot[i],
+            "abs_weight_fb": abs_weight_tot[i],
             "local_signed_fraction": local_signed_fraction[i],
-            "entries": entries_combined[i],
+            "entries": entries_tot[i],
         })
 
     return {
-        "rows": rows, "edges": edges, "signed": signed_combined,
-        "absw": abs_combined, "entries": entries_combined,
-        "n_total": n_total, "frame": frame, "observable": observable,
-        "weight_column": templates[0]["meta"].get("weight_column"),
+        "bin_records": bin_records, 
+        "edges": edges, 
+        "signed": signed_weight_tot,
+        "absw": abs_weight_tot, 
+        "entries": entries_tot,
+        "n_total": n_total, 
+        "frame": frame, 
+        "observable": observable,
+        "weight_column": chunk_hists[0]["meta"].get("weight_column"),
     }
 
 
-def combine_one(pattern: str, chunk_ids: List[int]) -> dict:
+def combine_one(pattern: str, chunk_ids: List[int], feature_meta_pattern: str) -> dict:
     """Load, validate, and combine one pattern's chunks. The single-pattern
     workhorse reused by both single-output mode and --compare-plot mode."""
-    templates = [load_chunk_template(pattern, c) for c in chunk_ids]
+    templates = [load_chunk_template(pattern, c, feature_meta_pattern) for c in chunk_ids]
     validate_consistent(templates)
     return combine_templates(templates)
 
@@ -187,7 +224,7 @@ def combine_one(pattern: str, chunk_ids: List[int]) -> dict:
 def write_combined(combined: dict, out_path: Path, chunk_ids: List[int], pattern: str) -> None:
     per_chunk_n = {}  # not reconstructable here without templates; caller can extend if needed
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    write_table(out_path, combined["rows"], metadata={
+    write_table(out_path, combined["bin_records"], metadata={
         "observable": combined["observable"],
         "frame": combined["frame"],
         "weight_column": combined["weight_column"],
@@ -251,6 +288,11 @@ def main() -> int:
     parser.add_argument("--no-plot", action="store_true")
 
     # compare-plot mode
+    parser.add_argument(
+        "--feature-meta-pattern",
+        default="outputs/angular_lr/features/chunk_1-10/features_gen_higgs_rest_chunk{chunk}.meta.json",
+        help="Pattern for feature metadata JSON containing n_read/n_sidecar",
+    )
     parser.add_argument("--reco-cpv-pattern", default=None)
     parser.add_argument("--reco-sm-pattern", default=None)
     parser.add_argument("--gen-cpv-pattern", default=None)
@@ -277,10 +319,10 @@ def main() -> int:
         if missing:
             raise SystemExit(f"--compare-plot requires: {', '.join(missing)}")
 
-        reco_cpv = combine_one(args.reco_cpv_pattern, chunk_ids)
-        reco_sm = combine_one(args.reco_sm_pattern, chunk_ids)
-        gen_cpv = combine_one(args.gen_cpv_pattern, chunk_ids)
-        gen_sm = combine_one(args.gen_sm_pattern, chunk_ids)
+        reco_cpv = combine_one(args.reco_cpv_pattern, chunk_ids, args.feature_meta_pattern)
+        reco_sm  = combine_one(args.reco_sm_pattern,  chunk_ids, args.feature_meta_pattern)
+        gen_cpv  = combine_one(args.gen_cpv_pattern,  chunk_ids, args.feature_meta_pattern)
+        gen_sm   = combine_one(args.gen_sm_pattern,   chunk_ids, args.feature_meta_pattern)
 
         out_dir = Path(args.out_dir) / chunk_label
         full_tag = f"{args.tag}_{chunk_label}"
@@ -308,8 +350,8 @@ def main() -> int:
     elif "{chunk_label}" in out_str:
         out_str = out_str.format(chunk_label=chunk_label)
 
-    combined = combine_one(args.pattern, chunk_ids)
-    out_path = Path(out_str)
+    combined = combine_one(args.pattern, chunk_ids, args.feature_meta_pattern)
+    out_path  = Path(out_str)
 
     # Automatically insert the chunk folder into the target path if not already present
     if chunk_label not in out_path.parts:
