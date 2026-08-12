@@ -3161,19 +3161,17 @@ and provide the HTCondor export and chunk-normalisation workflow.
    Check if the current root path match those under /data
    
 **Create the Supersets with the training weight**
+
 1. Copy and make a new config file called "analysis_ml_superdataset_lr.yaml", check the sample, frame, split, weights,outputs.base_dir:outputs/ml_superdataset.
 2. cd to the condor/export_feature, read and understand what each file work for, and run a smoke test:
    ```
    cd condor/export_feature
-   python3 make_arguments.py \
-  --config ../../configs/<new_ml_yaml>.yaml \
-  --chunks 0
-
-  condor_submit submit_export_features.sub
+   python3 make_arguments.py --config ../../configs/<new_ml_yaml>.yaml --chunks 0
+   condor_submit submit_export_features.sub
    ```
 3. Run the whole condorworkflow to get all ML dataset for the tth-cpv and tth-sm eLpR.
    Be aware of how many ill events(If any variables of some events get none output).
-4. Merge the effective events of the CPV and SM separately.
+4. Write a new script /scripts/merge_feature_chunks.py : Merge the 80 chunk-level CSV files produced by `export_features.py` into a single superdataset, without recomputing selections, splits, weights, or features; check that all chunks are present, the schemas are identical, and there are no duplicated events; keep `lepton_flavor` so electron and muon channels can be selected later at training time; report the total event count and the electron/muon train/validation/test and ± label counts; and write the merged dataset plus simple metadata under `outputs/ml_superdataset/features/`..
 
 ## 5.2 BDT baseline comparison
 
