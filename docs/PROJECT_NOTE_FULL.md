@@ -3173,7 +3173,9 @@ and provide the HTCondor export and chunk-normalisation workflow.
    ```
 3. Run the whole condorworkflow to get all ML dataset for the tth-cpv and tth-sm eLpR.
    Be aware of how many ill events(If any variables of some events get none output).
-4. Merge the effective events of the CPV and SM separately.
+4. Write a new script /scripts/merge_feature_chunks.py : Merge the 80 chunk-level CSV files produced by `export_features.py` into a single superdataset, without recomputing selections, splits, weights, or features; check that all chunks are present, the schemas are identical, and there are no duplicated events; keep `lepton_flavor` so electron and muon channels can be selected later at training time; report the total event count and the electron/muon train/validation/test and ± label counts; and write the merged dataset plus simple metadata under `outputs/ml_superdataset/features/`..
+
+  ```
 
 ## 5.2 BDT baseline comparison
 
