@@ -3166,10 +3166,7 @@ and provide the HTCondor export and chunk-normalisation workflow.
 2. cd to the condor/export_feature, read and understand what each file work for, and run a smoke test:
    ```
    cd condor/export_feature
-   python3 make_arguments.py \
-  --config ../../configs/<new_ml_yaml>.yaml \
-  --chunks 0
-
+   python3 make_arguments.py --config ../../configs/<new_ml_yaml>.yaml --chunks 0
   condor_submit submit_export_features.sub
    ```
 3. Run the whole condorworkflow to get all ML dataset for the tth-cpv and tth-sm eLpR.
