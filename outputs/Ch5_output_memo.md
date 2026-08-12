@@ -54,4 +54,13 @@ outputs/ml_superdataset/features/features_reco_higgs_rest_chunk0.meta.json
 
 ### 1.3  Run the whole condor workflow to get all ML dataset for the tth-cpv and tth-sm eLpR
 
-
+Example Input (sm, chunk0, gen-level, higgs_rest frame):
+```
+python3 make_arguments.py \
+  --config ../../configs/analysis_ml_superdataset_lr.yaml \
+  --chunks 0 \
+  --component sm \
+  --level gen
+  
+condor_submit submit_export_features.sub
+```
