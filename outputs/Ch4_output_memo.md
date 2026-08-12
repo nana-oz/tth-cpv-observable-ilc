@@ -459,48 +459,154 @@ All files are on
 ### 1. Export files for combined chunk
 - Use `scripts/combine_angular_templates.py` to compute the O_W/O_lD plot, .csv, and .json files for combined chunks (1-10).
 
-Base Input:
+Input (O_W, electron):
 ```
 python3 scripts/combine_angular_templates.py \
-    --chunks 1-10 \
-    --compare-plot \
-    --reco-cpv-pattern "outputs/angular_lr/angular/O_lD/chunk{chunk}/O_lD_all_reco_electron_chunk{chunk}_bins.csv" \
-    --reco-sm-pattern  "outputs/angular_lr/angular/O_lD/chunk{chunk}/O_lD_all_sm_reco_electron_chunk{chunk}_bins.csv" \
-    --gen-cpv-pattern  "outputs/angular_lr/angular/O_lD/chunk{chunk}/O_lD_all_gen_electron_chunk{chunk}_bins.csv" \
-    --gen-sm-pattern   "outputs/angular_lr/angular/O_lD/chunk{chunk}/O_lD_all_sm_gen_electron_chunk{chunk}_bins.csv" \
-    --out-dir outputs/angular_lr/angular/O_lD \
-    --tag O_lD_electron
+        --chunks 1-10 \
+        --compare-plot \
+        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --out-dir outputs/angular_lr/angular/O_W \
+        --tag O_W_electron
+```
+
+Input (O_W, muon):
+```
+python3 scripts/combine_angular_templates.py \
+        --chunks 1-10 \
+        --compare-plot \
+        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_muon_chunk{chunk}_bins.csv" \
+        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_muon_chunk{chunk}_bins.csv" \
+        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_muon_chunk{chunk}_bins.csv" \
+        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_muon_chunk{chunk}_bins.csv" \
+        --out-dir outputs/angular_lr/angular/O_W \
+        --tag O_W_muon
+```
+
+Input (O_lD, electron):
+```
+python3 scripts/combine_angular_templates.py \
+        --chunks 1-10 \
+        --compare-plot \
+        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-cpv-pattern "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-sm-pattern  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+        --gen-cpv-pattern  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-sm-pattern   "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --out-dir outputs/angular_lr/angular/O_lD \
+        --tag O_lD_electron
+```
+
+Input (O_lD, muon):
+```
+python3 scripts/combine_angular_templates.py \
+        --chunks 1-10 \
+        --compare-plot \
+        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-cpv-pattern "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_reco_muon_chunk{chunk}_bins.csv" \
+        --reco-sm-pattern  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_reco_muon_chunk{chunk}_bins.csv" \
+        --gen-cpv-pattern  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_gen_muon_chunk{chunk}_bins.csv" \
+        --gen-sm-pattern   "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_gen_muon_chunk{chunk}_bins.csv" \
+        --out-dir outputs/angular_lr/angular/O_lD \
+        --tag O_lD_muon
 ```
 
 Output (for electron only): 
 
-**Output files are under `chunk_1-10` folder in each angular observable folder.**
+**Output files are under `chunk1-10` folder in each angular observable folder.**
 
 ```
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_combined_bins.csv
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_combined_bins.meta.json
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen_combined_bins.csv
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen_combined_bins.meta.json
 
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.csv
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.meta.json
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.csv
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.meta.json
 
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco_combined_bins.csv
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco_combined_bins.meta.json
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_reco_combined_bins.csv
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_reco_combined_bins.meta.json
 
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.csv
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.meta.json
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.csv
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.meta.json
 
-outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_gen_vs_reco_cpv_vs_sm_combined.png
+outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen_vs_reco_cpv_vs_sm_combined.png
 ```
 
 ### 2. Calculate Fisher Information
 #### 2.1 `higgs_rest` frame
-Base Input:
+Input (O_W, electron, gen):
 ```
 python3 scripts/evaluate_fisher.py \
-        --template outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco_combined_bins.csv \
-        --sm-template outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.csv \
+        --template outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.csv \
         --luminosity-scale 8000 \
-        --out outputs/angular_lr/angular/O_W/chunk_1-10/O_W_electron_chunk1-10_reco.fisher.json
+        --out outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen.fisher.json
+```
+
+Input (O_W, muon, gen):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr/angular/O_W/chunk1-10/O_W_muon_chunk1-10_gen_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_W/chunk1-10/O_W_muon_chunk1-10_sm_gen_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr/angular/O_W/chunk1-10/O_W_muon_chunk1-10_gen.fisher.json
+```
+
+Input (O_lD, electron, gen):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_electron_chunk1-10_gen_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_electron_chunk1-10_sm_gen_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_electron_chunk1-10_gen.fisher.json
+```
+
+Input (O_lD, muon, gen):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_muon_chunk1-10_gen_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_muon_chunk1-10_sm_gen_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_muon_chunk1-10_gen.fisher.json
+```
+
+Input (O_W, electron, gen):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen.fisher.json
+```
+
+Input (O_W, muon, reco):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr/angular/O_W/chunk1-10/O_W_muon_chunk1-10_reco_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_W/chunk1-10/O_W_muon_chunk1-10_sm_reco_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr/angular/O_W/chunk1-10/O_W_muon_chunk1-10_reco.fisher.json
+```
+
+Input (O_lD, electron, reco):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_electron_chunk1-10_reco_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_electron_chunk1-10_sm_reco_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_electron_chunk1-10_reco.fisher.json
+```
+
+Input (O_lD, muon, reco):
+```
+python3 scripts/evaluate_fisher.py \
+        --template outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_muon_chunk1-10_reco_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_muon_chunk1-10_sm_reco_combined_bins.csv \
+        --luminosity-scale 8000 \
+        --out outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_muon_chunk1-10_reco.fisher.json
 ```
 
 Output:
@@ -520,12 +626,12 @@ outputs/angular_lr/angular/O_lD/chunk_1-10/O_lD_muon_chunk1-10_reco.fisher.jso4+
 
 | Observable | Lepton category | Gen population | Reco population | Frame | $N_{\text{gen}}$ | $N_{\text{reco}}$ | $I_{\text{gen}}$ | $I_{\text{reco}}$ | $I_{\text{reco}} / I_{\text{gen}}$ |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 10792 | 13343 | 7.939889640132972 | 0.37445861335929403 | 0.04716168994 |
-| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 10558 | 12775 | 7.749955641499908 | 0.26236694531429944 | 0.03385399316 |
-| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 15.68984528 | $I_e + I_\mu =$ 0.6368255587 | 0.04058838996 |
-| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` | 10792 | 13343 | 8.046810158639751 | 1.329605740174029 | 0.1652338894 |
-| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` | 10558 | 12775 | 8.139939998761534 | 1.3970787289695539 | 0.1716325586 |
-| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 16.18675016 | $I_e + I_\mu =$ 2.726684469 | 0.1684516312 |
+| $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  | 7.9338364292670125 | 0.3752751568988437 | 0.04730059162 |
+| $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |  |  | 7.74643456580977 | 0.2635881333035203 | 0.03402702638 |
+| $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 15.680271 | $I_e + I_\mu =$ 0.6388632902 | 0.04074312811 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  | 8.040236627440308 | 1.3281079392986155 | 0.1651826931 |
+| $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |  |  | 8.135175165809148 | 1.3947006277514555 | 0.1714407618 |
+| $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 16.17541179 | $I_e + I_\mu =$ 2.722808567 | 0.1683300928 |
 
 #### 2.2 Other frames
 `lab` frame
@@ -533,15 +639,18 @@ outputs/angular_lr/angular/O_lD/chunk_1-10/O_lD_muon_chunk1-10_reco.fisher.jso4+
 Base Input:
 ```
 python3 scripts/combine_angular_templates.py \
-    --chunks 1-10 \
-    --compare-plot \
-    --reco-cpv-pattern "outputs/angular_lr_lab/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_reco_electron_chunk{chunk}_bins.csv" \
-    --reco-sm-pattern  "outputs/angular_lr_lab/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_sm_reco_electron_chunk{chunk}_bins.csv" \
-    --gen-cpv-pattern  "outputs/angular_lr_lab/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_gen_electron_chunk{chunk}_bins.csv" \
-    --gen-sm-pattern   "outputs/angular_lr_lab/angular/O_lD/chunk_1-10/chunk{chunk}/O_lD_all_sm_gen_electron_chunk{chunk}_bins.csv" \
-    --out-dir outputs/angular_lr_lab/angular/O_lD \
-    --tag O_lD_electron
+        --chunks 1-10 \
+        --compare-plot \
+        --feature-meta-pattern "outputs/angular_lr_lab/features/chunk1-10/features_gen_lab_chunk{chunk}.meta.json" \
+        --reco-cpv-pattern "outputs/angular_lr_lab/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-sm-pattern  "outputs/angular_lr_lab/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+        --gen-cpv-pattern  "outputs/angular_lr_lab/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-sm-pattern   "outputs/angular_lr_lab/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --out-dir outputs/angular_lr_lab/angular/O_W \
+        --tag O_W_electron
 ```
+
+**followings are not updated yet**
 
 Base Input (Fisher):
 ```
