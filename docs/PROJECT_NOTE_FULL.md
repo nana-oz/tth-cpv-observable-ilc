@@ -3184,61 +3184,64 @@ Input the features only from the reconstructed lepton and selected down-type jet
    * Change the "analysis": name, family, such as ml_superdataset_lr, O_ML
    * Change the "observable": defination:"O_ML = P(+) - P(-)", n_bins:20, range:[-1.0,1.0]
    * Change the "features" as
-```
-features:
-  default_set: lD
 
-  sets:
-    lD:
-      objects:
-        lepton:
-          - E
-          - pt
-          - theta
-          - phi
+      ```
+      features:
+        default_set: lD
+      
+        sets:
+          lD:
+            objects:
+              lepton:
+                - E
+                - pt
+                - theta
+                - phi
+      
+              down_type_daughter:
+                - E
+                - theta
+                - phi
+                - mass
+      
+            auxiliary: []
+      
+          lD_auxiliary:
+            objects:
+              lepton:
+                - E
+                - pt
+                - theta
+                - phi
+      
+              down_type_daughter:
+                - E
+                - theta
+                - phi
+                - mass
+      
+            auxiliary:
+              - w_assignment_likelihood_selected
+              - final_selection_score
+              - m_W_had
+              - m_top_had
+              - m_top_lep
+              - m_H
+              - m_ttbar
+      ```
 
-        down_type_daughter:
-          - E
-          - theta
-          - phi
-          - mass
-
-      auxiliary: []
-
-    lD_auxiliary:
-      objects:
-        lepton:
-          - E
-          - pt
-          - theta
-          - phi
-
-        down_type_daughter:
-          - E
-          - theta
-          - phi
-          - mass
-
-      auxiliary:
-        - w_assignment_likelihood_selected
-        - final_selection_score
-        - m_W_had
-        - m_top_had
-        - m_top_lep
-        - m_H
-        - m_ttbar
-```
     * Add a training section
-    ```
-    training:
-      lepton_flavors:
-        - electron
-        - muon
-
-      label_column: label
-      training_weight: weight_training
-      balance_classes: true
-  ```
+    
+        ```
+          training:
+            lepton_flavors:
+              - electron
+              - muon
+      
+            label_column: label
+            training_weight: weight_training
+            balance_classes: true
+        ```
   * Delete ` score: "P(+) - P(-)" ` in "model"
     
 3. Modify the /scripts/train_cpv_model.py,
@@ -3253,7 +3256,7 @@ features:
 5. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
 
 
-**Adding  auxiliary variables**
+**Second Model: Adding  auxiliary variables**
 
 W-assignment and ordering
 variables plus the kinematic-fit final-selection score, invariant-mass
