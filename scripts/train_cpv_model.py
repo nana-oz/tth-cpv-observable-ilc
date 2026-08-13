@@ -86,20 +86,11 @@ def resolve_feature_value(row, feature_name: str) -> float:
     #     ...
     #     return to_float(row[f"{selected_prefix}_{variable}"])
 
-    # TODO: lepton_pt frame consistency.
-    #
-    # lepton_E / theta / phi used for this model must be in the configured
-    # analysis frame (currently higgs_rest). lepton_pt must be recomputed
-    # from the lepton four-vector AFTER applying the same frame transformation.
-    # Use the existing reference-frame function prepared for this purpose.
-    # Do not mix lab-frame lepton_pt with higgs-rest-frame E/theta/phi.
-
     # TODO: virtual auxiliary feature.
     #
     # w_assignment_likelihood_selected does not exist directly in the CSV.
-    # Resolve it from L12 / L21 according to the W-jet orientation actually
-    # selected by idx_W_quark / idx_W_antiquark relative to idx_W1 / idx_W2.
-    #
+    # Resolve it from L12 preference or L21 preference by the w_orientation_status
+    # If it is L12 preference then return to L12
     # if feature_name == "w_assignment_likelihood_selected":
     #     ...
     #     return selected_L
@@ -235,22 +226,9 @@ def main() -> int:
     )
 
     # TODO: electron / muon must be trained separately.
-    #
-    # Read:
-    #     cfg["training"]["lepton_flavors"]
-    #
-    # and run the prepare -> model.fit -> save sequence independently for:
-    #     electron
-    #     muon
-    #
-    # Filter with:
-    #     row["lepton_flavor"] == lepton_flavor
-    #
-    # Recommended structure:
-    #
+    # Do the next uncommented code under this for loop with two lepton flavors
     # for lepton_flavor in training_cfg["lepton_flavors"]:
-    #     flavor_rows = [...]
-    #     train_one_category(flavor_rows, lepton_flavor, ...)
+    #     flavor_rows = [...] Judge if the lepton is muon or electron.
     #
     # Each category must produce an independent model and metadata file.
 
@@ -383,6 +361,7 @@ def main() -> int:
     #
     #     model/lD/electron/
     #     model/lD/muon/
+    # Also the meta data path also need to change later
 
     out_dir.mkdir(
         parents=True,
