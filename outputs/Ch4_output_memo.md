@@ -464,11 +464,14 @@ Input (O_W, electron):
 python3 scripts/combine_angular_templates.py \
         --chunks 1-10 \
         --compare-plot \
-        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
-        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
-        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
-        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
-        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --reco-cpv-csv "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-cpv-meta "outputs/angular_lr/features/chunk1-10/features_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-sm-csv  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-sm-meta  "outputs/angular_lr/features/chunk1-10/features_sm_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-cpv-csv  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-cpv-meta  "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-sm-csv   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-sm-meta   "outputs/angular_lr/features/chunk1-10/features_sm_gen_higgs_rest_chunk{chunk}.meta.json" \
         --out-dir outputs/angular_lr/angular/O_W \
         --tag O_W_electron
 ```
@@ -478,11 +481,14 @@ Input (O_W, muon):
 python3 scripts/combine_angular_templates.py \
         --chunks 1-10 \
         --compare-plot \
-        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
-        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_muon_chunk{chunk}_bins.csv" \
-        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_muon_chunk{chunk}_bins.csv" \
-        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_muon_chunk{chunk}_bins.csv" \
-        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_muon_chunk{chunk}_bins.csv" \
+        --reco-cpv-csv "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_muon_chunk{chunk}_bins.csv" \
+        --reco-cpv-meta "outputs/angular_lr/features/chunk1-10/features_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-sm-csv  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_muon_chunk{chunk}_bins.csv" \
+        --reco-sm-meta  "outputs/angular_lr/features/chunk1-10/features_sm_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-cpv-csv  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_muon_chunk{chunk}_bins.csv" \
+        --gen-cpv-meta  "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-sm-csv   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_muon_chunk{chunk}_bins.csv" \
+        --gen-sm-meta   "outputs/angular_lr/features/chunk1-10/features_sm_gen_higgs_rest_chunk{chunk}.meta.json" \
         --out-dir outputs/angular_lr/angular/O_W \
         --tag O_W_muon
 ```
@@ -492,11 +498,14 @@ Input (O_lD, electron):
 python3 scripts/combine_angular_templates.py \
         --chunks 1-10 \
         --compare-plot \
-        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
-        --reco-cpv-pattern "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_reco_electron_chunk{chunk}_bins.csv" \
-        --reco-sm-pattern  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_reco_electron_chunk{chunk}_bins.csv" \
-        --gen-cpv-pattern  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_gen_electron_chunk{chunk}_bins.csv" \
-        --gen-sm-pattern   "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --reco-cpv-csv "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-cpv-meta "outputs/angular_lr/features/chunk1-10/features_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-sm-csv  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-sm-meta  "outputs/angular_lr/features/chunk1-10/features_sm_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-cpv-csv  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-cpv-meta  "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-sm-csv   "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-sm-meta   "outputs/angular_lr/features/chunk1-10/features_sm_gen_higgs_rest_chunk{chunk}.meta.json" \
         --out-dir outputs/angular_lr/angular/O_lD \
         --tag O_lD_electron
 ```
@@ -506,11 +515,14 @@ Input (O_lD, muon):
 python3 scripts/combine_angular_templates.py \
         --chunks 1-10 \
         --compare-plot \
-        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
-        --reco-cpv-pattern "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_reco_muon_chunk{chunk}_bins.csv" \
-        --reco-sm-pattern  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_reco_muon_chunk{chunk}_bins.csv" \
-        --gen-cpv-pattern  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_gen_muon_chunk{chunk}_bins.csv" \
-        --gen-sm-pattern   "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_gen_muon_chunk{chunk}_bins.csv" \
+        --reco-cpv-csv "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_reco_muon_chunk{chunk}_bins.csv" \
+        --reco-cpv-meta "outputs/angular_lr/features/chunk1-10/features_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-sm-csv  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_reco_muon_chunk{chunk}_bins.csv" \
+        --reco-sm-meta  "outputs/angular_lr/features/chunk1-10/features_sm_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-cpv-csv  "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_gen_muon_chunk{chunk}_bins.csv" \
+        --gen-cpv-meta  "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-sm-csv   "outputs/angular_lr/angular/O_lD/chunk1-10/chunk{chunk}/O_lD_all_sm_gen_muon_chunk{chunk}_bins.csv" \
+        --gen-sm-meta   "outputs/angular_lr/features/chunk1-10/features_sm_gen_higgs_rest_chunk{chunk}.meta.json" \
         --out-dir outputs/angular_lr/angular/O_lD \
         --tag O_lD_muon
 ```
@@ -573,13 +585,13 @@ python3 scripts/evaluate_fisher.py \
         --out outputs/angular_lr/angular/O_lD/chunk1-10/O_lD_muon_chunk1-10_gen.fisher.json
 ```
 
-Input (O_W, electron, gen):
+Input (O_W, electron, reco):
 ```
 python3 scripts/evaluate_fisher.py \
-        --template outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen_combined_bins.csv \
-        --sm-template outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_sm_gen_combined_bins.csv \
+        --template outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_reco_combined_bins.csv \
+        --sm-template outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_sm_reco_combined_bins.csv \
         --luminosity-scale 8000 \
-        --out outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_gen.fisher.json
+        --out outputs/angular_lr/angular/O_W/chunk1-10/O_W_electron_chunk1-10_reco.fisher.json
 ```
 
 Input (O_W, muon, reco):
@@ -629,7 +641,7 @@ outputs/angular_lr/angular/O_lD/chunk_1-10/O_lD_muon_chunk1-10_reco.fisher.jso4+
 | $O_{jj}\ (O_W)$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  | 7.9338364292670125 | 0.3752751568988437 | 0.04730059162 |
 | $O_{jj}\ (O_W)$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |  |  | 7.74643456580977 | 0.2635881333035203 | 0.03402702638 |
 | $O_{jj}\ (O_W)$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 15.680271 | $I_e + I_\mu =$ 0.6388632902 | 0.04074312811 |
-| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  | 8.040236627440308 | 1.3281079392986155 | 0.1651826931 |
+| $O_{\ell D}\ (O_{\ell D})$ | electron | $H \to b\bar{b}$, strict semileptonic $e$ | full accepted reco $e$ | `higgs_rest` |  |  | 8.040236627440306 | 1.3281079392986155 | 0.1651826931 |
 | $O_{\ell D}\ (O_{\ell D})$ | muon | $H \to b\bar{b}$, strict semileptonic $\mu$ | full accepted reco $\mu$ | `higgs_rest` |  |  | 8.135175165809148 | 1.3947006277514555 | 0.1714407618 |
 | $O_{\ell D}\ (O_{\ell D})$ | combined likelihood | $e + \mu$ categories | $e + \mu$ categories | `higgs_rest` |  |  | $I_e + I_\mu =$ 16.17541179 | $I_e + I_\mu =$ 2.722808567 | 0.1683300928 |
 
