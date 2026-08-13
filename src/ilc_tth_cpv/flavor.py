@@ -62,7 +62,7 @@ def orient_w_pair(
 
     delta_L = math.log(L12)-math.log(L21)
     L_ratio = L12 / L21
-    margin = abs(L_ratio - 1.0)
+    margin = abs(delta_L)
 
     # Determine the assignment of jets based on L12 and L21
     if abs(L_ratio - 1) <= tie_tolerance: 
