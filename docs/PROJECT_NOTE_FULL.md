@@ -3244,25 +3244,20 @@ Input the features only from the reconstructed lepton and selected down-type jet
         ```
   * Delete ` score: "P(+) - P(-)" ` in "model"
     
-3. Modify the /scripts/train_cpv_model.py,
-  * Read feature set from YAML, add option "--feature-set", delete "--objects"
+2. Modify the /scripts/train_cpv_model.py, hints are included as comments inside.
   * Boost lepton p_t to the higgs_rest
   * Resolve down-type jet by idx_W_down_candidate
   * Train electron and muon separately
   * Output two model : model/lD/electron, model/lD/muon
   * Support the axiliary virtual feature "w_assignment_likelihood_selected"
 
-4. Look if the loss function converges, check the precision (hopefully higher than 0.5)
-5. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
+3. Look if the loss function converges, check the precision (hopefully higher than 0.5)
+4. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
 
 
 **Second Model: Adding  auxiliary variables**
 
-W-assignment and ordering
-variables plus the kinematic-fit final-selection score, invariant-mass
-combinations, and the union of the two auxiliary groups, selecting the baseline
-with validation Fisher information together with the train–validation loss
-behaviour.
+See the lD_auxiliary above.
 
 **CatBoost**
 
