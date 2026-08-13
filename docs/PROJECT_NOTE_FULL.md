@@ -3175,12 +3175,93 @@ and provide the HTCondor export and chunk-normalisation workflow.
 
 ## 5.2 BDT baseline comparison
 
-Starting from the reconstructed lepton and selected down-type jet, compare
-XGBoost and CatBoost using no auxiliary variables, W-assignment and ordering
+**First Model "lD_minimal_xgb": lepton+Down-type jet kinematics with XGBoost**
+
+Input the features only from the reconstructed lepton and selected down-type jet kinematics.
+{E_l,pT_l,theta_l,phi_l, E_D,theta_D,phi_D,mass_D}
+
+1. Modify the ml superset yaml, delete the angular observable information, holds the ml-related one:
+   * Change the "analysis": name, family, such as ml_superdataset_lr, O_ML
+   * Change the "observable": defination:"O_ML = P(+) - P(-)", n_bins:20, range:[-1.0,1.0]
+   * Change the "features" as
+```
+features:
+  default_set: lD
+
+  sets:
+    lD:
+      objects:
+        lepton:
+          - E
+          - pt
+          - theta
+          - phi
+
+        down_type_daughter:
+          - E
+          - theta
+          - phi
+          - mass
+
+      auxiliary: []
+
+    lD_auxiliary:
+      objects:
+        lepton:
+          - E
+          - pt
+          - theta
+          - phi
+
+        down_type_daughter:
+          - E
+          - theta
+          - phi
+          - mass
+
+      auxiliary:
+        - w_assignment_likelihood_selected
+        - final_selection_score
+        - m_W_had
+        - m_top_had
+        - m_top_lep
+        - m_H
+        - m_ttbar
+```
+    * Add a training section
+    ```
+    training:
+      lepton_flavors:
+        - electron
+        - muon
+
+      label_column: label
+      training_weight: weight_training
+      balance_classes: true
+  ```
+  * Delete ` score: "P(+) - P(-)" ` in "model"
+    
+3. Modify the /scripts/train_cpv_model.py,
+  * Read feature set from YAML, add option "--feature-set", delete "--objects"
+  * Boost lepton p_t to the higgs_rest
+  * Resolve down-type jet by idx_W_down_candidate
+  * Train electron and muon separately
+  * Output two model : model/lD/electron, model/lD/muon
+  * Support the axiliary virtual feature "w_assignment_likelihood_selected"
+
+4. Look if the loss function converges, check the precision (hopefully higher than 0.5)
+5. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
+
+
+**Adding  auxiliary variables**
+
+W-assignment and ordering
 variables plus the kinematic-fit final-selection score, invariant-mass
 combinations, and the union of the two auxiliary groups, selecting the baseline
 with validation Fisher information together with the train–validation loss
 behaviour.
+
+**CatBoost**
 
 ## 5.3 W-daughter representation and assignment study
 
