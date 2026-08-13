@@ -1,1 +1,1 @@
-configs/analysis_ml_superdataset_lr.yaml, 0, interference, reco
+configs/analysis_ml_superdataset_lr.yaml, 0, sm, gen

@@ -13,11 +13,14 @@ Single-template usage:
     python3 scripts/combine_angular_templates.py \
         --chunks 1-10 \
         --compare-plot \
-        --feature-meta-pattern "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
-        --reco-cpv-pattern "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
-        --reco-sm-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
-        --gen-cpv-pattern  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
-        --gen-sm-pattern   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --reco-cpv-csv "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-cpv-meta "outputs/angular_lr/features/chunk1-10/features_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --reco-sm-csv  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_reco_electron_chunk{chunk}_bins.csv" \
+        --reco-sm-meta  "outputs/angular_lr/features/chunk1-10/features_sm_reco_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-cpv-csv  "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-cpv-meta  "outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json" \
+        --gen-sm-csv   "outputs/angular_lr/angular/O_W/chunk1-10/chunk{chunk}/O_W_all_sm_gen_electron_chunk{chunk}_bins.csv" \
+        --gen-sm-meta   "outputs/angular_lr/features/chunk1-10/features_sm_gen_higgs_rest_chunk{chunk}.meta.json" \
         --out-dir outputs/angular_lr/angular/O_W \
         --tag O_W_electron
 """
@@ -68,7 +71,7 @@ def get_chunk_label(chunk_ids: List[int]) -> str:
 
 # File loading 
 def meta_path_for(bins_csv_path: Path) -> Path:
-    """Takes the oath to a .csv file and derives the path to .meta.json file"""
+    """Takes the path to a .csv file and derives the path to bins.meta.json file"""
     return Path(str(bins_csv_path).rsplit(".", 1)[0] + ".meta.json")
 
 
@@ -91,8 +94,10 @@ def load_chunk_template(pattern: str, chunk: int, feature_meta_pattern: str) -> 
     else:
         raise SystemExit(f"Missing chunk {chunk} metadata: {bins_meta_path}")
 
-    # Search for gen-level event counts (n_read or n_sidecar) from feature_meta.json
+    # Search for event counts (n_read or n_sidecar or n_write) from feature_meta.json
     n_k = None
+    n_k_source = None
+    
     if feature_meta_pattern:
         feature_meta_path = Path(feature_meta_pattern.format(chunk=chunk))
         if not feature_meta_path.exists():
@@ -101,7 +106,26 @@ def load_chunk_template(pattern: str, chunk: int, feature_meta_pattern: str) -> 
         with feature_meta_path.open() as f:
             feature_meta = json.load(f)
 
-        n_k = feature_meta.get("n_read") or feature_meta.get("n_sidecar")
+        if "n_sidecar" in feature_meta and feature_meta["n_sidecar"]:
+            n_k = feature_meta["n_sidecar"]
+            n_k_source = "n_sidecar"
+        elif "n_read" in feature_meta:
+            n_k = feature_meta["n_read"]
+            n_k_source = "n_read"
+        elif "sm_normalization" in feature_meta and feature_meta["sm_normalization"] and "n_written" in feature_meta["sm_normalization"]:
+            n_k = feature_meta["sm_normalization"]["n_written"]
+            n_k_source = "sm_normalization.n_written"
+        else:
+            n_k = None
+            n_k_source = None
+            raise SystemExit(
+                f"Chunk {chunk}: could not find an event count in {feature_meta_path}. "
+                f"Tried 'n_read', 'n_sidecar', 'sm_normalization.n_written'. "
+                f"Available top-level keys: {sorted(feature_meta.keys())}"
+            )
+            
+
+        print(f"-> Loaded Chunk {chunk}: N_k = {int(n_k)} (from '{n_k_source}' in {feature_meta_path.name})")
 
     if n_k is None:
         raise SystemExit(
@@ -118,6 +142,7 @@ def load_chunk_template(pattern: str, chunk: int, feature_meta_pattern: str) -> 
         "bin_records": bin_records, 
         "meta": meta, 
         "n_k": float(n_k),
+        "n_k_source": n_k_source,
     }
 
 
@@ -158,6 +183,8 @@ def combine_templates(chunk_hists: List[dict]) -> dict:
     n_total = sum(hist_per_chunk["n_k"] for hist_per_chunk in chunk_hists)
     if n_total <= 0.0:
         raise SystemExit("N_total <= 0; cannot combine (check n_read values)")
+
+    per_chunk_n = {hist["chunk"]: hist["n_k"] for hist in chunk_hists}
 
     # Get number of bins and edges from one of the chunks 
     n_bins = len(chunk_hists[0]["bin_records"])
@@ -207,9 +234,11 @@ def combine_templates(chunk_hists: List[dict]) -> dict:
         "absw": abs_weight_tot, 
         "entries": entries_tot,
         "n_total": n_total, 
+        "per_chunk_n": per_chunk_n,
         "frame": frame, 
         "observable": observable,
         "weight_column": chunk_hists[0]["meta"].get("weight_column"),
+        "chunk_hists": chunk_hists,
     }
 
 
@@ -222,22 +251,30 @@ def combine_one(pattern: str, chunk_ids: List[int], feature_meta_pattern: str) -
 
 
 def write_combined(combined: dict, out_path: Path, chunk_ids: List[int], pattern: str) -> None:
-    per_chunk_n = {}  # not reconstructable here without templates; caller can extend if needed
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    write_table(out_path, combined["bin_records"], metadata={
+
+    chunk_hists = combined.get("chunk_hists", [])
+
+    meta = {
         "observable": combined["observable"],
         "frame": combined["frame"],
         "weight_column": combined["weight_column"],
         "combination_method": (
             "event-count-weighted average across chunks: "
-            "H_i = sum_k (N_k/N_total) * H_i^(k); entries summed directly; "
-            "local_signed_fraction recomputed from combined signed/abs"
+            "H_i = sum_k (N_k/N_total) * H_i^(k); entries summed directly"
         ),
         "contributing_chunks": chunk_ids,
-        "n_total": combined["n_total"],
-        "n_read": combined["n_total"],
+        "per_chunk_n_k": {
+            f"chunk_{c['chunk']}": int(c["n_k"]) for c in chunk_hists
+        },
+        "per_chunk_n_sources": {
+            f"chunk_{c['chunk']}": c.get("n_k_source", "unknown") for c in chunk_hists
+        },
+        "n_k_total": int(combined["n_total"]),
         "source_pattern": pattern,
-    })
+    }
+
+    write_table(out_path, combined["bin_records"], metadata=meta)
     print(f"bins   -> {out_path}  (N_total={combined['n_total']:.1f})")
 
 
@@ -290,13 +327,17 @@ def main() -> int:
     # compare-plot mode
     parser.add_argument(
         "--feature-meta-pattern",
-        default="outputs/angular_lr/features/chunk_1-10/features_gen_higgs_rest_chunk{chunk}.meta.json",
-        help="Pattern for feature metadata JSON containing n_read/n_sidecar",
+        default="outputs/angular_lr/features/chunk1-10/features_gen_higgs_rest_chunk{chunk}.meta.json",
+        help="Pattern for feature metadata JSON containing n_read/n_sidecar/n_written",
     )
-    parser.add_argument("--reco-cpv-pattern", default=None)
-    parser.add_argument("--reco-sm-pattern", default=None)
-    parser.add_argument("--gen-cpv-pattern", default=None)
-    parser.add_argument("--gen-sm-pattern", default=None)
+    parser.add_argument("--reco-cpv-csv", default=None)
+    parser.add_argument("--reco-cpv-meta", default=None)
+    parser.add_argument("--reco-sm-csv", default=None)
+    parser.add_argument("--reco-sm-meta", default=None)
+    parser.add_argument("--gen-cpv-csv", default=None)
+    parser.add_argument("--gen-cpv-meta", default=None)
+    parser.add_argument("--gen-sm-csv", default=None)
+    parser.add_argument("--gen-sm-meta", default=None)
     parser.add_argument("--out-dir", default=None)
     parser.add_argument("--tag", default=None, help="filename tag, e.g. O_W_electron")
 
@@ -307,10 +348,10 @@ def main() -> int:
 
     if args.compare_plot:
         required = {
-            "--reco-cpv-pattern": args.reco_cpv_pattern,
-            "--reco-sm-pattern": args.reco_sm_pattern,
-            "--gen-cpv-pattern": args.gen_cpv_pattern,
-            "--gen-sm-pattern": args.gen_sm_pattern,
+            "--reco-cpv-csv": args.reco_cpv_csv,
+            "--reco-sm-csv": args.reco_sm_csv,
+            "--gen-cpv-csv": args.gen_cpv_csv,
+            "--gen-sm-csv": args.gen_sm_csv,
             "--out-dir": args.out_dir,
             "--tag": args.tag,
         }
@@ -319,18 +360,23 @@ def main() -> int:
         if missing:
             raise SystemExit(f"--compare-plot requires: {', '.join(missing)}")
 
-        reco_cpv = combine_one(args.reco_cpv_pattern, chunk_ids, args.feature_meta_pattern)
-        reco_sm  = combine_one(args.reco_sm_pattern,  chunk_ids, args.feature_meta_pattern)
-        gen_cpv  = combine_one(args.gen_cpv_pattern,  chunk_ids, args.feature_meta_pattern)
-        gen_sm   = combine_one(args.gen_sm_pattern,   chunk_ids, args.feature_meta_pattern)
+        reco_cpv_meta = args.reco_cpv_meta or args.feature_meta_pattern
+        reco_sm_meta  = args.reco_sm_meta  or args.feature_meta_pattern
+        gen_cpv_meta  = args.gen_cpv_meta  or args.feature_meta_pattern
+        gen_sm_meta   = args.gen_sm_meta   or args.feature_meta_pattern
+
+        reco_cpv = combine_one(args.reco_cpv_csv, chunk_ids, reco_cpv_meta)
+        reco_sm  = combine_one(args.reco_sm_csv,  chunk_ids, reco_sm_meta)
+        gen_cpv  = combine_one(args.gen_cpv_csv,  chunk_ids, gen_cpv_meta)
+        gen_sm   = combine_one(args.gen_sm_csv,   chunk_ids, gen_sm_meta)
 
         out_dir = Path(args.out_dir) / chunk_label
         full_tag = f"{args.tag}_{chunk_label}"
 
-        write_combined(reco_cpv, out_dir / f"{full_tag}_reco_combined_bins.csv", chunk_ids, args.reco_cpv_pattern)
-        write_combined(reco_sm, out_dir / f"{full_tag}_sm_reco_combined_bins.csv", chunk_ids, args.reco_sm_pattern)
-        write_combined(gen_cpv, out_dir / f"{full_tag}_gen_combined_bins.csv", chunk_ids, args.gen_cpv_pattern)
-        write_combined(gen_sm, out_dir / f"{full_tag}_sm_gen_combined_bins.csv", chunk_ids, args.gen_sm_pattern)
+        write_combined(reco_cpv, out_dir / f"{full_tag}_reco_combined_bins.csv", chunk_ids, args.reco_cpv_csv)
+        write_combined(reco_sm, out_dir / f"{full_tag}_sm_reco_combined_bins.csv", chunk_ids, args.reco_sm_csv)
+        write_combined(gen_cpv, out_dir / f"{full_tag}_gen_combined_bins.csv", chunk_ids, args.gen_cpv_csv)
+        write_combined(gen_sm, out_dir / f"{full_tag}_sm_gen_combined_bins.csv", chunk_ids, args.gen_sm_csv)
 
         plot_four_curve_comparison(
             reco_cpv, reco_sm, gen_cpv, gen_sm,
