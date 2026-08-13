@@ -3245,11 +3245,9 @@ Input the features only from the reconstructed lepton and selected down-type jet
   * Delete ` score: "P(+) - P(-)" ` in "model"
     
 2. Modify the /scripts/train_cpv_model.py, hints are included as comments inside.
-  * Boost lepton p_t to the higgs_rest
   * Resolve down-type jet by idx_W_down_candidate
-  * Train electron and muon separately
-  * Output two model : model/lD/electron, model/lD/muon
   * Support the axiliary virtual feature "w_assignment_likelihood_selected"
+  * Train electron and muon separately and output as two model : model/lD/electron, model/lD/muon
 
 3. Look if the loss function converges, check the precision (hopefully higher than 0.5)
 4. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
