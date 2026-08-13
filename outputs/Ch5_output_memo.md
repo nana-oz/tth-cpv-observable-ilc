@@ -32,35 +32,101 @@ Create `analysis_ml_superdataset_lr.yaml`:
 - Outputs is set to `base_dir: outputs/ml_superdataset`
 
 Test Run <br>
-Input 1 (Write arguments.txt for the feature-export HTCondor workflow):
+Input (Write arguments.txt for the feature-export HTCondor workflow and then submit condor):
 ```
 python3 make_arguments.py \
   --config ../../configs/analysis_ml_superdataset_lr.yaml \
   --chunks 0
-```
 
-Output 1: `condor/export_feature/arguments.txt`
-
-Input 2 (Submit condor):
-```
 condor_submit submit_export_features.sub
 ```
 
-Output 2: 
+Output: 
 ```
+condor/export_feature/arguments.txt
+
 outputs/ml_superdataset/features/features_reco_higgs_rest_chunk0.csv
 outputs/ml_superdataset/features/features_reco_higgs_rest_chunk0.meta.json
 ```
 
-### 1.3  Run the whole condor workflow to get all ML dataset for the tth-cpv and tth-sm eLpR
 
-Example Input (sm, chunk0, gen-level, higgs_rest frame):
+### 1.3  Run the whole condor workflow to get all ML dataset for the tth-cpv and tth-sm eLpR
+Input 1 (cpv, chunk0-79, gen-level, higgs_rest frame):
 ```
 python3 make_arguments.py \
   --config ../../configs/analysis_ml_superdataset_lr.yaml \
-  --chunks 0 \
+  --chunks 1-79 \
+  --component interference \
+  --level gen
+  
+condor_submit submit_export_features.sub
+```
+**STATUS: Run Complete**
+
+Input 2 (sm, chunk0-79, gen-level, higgs_rest frame):
+```
+python3 make_arguments.py \
+  --config ../../configs/analysis_ml_superdataset_lr.yaml \
+  --chunks 1-79 \
   --component sm \
   --level gen
   
 condor_submit submit_export_features.sub
 ```
+**STATUS: Error**
+
+Input 3 (cpv, chunk0-79, reco-level, higgs_rest frame):
+```
+python3 make_arguments.py \
+  --config ../../configs/analysis_ml_superdataset_lr.yaml \
+  --chunks 1-79 \
+  --component interference \
+  --level reco
+  
+condor_submit submit_export_features.sub
+```
+**STATUS: Run Complete**
+
+Input 4 (sm, chunk0-79, reco-level, higgs_rest frame):
+```
+python3 make_arguments.py \
+  --config ../../configs/analysis_ml_superdataset_lr.yaml \
+  --chunks 1-79 \
+  --component sm \
+  --level reco
+  
+condor_submit submit_export_features.sub
+```
+**STATUS: Run Complete**
+
+### 1.4  Write a new script `/scripts/merge_feature_chunks.py`
+
+Condition for the new code:
+- Merge the 80 chunk-level CSV files produced by `export_features.py` into a single superdataset, without recomputing selections, splits, weights, or features [x]
+- check that all chunks are present, the schemas are identical, and there are no duplicated events [x]
+- keep `lepton_flavor` so electron and muon channels can be selected later at training time [x]
+- report the total event count and the electron/muon train/validation/test and ± label counts [x]
+- write the merged dataset plus simple metadata under `outputs/ml_superdataset/features/` [x]
+
+To Run (example: sm, gen)
+```
+python3 ../../scripts/merge_feature_chunks.py \
+  --model sm \
+  --level gen \
+  --chunks 1-79 
+```
+
+Output file example:
+```
+outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.csv
+outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.meta.json
+```
+
+Status:
+- gen, cpv **Not Run Yet**
+- gen, sm **Features not produced**
+- reco, cpv **Run Complete**
+- reco, sm **Run Complete**
+
+## 2. BDT Baseline Comparison (Ch. 5.2)
+
