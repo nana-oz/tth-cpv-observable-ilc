@@ -102,11 +102,11 @@ condor_submit submit_export_features.sub
 ### 1.4  Write a new script `/scripts/merge_feature_chunks.py`
 
 Condition for the new code:
-- Merge the 80 chunk-level CSV files produced by `export_features.py` into a single superdataset, without recomputing selections, splits, weights, or features [x]
-- check that all chunks are present, the schemas are identical, and there are no duplicated events [x]
-- keep `lepton_flavor` so electron and muon channels can be selected later at training time [x]
-- report the total event count and the electron/muon train/validation/test and ± label counts [x]
-- write the merged dataset plus simple metadata under `outputs/ml_superdataset/features/` [x]
+- [x] Merge the 80 chunk-level CSV files produced by `export_features.py` into a single superdataset, without recomputing selections, splits, weights, or features 
+- [x] check that all chunks are present, the schemas are identical, and there are no duplicated events 
+- [x] keep `lepton_flavor` so electron and muon channels can be selected later at training time 
+- [x] report the total event count and the electron/muon train/validation/test and ± label counts 
+- [x] write the merged dataset plus simple metadata under `outputs/ml_superdataset/features/` 
 
 To Run (example: sm, gen)
 ```
@@ -130,9 +130,9 @@ Status:
 
 ## 2. BDT Baseline Comparison (Ch. 5.2)
 ### 2.1 Modify Files Used for ML
-Modify `analysis_ml_superdataset_lr.yaml` --> Complete
+Modify `analysis_ml_superdataset_lr.yaml` -> Complete
 
-Modify the `/scripts/train_cpv_model.py` --> Complete
+Modify the `/scripts/train_cpv_model.py` -> Complete
 ```
     # TODO: down_type_daughter is a virtual object.
     #
@@ -186,32 +186,64 @@ Modify the `/scripts/train_cpv_model.py` --> Complete
 
 ```
 
-### 2.2 Look if the loss function converges, check the precision 
+### 2.2 Check the loss function and the precision 
 Sample Input:
 ```
 python3 scripts/train_cpv_model.py \
         --config configs/analysis_ml_superdataset_lr.yaml \
-        --features outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk0.csv \
+        --features outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
         --feature-set lD
 ```
 
-Check logloss:
-- electron ==> NOT CONVERGED! 
-[0]     validation_0-logloss:0.69313 <br>
-[100]   validation_0-logloss:0.79783 <br>
-[200]   validation_0-logloss:0.89286 <br>
-[300]   validation_0-logloss:0.99513 <br>
-[400]   validation_0-logloss:1.05155 <br>
-[499]   validation_0-logloss:1.12075
+Output (electron):
+```
+outputs/ml_superdataset/model/lD/electron/cpv_xgboost.json
+outputs/ml_superdataset/model/lD/electron/feature_importance.png
+outputs/ml_superdataset/model/lD/electron/model_metadata.json
+outputs/ml_superdataset/model/lD/electron/roc_curve.png
+outputs/ml_superdataset/model/lD/electron/training_history.json
+outputs/ml_superdataset/model/lD/electron/training_loss.png
+```
 
-- muon ==> NOT CONVERGED!
-[0]     validation_0-logloss:0.69839 <br>
-[100]   validation_0-logloss:0.73968 <br>
-[200]   validation_0-logloss:0.81167 <br>
-[300]   validation_0-logloss:0.87425 <br>
-[400]   validation_0-logloss:0.92209 <br>
-[499]   validation_0-logloss:0.96869
+Check logloss and precision:
+- logloss (electron) => NOT CONVERGED!
+  - Potential overfitting; train loss is decreasing over iterations, but validation loss increases
+- precision (electron): 0.5177
+- AUC Score
+  - Validation: 0.5
+  - Test: 0.521 
 
+- logloss (muon) => NOT CONVERGED!
+  - Potential overfitting; train loss is decreasing over iterations, but validation loss increases 
+- precision (electron): 0.4658
+- AUC Score
+  - Validation: 0.578
+  - Test: 0.426
+
+
+### 2.3 Model Improvement
+#### 2.3.1 Tuning Parameters
+Modify `model:`, `params:` in `configs/analysis_ml_superdataset_lr.yaml` to tune the parameter.
+
+Parameters and Scores:
+| Scores | Parameters | Trial 1 | Trial 2 | Trial 3 | Trial 4 | Trial 5 | Trial 6 | Trial 7 | Trial 8 | Trial 9 |
+|--------|------------|---------|---------|---------|---------|---------|---------|---------|---------|---------|
+|  | n_estimators | 200 | 150 | 200 | 200 | 200 | 200 | 500 |  |  |
+|  | max_depth | 6 | 6 | 3 | 4 | 4 | 4 | 4 |  |  |
+|  | learning_rate| 0.1 | 0.1 | 0.1 | 0.1 | 0.1 | 0.05 | 0.05 |  |  |
+|  | early_stopping_rounds| -- | -- | -- | -- | 20 | 20 | 20 |  |  |
+|  | random_seed | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 |  |  |
+|  |  |  |  |  |  |  |  |  |  |  |
+| Precision | electron | 0.5032 | 0.5030 | 0.5027 | 0.5053 | 0.4952 | 0.4974 | 0.4974 |  |  |
+| AUC: Train | electron | 0.814 | 0.785 | 0.604 | 0.664 | 0.535 | 0.520 | 0.520 |  |  |
+| AUC: Validate | electron | 0.494 | 0.495 | 0.499 | 0.502 | 0.495 | 0.490 | 0.490 |  |  |
+| AUC: Test | electron | 0.500 | 0.523 | 0.498 | 0.498 | 0.494 | 0.495 | 0.495 |  |  |
+| Loss Curve: Validation | electron | overfit | overfit | overfit | overfit | overfit | overfit | overfit |  |  |
+| Precision | muon | 0.5036 | 0.5050 | 0.5054 | 0.5067 | 0.4972 | 0.4996 | 0.4996 |  |  |
+| AUC: Train | muon | 0.811 | 0.781 | 0.602 | 0.664 | 0.508 | 0.509 | 0.509 |  |  |
+| AUC: Validate | muon | 0.495 | 0.493 | 0.497 | 0.491 | 0.499 | 0.499 | 0.499 |  |  |
+| AUC: Test | muon | 0.506 | 0.443 | 0.503 | 0.505 | 0.499 | 0.500 | 0.500 |  |  |
+| Loss Curve: Validation | muon | overfit | overfit | overfit | overfit | overfit | overfit | overfit |  |  |
 
 
 
