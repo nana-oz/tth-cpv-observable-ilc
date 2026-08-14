@@ -3249,8 +3249,10 @@ Input the features only from the reconstructed lepton and selected down-type jet
   * Support the axiliary virtual feature "w_assignment_likelihood_selected"
   * Train electron and muon separately and output as two model : model/lD/electron, model/lD/muon
 
-3. Look if the loss function converges, check the precision (hopefully higher than 0.5)
+3. Look if the loss function converges, check the precision (hopefully higher than 0.5) Play around with the model parameters.
 4. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
+   * Make sure the physics weight for the whole dataset is same logic to the one you write for the angular observable
+   * Build the similiar pipeline as the angular observable from read models to the evaluate fisher
 
 
 **Second Model: Adding  auxiliary variables**
