@@ -874,9 +874,14 @@ def export_reco(
         lepton = snapshot["lepton"]
         neutrino = fitted_neutrino_p4(fit_row)
 
-        # Lepton Kinematics (Pre-Fit SLCIO)
-        if lepton is not None:
-            lepton_E, lepton_px, lepton_py, lepton_pz = lepton
+        # Lepton Kinematics (boosted to higgs_rest frame)
+        if lepton is not None and rest_p4 is not None:
+            boosted_lepton = frames.boost_to_rest(lepton, rest_p4)
+        else:
+            boosted_lepton = None
+
+        if boosted_lepton is not None:
+            lepton_E, lepton_px, lepton_py, lepton_pz = boosted_lepton
             record.update({
                 "lepton_px": lepton_px,
                 "lepton_py": lepton_py,
@@ -885,7 +890,10 @@ def export_reco(
             })
         else:
             record.update({
-                "lepton_px": NAN, "lepton_py": NAN, "lepton_pz": NAN, "lepton_pt": NAN
+                "lepton_px": NAN, 
+                "lepton_py": NAN, 
+                "lepton_pz": NAN,
+                "lepton_pt": NAN,
             })
 
         # Neutrino Kinematics (Post-Fit KinFit ROOT)
