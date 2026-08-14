@@ -21,7 +21,10 @@ import argparse
 import datetime
 import json
 import sys
+import numpy as np
+import matplotlib.pyplot as plt
 from pathlib import Path
+from sklearn.metrics import roc_curve, auc, precision_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -65,14 +68,14 @@ def resolve_feature_value(row, feature_name: str) -> float:
     # Decide whther the selected down-type jet corresponds to wjet_quark or wjet_antiquark
     # then read the requested variable from that object
 
-    idx_W_down_candidate = row.get("idx_W_down_candidate")
-    idx_W_quark          = row.get("idx_W_quark")
-    idx_W_antiquark      = row.get("idx_W_antiquark")
+    idx_W_down_candidate = float(row.get("idx_W_down_candidate"))
+    idx_W_quark          = float(row.get("idx_W_quark"))
+    idx_W_antiquark      = float(row.get("idx_W_antiquark"))
 
     if feature_name.startswith("down_type_daughter_"):
         variable = feature_name.removeprefix("down_type_daughter_")
     
-        if idx_W_down_candidate not in (None, -1):
+        if idx_W_down_candidate not in (None, -1.0):
             if idx_W_down_candidate == idx_W_quark:
                 # Down-type candidate is w_jet_quark
                 selected_prefix = "wjet_quark"
@@ -105,9 +108,9 @@ def resolve_feature_value(row, feature_name: str) -> float:
             selected_L = None
 
         if selected_L is None:
-            return NAN
+            return float("nan")
 
-        return selected_L
+        return float(selected_L)
 
     return to_float(row.get(feature_name))
 
@@ -287,6 +290,7 @@ def main() -> int:
                 max_depth=int(params.get("max_depth", 6)),
                 learning_rate=float(params.get("learning_rate", 0.1)),
                 random_state=int(params.get("random_seed", 20260720)),
+                early_stopping_rounds=int(params.get("early_stopping_rounds", 20)),
                 eval_metric="logloss",
             )
 
@@ -294,22 +298,29 @@ def main() -> int:
             #     -1 -> class 0
             #     +1 -> class 1
             to_binary = {-1: 0, 1: 1}
+            y_train_bin = [to_binary[y] for y in data["train"][1]]
+            y_val_bin = [to_binary[y] for y in data["validation"][1]]
+
+            eval_set = [
+                (data["train"][0], y_train_bin),        # validation_0, train set
+                (data["validation"][0], y_val_bin),     # validation_1, validation set
+            ]
 
             model.fit(
                 data["train"][0],
                 [to_binary[y] for y in data["train"][1]],
                 sample_weight=data["train"][2],
-                eval_set=[
-                    (
-                        data["validation"][0],
-                        [
-                            to_binary[y]
-                            for y in data["validation"][1]
-                        ],
-                    )
-                ],
+                eval_set=eval_set,
                 verbose=100,
             )
+
+            evals_result = model.evals_result()
+
+            history = {
+                "train_logloss": evals_result["validation_0"]["logloss"],
+                "validation_logloss": evals_result["validation_1"]["logloss"],
+            }
+
 
             classes = [-1, 1]
             model_file = "cpv_xgboost.json"
@@ -340,6 +351,12 @@ def main() -> int:
                 ),
             )
 
+            evals = model.get_evals_result()
+            history = {
+                "train_logloss": evals["learn"]["Logloss"],
+                "validation_logloss": evals["validation"]["Logloss"],
+            }
+
             classes = [int(c) for c in model.classes_]
             model_file = "cpv_catboost.cbm"
 
@@ -361,7 +378,6 @@ def main() -> int:
             )
 
         # precision evaluation
-        from sklearn.metrics import precision_score
         X_test = data["test"][0]
         y_test_raw = data["test"][1]
 
@@ -393,6 +409,71 @@ def main() -> int:
 
         model_path = out_dir / model_file
         model.save_model(str(model_path))
+
+        history_path = out_dir / "training_history.json"
+        with history_path.open("w") as f:
+            json.dump(history, f, indent=2)
+
+        # generate training_loss.png (Train vs Validation loss)
+        epochs = len(history["train_logloss"])
+
+        plt.figure(figsize=(8, 5))
+        plt.plot(range(1, epochs + 1), history["train_logloss"], label="Train Loss", color="blue", lw=2)
+        plt.plot(range(1, epochs + 1), history["validation_logloss"], label="Validation Loss", color="orange", lw=2)
+        plt.xlabel("Boosting Iterations / Trees")
+        plt.ylabel("Log Loss")
+        plt.title(f"Training Loss Curve — {lepton_flavor}")
+        plt.legend()
+        plt.grid(True, linestyle="--", alpha=0.6)
+        plt.tight_layout()
+        plt.savefig(out_dir / "training_loss.png", dpi=300)
+        plt.close()
+
+
+        # Generate roc_curve.png (ROC Curves for Train/Val/Test)
+        plt.figure(figsize=(7, 6))
+        colors = {"train": "blue", "validation": "orange", "test": "green"}
+
+        for split_name in ["train", "validation", "test"]:
+            X_s, y_s, _ = data[split_name]
+            y_s_bin = [to_binary[y] for y in y_s]
+            
+            # Predict probabilities for signal class (1)
+            y_prob = model.predict_proba(X_s)[:, 1]
+            fpr, tpr, _ = roc_curve(y_s_bin, y_prob)
+            roc_auc = auc(fpr, tpr)
+            
+            plt.plot(
+                fpr, tpr, 
+                color=colors[split_name], 
+                lw=2, 
+                label=f"{split_name.capitalize()} (AUC = {roc_auc:.3f})"
+            )
+
+        plt.plot([0, 1], [0, 1], "k--", label="Random Guessing (AUC = 0.500)")
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+        plt.title(f"ROC Curves — {lepton_flavor}")
+        plt.legend(loc="lower right")
+        plt.grid(True, linestyle="--", alpha=0.6)
+        plt.tight_layout()
+        plt.savefig(out_dir / "roc_curve.png", dpi=300)
+        plt.close()
+
+
+        # Generate feature_importance.png
+        importances = model.feature_importances_
+        indices = np.argsort(importances)
+
+        plt.figure(figsize=(8, max(4, len(feature_cols) * 0.3)))
+        plt.barh(range(len(indices)), importances[indices], color="teal", align="center")
+        plt.yticks(range(len(indices)), [feature_cols[i] for i in indices])
+        plt.xlabel("Feature Importance (Gain)")
+        plt.title(f"Feature Importances — {lepton_flavor}")
+        plt.tight_layout()
+        plt.savefig(out_dir / "feature_importance.png", dpi=300)
+        plt.close()
+
 
         metadata = {
             "lepton_flavor": lepton_flavor,

@@ -105,10 +105,11 @@ split:
 model:
   type: xgboost               # ships with the key4hep cvmfs stack; catboost optional
   params:
-    n_estimators: 500
-    max_depth: 6
-    learning_rate: 0.1
-    random_seed: 20260720
+    n_estimators: 200         # try 150
+    max_depth: 4              # try 3, 4, 5...
+    learning_rate: 0.05        # try 0.05~0.1 
+    random_seed: 20260720 
+    early_stopping_rounds: 20
   class_order: [-1, 1]        # [interference<0, interference>0]; frozen
 
 weights:
