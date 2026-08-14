@@ -129,4 +129,89 @@ Status:
 - reco, sm **Run Complete**
 
 ## 2. BDT Baseline Comparison (Ch. 5.2)
+### 2.1 Modify Files Used for ML
+Modify `analysis_ml_superdataset_lr.yaml` --> Complete
+
+Modify the `/scripts/train_cpv_model.py` --> Complete
+```
+    # TODO: down_type_daughter is a virtual object.
+    #
+    # For features such as:
+    #     down_type_daughter_E
+    #     down_type_daughter_theta
+    #     down_type_daughter_phi
+    #     down_type_daughter_mass
+    #
+    # use:
+    #     idx_W_down_candidate
+    #     idx_W_quark
+    #     idx_W_antiquark
+    #
+    # to decide whether the selected down-type jet corresponds to
+    # wjet_quark or wjet_antiquark, then read the requested variable
+    # from that object.
+    #
+    # Example logic:
+    #
+    # if feature_name.startswith("down_type_daughter_"):
+    #     variable = feature_name.removeprefix("down_type_daughter_")
+    #     ...
+    #     return to_float(row[f"{selected_prefix}_{variable}"])
+
+
+    # TODO: virtual auxiliary feature.
+    #
+    # w_assignment_likelihood_selected does not exist directly in the CSV.
+    # Resolve it from L12 preference or L21 preference by the w_orientation_status
+    # If it is L12 preference then return to L12
+    # if feature_name == "w_assignment_likelihood_selected":
+    #     ...
+    #     return selected_L
+
+
+    # TODO: electron / muon must be trained separately.
+    # Do the next uncommented code under this for loop with two lepton flavors
+    # for lepton_flavor in training_cfg["lepton_flavors"]:
+    #     flavor_rows = [...] Judge if the lepton is muon or electron.
+    #
+    # Each category must produce an independent model and metadata file.
+
+
+    # TODO: after electron/muon category splitting is implemented,
+    # add the lepton flavor to the output path, for example:
+    #
+    #     model/lD/electron/
+    #     model/lD/muon/
+    # Also the meta data path also need to change later
+
+```
+
+### 2.2 Look if the loss function converges, check the precision 
+Sample Input:
+```
+python3 scripts/train_cpv_model.py \
+        --config configs/analysis_ml_superdataset_lr.yaml \
+        --features outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk0.csv \
+        --feature-set lD
+```
+
+Check logloss:
+- electron ==> NOT CONVERGED! 
+[0]     validation_0-logloss:0.69313 <br>
+[100]   validation_0-logloss:0.79783 <br>
+[200]   validation_0-logloss:0.89286 <br>
+[300]   validation_0-logloss:0.99513 <br>
+[400]   validation_0-logloss:1.05155 <br>
+[499]   validation_0-logloss:1.12075
+
+- muon ==> NOT CONVERGED!
+[0]     validation_0-logloss:0.69839 <br>
+[100]   validation_0-logloss:0.73968 <br>
+[200]   validation_0-logloss:0.81167 <br>
+[300]   validation_0-logloss:0.87425 <br>
+[400]   validation_0-logloss:0.92209 <br>
+[499]   validation_0-logloss:0.96869
+
+
+
 
