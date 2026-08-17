@@ -228,22 +228,22 @@ Modify `model:`, `params:` in `configs/analysis_ml_superdataset_lr.yaml` to tune
 Parameters and Scores:
 | Scores | Parameters | Trial 1 | Trial 2 | Trial 3 | Trial 4 | Trial 5 | Trial 6 | Trial 7 | Trial 8 | Trial 9 |
 |--------|------------|---------|---------|---------|---------|---------|---------|---------|---------|---------|
-|  | n_estimators | 200 | 150 | 200 | 200 | 200 | 200 | 500 |  |  |
-|  | max_depth | 6 | 6 | 3 | 4 | 4 | 4 | 4 |  |  |
-|  | learning_rate| 0.1 | 0.1 | 0.1 | 0.1 | 0.1 | 0.05 | 0.05 |  |  |
-|  | early_stopping_rounds| -- | -- | -- | -- | 20 | 20 | 20 |  |  |
-|  | random_seed | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 |  |  |
+|  | n_estimators | 200 | 150 | 200 | 200 | 200 | 200 | 500 | 200 | 200 |
+|  | max_depth | 6 | 6 | 3 | 4 | 4 | 4 | 4 | 6 | 6 |
+|  | learning_rate| 0.1 | 0.1 | 0.1 | 0.1 | 0.1 | 0.05 | 0.05 | 0.05 | 0.05 |
+|  | early_stopping_rounds| -- | -- | -- | -- | 20 | 20 | 20 | 20 | -- |
+|  | random_seed | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 | 20260720 | 42 | 42 |
 |  |  |  |  |  |  |  |  |  |  |  |
-| Precision | electron | 0.5032 | 0.5030 | 0.5027 | 0.5053 | 0.4952 | 0.4974 | 0.4974 |  |  |
-| AUC: Train | electron | 0.814 | 0.785 | 0.604 | 0.664 | 0.535 | 0.520 | 0.520 |  |  |
-| AUC: Validate | electron | 0.494 | 0.495 | 0.499 | 0.502 | 0.495 | 0.490 | 0.490 |  |  |
-| AUC: Test | electron | 0.500 | 0.523 | 0.498 | 0.498 | 0.494 | 0.495 | 0.495 |  |  |
-| Loss Curve: Validation | electron | overfit | overfit | overfit | overfit | overfit | overfit | overfit |  |  |
-| Precision | muon | 0.5036 | 0.5050 | 0.5054 | 0.5067 | 0.4972 | 0.4996 | 0.4996 |  |  |
-| AUC: Train | muon | 0.811 | 0.781 | 0.602 | 0.664 | 0.508 | 0.509 | 0.509 |  |  |
-| AUC: Validate | muon | 0.495 | 0.493 | 0.497 | 0.491 | 0.499 | 0.499 | 0.499 |  |  |
-| AUC: Test | muon | 0.506 | 0.443 | 0.503 | 0.505 | 0.499 | 0.500 | 0.500 |  |  |
-| Loss Curve: Validation | muon | overfit | overfit | overfit | overfit | overfit | overfit | overfit |  |  |
+| Precision | electron | 0.5032 | 0.5030 | 0.5027 | 0.5053 | 0.4952 | 0.4974 | 0.4974 | 0.5006 | 0.5026 |
+| AUC: Train | electron | 0.814 | 0.785 | 0.604 | 0.664 | 0.535 | 0.520 | 0.520 | 0.535 | 0.750 |
+| AUC: Validate | electron | 0.494 | 0.495 | 0.499 | 0.502 | 0.495 | 0.490 | 0.490 | 0.497 | 0.499 |
+| AUC: Test | electron | 0.500 | 0.523 | 0.498 | 0.498 | 0.494 | 0.495 | 0.495 | 0.500 | 0.499 |
+| Loss Curve: Validation | electron | overfit | overfit | overfit | overfit | overfit | overfit | overfit | overfit? | overfit? |
+| Precision | muon | 0.5036 | 0.5050 | 0.5054 | 0.5067 | 0.4972 | 0.4996 | 0.4996 | 0.5066 | 0.5064 |
+| AUC: Train | muon | 0.811 | 0.781 | 0.602 | 0.664 | 0.508 | 0.509 | 0.509 | 0.521 | 0.743 |
+| AUC: Validate | muon | 0.495 | 0.493 | 0.497 | 0.491 | 0.499 | 0.499 | 0.499 | 0.495 | 0.490 |
+| AUC: Test | muon | 0.506 | 0.443 | 0.503 | 0.505 | 0.499 | 0.500 | 0.500 | 0.502 | 0.506 |
+| Loss Curve: Validation | muon | overfit | overfit | overfit | overfit | overfit | overfit | overfit | overfit? | overfit? |
 
 
 
