@@ -51,7 +51,7 @@ outputs/ml_superdataset/features/features_reco_higgs_rest_chunk0.meta.json
 
 
 ### 1.3  Run the whole condor workflow to get all ML dataset for the tth-cpv and tth-sm eLpR
-Input 1 (cpv, chunk0-79, gen-level, higgs_rest frame):
+Input 1 (cpv, chunk1-79, gen-level, higgs_rest frame):
 ```
 python3 make_arguments.py \
   --config ../../configs/analysis_ml_superdataset_lr.yaml \
@@ -63,7 +63,7 @@ condor_submit submit_export_features.sub
 ```
 **STATUS: Run Complete**
 
-Input 2 (sm, chunk0-79, gen-level, higgs_rest frame):
+Input 2 (sm, chunk1-79, gen-level, higgs_rest frame):
 ```
 python3 make_arguments.py \
   --config ../../configs/analysis_ml_superdataset_lr.yaml \
@@ -75,7 +75,7 @@ condor_submit submit_export_features.sub
 ```
 **STATUS: Error**
 
-Input 3 (cpv, chunk0-79, reco-level, higgs_rest frame):
+Input 3 (cpv, chunk1-79, reco-level, higgs_rest frame):
 ```
 python3 make_arguments.py \
   --config ../../configs/analysis_ml_superdataset_lr.yaml \
@@ -87,7 +87,7 @@ condor_submit submit_export_features.sub
 ```
 **STATUS: Run Complete**
 
-Input 4 (sm, chunk0-79, reco-level, higgs_rest frame):
+Input 4 (sm, chunk1-79, reco-level, higgs_rest frame):
 ```
 python3 make_arguments.py \
   --config ../../configs/analysis_ml_superdataset_lr.yaml \
@@ -108,11 +108,11 @@ Condition for the new code:
 - [x] report the total event count and the electron/muon train/validation/test and ± label counts 
 - [x] write the merged dataset plus simple metadata under `outputs/ml_superdataset/features/` 
 
-To Run (example: sm, gen)
+To Run (example: cpv, reco)
 ```
 python3 ../../scripts/merge_feature_chunks.py \
-  --model sm \
-  --level gen \
+  --model cpv \
+  --level reco \
   --chunks 1-79 
 ```
 
@@ -245,5 +245,40 @@ Parameters and Scores:
 | AUC: Test | muon | 0.506 | 0.443 | 0.503 | 0.505 | 0.499 | 0.500 | 0.500 | 0.502 | 0.506 |
 | Loss Curve: Validation | muon | overfit | overfit | overfit | overfit | overfit | overfit | overfit | overfit? | overfit? |
 
+#### 2.3.2 Let ML Learn `lepton_charge`
+To let the ML learn the order of lepton or down-type-quark, add one another feature `lepton_charge` into the object `lepton` in the original config yaml to train. 
 
+Parameters and Scores:
+| Scores | Parameters | Trial 1 | Trial 2 | Trial 3 | Trial 4 | Trial 5 |
+|--------|------------|---------|---------|---------|---------|---------|
+|  | n_estimators | 200 |  |  |  |  |
+|  | max_depth | 6 |  |  |  |  |
+|  | learning_rate| 0.05 |  |  |  |  |
+|  | early_stopping_rounds| -- |  |  |  |  |
+|  | random_seed | 42 |  |  |  |  |
+|  |  |  |  |  |  |  |
+| Precision | electron | 0.5133 |  |  |  |  |
+| AUC: Train | electron | 0.752 |  |  |  |  |
+| AUC: Validate | electron | 0.515 |  |  |  |  |
+| AUC: Test | electron | 0.514 |  |  |  |  | 
+| Loss Curve: Validation | electron | overfit |  |  |  |  |
+| Precision | muon | 0.5043 |  |  |  |  |
+| AUC: Train | muon | 0.755 | 0. | 0. | 0. | 0. |
+| AUC: Validate | muon | 0.507 | 0. | 0. | 0. | 0. |
+| AUC: Test | muon | 0.507 | 0. | 0. | 0. | 0. |
+| Loss Curve: Validation | muon | overfit |  |  |  |  |
+
+
+
+### 2.4 Build the Angular Observable
+
+Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
+
+Make sure the physics weight for the whole dataset is same logic to the one you write for the angular observable
+Build the similar pipeline as the angular observable from read models to the evaluate fisher
+
+
+## 3. Trial with New Feature Input
+### 3.1 Modify Config Yaml
+Created `configs/analysis_ml_superdataset_lr_v2.yaml` and modified the features section to input with `top_side_fermion` and `anti_top_side_fermion` rather than `lepton` and `down_type_daughter`. For their kinematics, input `E`, `pt`, `theta`, `phi`, and `down_jet_mass` (to help identify the quark flavor). 
 
