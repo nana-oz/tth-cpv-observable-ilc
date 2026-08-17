@@ -272,7 +272,7 @@ Parameters and Scores:
 
 ### 2.4 Build the Angular Observable
 
-Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
+Build the observable by the `scripts/build_ml_observable.py` (Same to the angular, first ,split the lepton channel).
 
 Make sure the physics weight for the whole dataset is same logic to the one you write for the angular observable
 Build the similar pipeline as the angular observable from read models to the evaluate fisher
