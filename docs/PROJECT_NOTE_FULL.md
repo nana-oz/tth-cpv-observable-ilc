@@ -3249,23 +3249,24 @@ Input the features only from the reconstructed lepton and selected down-type jet
   * Support the axiliary virtual feature "w_assignment_likelihood_selected"
   * Train electron and muon separately and output as two model : model/lD/electron, model/lD/muon
 
-3. Look if the loss function converges, check the precision (hopefully higher than 0.5)
+3. Look if the loss function converges, check the precision (hopefully higher than 0.5) Play around with the model parameters.
 4. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
+   * Make sure the physics weight for the whole dataset is same logic to the one you write for the angular observable
+   * Build the similiar pipeline as the angular observable from read models to the evaluate fisher
 
 
 **Second Model: Adding  auxiliary variables**
 
-See the lD_auxiliary above.
+See the lD_auxiliary above. Try only the first two first. Then all auxiliary variables.
+If **The Taining Loss** is not converge, may need to wait me to make more data.
 
 **CatBoost**
 
 ## 5.3 W-daughter representation and assignment study
 
-Using the selected BDT setup, compare the current hard-selected down-type jet
-with representations that preserve both reconstructed W daughters and their
-two possible assignments, including assignment-likelihood and
-permutation-based approaches, while producing only one final
-$O_{\mathrm{ML}}$ value per physical event.
+Compare the next two options on W
+1. Add the kinematics of the second W daughter jet into features ( First with higher likelihood, second with lower, no other auxiliary )
+2. Different permutation input once （ One events, two rows)
 
 ## 5.4 Adding the fitted neutrino
 
@@ -3275,18 +3276,11 @@ than the lepton-plus-down-type-jet baseline.
 
 ## 5.5 Optional studies
 
-As time permits, repeat the selected setup with a neural network and revisit
-the W-daughter permutation problem, train using the two W jets alone to test
-whether ML can avoid or resolve the jet-ordering problem, enlarge the input to
-the complete reconstructed W products and top-decay $b/\bar b$ objects to test
-whether additional physical information helps or confuses the model, and study
-an SM-inclusive three-class model while retaining
+As time permits, repeat the selected setup with the following options
 
-$$
-O_{\mathrm{ML}}=P(+)-P(-)
-$$
-
-as the final learned CP observable.
+* Study an SM-inclusive three-class model
+* Enlarge the input to the complete reconstructed W products and top-decay $b/\bar b$ objects to test whether additional physical information helps or confuses the model.
+* A neural network and revisit the W-daughter permutation problem, train using the two W jets alone to test whether NN can avoid or resolve the jet-ordering problem
 
 ---
 
