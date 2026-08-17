@@ -268,7 +268,30 @@ Parameters and Scores:
 | AUC: Test | muon | 0.507 | 0. | 0. | 0. | 0. |
 | Loss Curve: Validation | muon | overfit |  |  |  |  |
 
+#### 2.3.3 Version 2
+```
+python3 make_arguments_v2.py \
+  --config ../../configs/analysis_ml_superdataset_lr_v2.yaml \
+  --chunks 1-79 \
+  --component interference \
+  --level reco
+  
+condor_submit submit_export_features_v2.sub
+```
 
+```
+python3 ../../scripts/merge_feature_chunks_v2.py \
+  --model cpv \
+  --level reco \
+  --chunks 1-79 
+```
+
+```
+python3 ../../scripts/train_cpv_model_v2.py \
+        --config ../../configs/analysis_ml_superdataset_lr_v2.yaml \
+        --features ../../outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --feature-set lD
+```
 
 ### 2.4 Build the Angular Observable
 Build the observable by the `scripts/build_ml_observable.py`.
