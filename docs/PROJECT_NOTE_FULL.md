@@ -3250,9 +3250,20 @@ Input the features only from the reconstructed lepton and selected down-type jet
   * Train electron and muon separately and output as two model : model/lD/electron, model/lD/muon
 
 3. Look if the loss function converges, check the precision (hopefully higher than 0.5) Play around with the model parameters.
-4. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,split the lepton channel).
-   * Make sure the physics weight for the whole dataset is same logic to the one you write for the angular observable
+   * Output the model evaluation quantities.
+   * Do the next step after get the reasonable precision.
+   * Update 170826: The model need information to **learn the order of the two objects**. We have two solution:
+     1. Add lepton charge to original(v1) dataset
+     2. Change the lepton/quark to "top, anti-top fermions" as v2 dataset
+4. Build the observable by the “scripts/build_ml_observable.py" (Same to the angular, first ,**split the lepton channel**).
+   * Make sure the physics weight for the whole dataset is same logic to the one you write for the angular observable. **Note the training weight may
+     not equal to the physics weight**.
    * Build the similiar pipeline as the angular observable from read models to the evaluate fisher
+   * **Note** Only run the next pipeline when the test AUC is larger than the 0.5
+5. Compare with the **CatBoost** (Check if the code in train_cpv_model.py for catboost works)
+   * Raw v1 ( without lepton charge): It shouldn't work but for a complete comparison.
+   * v1+lepton charge
+   * v2
 
 
 **Second Model: Adding  auxiliary variables**
@@ -3260,15 +3271,20 @@ Input the features only from the reconstructed lepton and selected down-type jet
 See the lD_auxiliary above. Try only the first two first. Then all auxiliary variables.
 If **The Taining Loss** is not converge, may need to wait me to make more data.
 
-**CatBoost**
+**Physics motivation: This section motivated by the fact that we have already known the angular O_lD works both gen and reco level , while O_jj works 
+almost only gen. So the ML must can learn physics from the reco O_lD when we choose the down-type jet by ourself, but can it combine more information and 
+exploit them for CPV, or just treat them as noise?**
 
 ## 5.3 W-daughter representation and assignment study
+**Physics motivation: See whether the model can learn the order of the w-daughter rather than we choose one by ourself and can it save the O_jj from reco level?**
 
 Compare the next two options on W
 1. Add the kinematics of the second W daughter jet into features ( First with higher likelihood, second with lower, no other auxiliary )
 2. Different permutation input once （ One events, two rows)
 
 ## 5.4 Adding the fitted neutrino
+**Physics motivation: See if the potential different sign of the delta_lnu, delta_jj, delta_lD will confuse the model?**
+(I will provide some statistic comparison of the different angular observables)
 
 Add the fitted-neutrino kinematics to the selected $O_{\ell D}$-branch feature
 set and test whether the learned observable retains more Fisher information
