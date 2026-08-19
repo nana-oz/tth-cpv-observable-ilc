@@ -1,5 +1,5 @@
 # =============================================================================
-# analysis_ml_superdataset_lr.yaml — O_ML baseline, pure LR helicity.
+# analysis_ml_superdataset_lr_v0.yaml — O_ML baseline, pure LR helicity.
 #
 # This file freezes everything a single baseline run needs. Do not edit
 # conventions here without updating docs/PHYSICS_CONVENTIONS.md.
@@ -54,7 +54,6 @@ features:
           - pt
           - theta
           - phi
-          - charge
 
         down_type_daughter:
           - E
@@ -71,7 +70,6 @@ features:
           - pt
           - theta
           - phi
-          - charge
 
         down_type_daughter:
           - E

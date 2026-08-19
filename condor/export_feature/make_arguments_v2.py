@@ -117,6 +117,9 @@ def main() -> int:
     selected = parse_chunk_selection(args.chunks, chunks)
     config_rel = config_path.relative_to(repo_root())
 
+    model_tag = "cpv" if args.component == "interference" else "sm"
+    out_dir = f"outputs/ml_superdataset/features_v2/{args.level}_{model_tag}"
+
     lines = [
         f"{config_rel}, {chunk}, {args.component}, {args.level}"
         for chunk in selected

@@ -3,7 +3,7 @@
 # Smoke-test chunk 0 first before submitting the full production.
 
 executable      = job_wrapper.sh
-arguments       = $(config) $(chunk) $(component) $(level)
+arguments       = $(config) $(chunk) $(component) $(level) $(out_dir)
 
 universe        = vanilla
 Requirements    = OpSys == "LINUX" && Arch == "X86_64"

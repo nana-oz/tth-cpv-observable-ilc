@@ -193,7 +193,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--out-dir",
-        default="../../outputs/ml_superdataset/features/{MLmodel}/{level}_{model}",
+        default="outputs/ml_superdataset/features_v2/{MLmodel}/{level}_{model}",
         help="Output directory for merged superdataset and metadata",
     )
     parser.add_argument(
@@ -210,7 +210,7 @@ def main() -> int:
     # Build input pattern
     if args.input_pattern is None:
         input_pattern = (
-            f"../../outputs/ml_superdataset/features/{args.MLmodel}/{args.level}_{args.model}/"
+            f"outputs/ml_superdataset/features_v2/{args.MLmodel}/{args.level}_{args.model}/"
             f"features{model_tag}_{args.level}_higgs_rest_chunk{{chunk}}.csv"
         )
     else:
@@ -226,7 +226,7 @@ def main() -> int:
     chunk_ids = parse_chunk_spec(args.chunks)
 
     # If output directory doesn't exist, create one
-    resolved_out_dir = args.out_dir.format(level=args.level, model=args.model, MLmodel=args.MLmodel,)
+    resolved_out_dir = args.out_dir.format(level=args.level, model=args.model, MLmodel=args.MLmodel)
     out_dir = Path(resolved_out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     

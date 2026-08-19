@@ -1,5 +1,5 @@
 # =============================================================================
-# analysis_ml_superdataset_lr.yaml — O_ML baseline, pure LR helicity.
+# analysis_ml_superdataset_lr_catboost.yaml — O_ML baseline, pure LR helicity.
 #
 # This file freezes everything a single baseline run needs. Do not edit
 # conventions here without updating docs/PHYSICS_CONVENTIONS.md.
@@ -54,7 +54,6 @@ features:
           - pt
           - theta
           - phi
-          - charge
 
         down_type_daughter:
           - E
@@ -71,7 +70,6 @@ features:
           - pt
           - theta
           - phi
-          - charge
 
         down_type_daughter:
           - E
@@ -105,7 +103,7 @@ split:
   seed: 20260720
 
 model:
-  type: xgboost               # ships with the key4hep cvmfs stack; catboost optional
+  type: catboost               # ships with the key4hep cvmfs stack; catboost optional
   params:
     n_estimators: 200         # try 150
     max_depth: 6              # try 3, 4, 5...

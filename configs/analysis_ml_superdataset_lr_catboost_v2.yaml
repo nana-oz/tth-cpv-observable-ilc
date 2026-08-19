@@ -1,5 +1,5 @@
 # =============================================================================
-# analysis_ml_superdataset_lr.yaml — O_ML baseline, pure LR helicity.
+# analysis_ml_superdataset_lr_catboost_v2.yaml — O_ML baseline, pure LR helicity.
 #
 # This file freezes everything a single baseline run needs. Do not edit
 # conventions here without updating docs/PHYSICS_CONVENTIONS.md.
@@ -49,35 +49,35 @@ features:
   sets:
     lD:
       objects:
-        lepton:
+        top_side_fermion:
           - E
           - pt
           - theta
           - phi
-          - charge
 
-        down_type_daughter:
+        anti_top_side_fermion:
           - E
+          - pt
           - theta
           - phi
-          - mass
 
-      auxiliary: []
+      auxiliary: 
+        - down_jet_mass
+      
 
     lD_auxiliary:
       objects:
-        lepton:
+        top_side_fermion:
           - E
           - pt
           - theta
           - phi
-          - charge
 
-        down_type_daughter:
+        anti_top_side_fermion:
           - E
+          - pt
           - theta
           - phi
-          - mass
 
       auxiliary:
         - w_assignment_likelihood_selected
@@ -87,6 +87,7 @@ features:
         - m_top_lep
         - m_H
         - m_ttbar
+        - down_jet_mass
 
 training:
   lepton_flavors:
@@ -105,7 +106,7 @@ split:
   seed: 20260720
 
 model:
-  type: xgboost               # ships with the key4hep cvmfs stack; catboost optional
+  type: catboost               # ships with the key4hep cvmfs stack; catboost optional
   params:
     n_estimators: 200         # try 150
     max_depth: 6              # try 3, 4, 5...
