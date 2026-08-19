@@ -294,14 +294,31 @@ Outputs are in `outputs/ml_superdataset/features_v2`.
 
 Train model:
 ```
-python3 ../../scripts/train_cpv_model_v2.py \
-        --config ../../configs/analysis_ml_superdataset_lr_v2.yaml \
-        --features ../../outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+python3 scripts/train_cpv_model_v2.py \
+        --config configs/analysis_ml_superdataset_lr_v2.yaml \
+        --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
         --feature-set lD
 ```
 
 Outputs are in `outputs/ml_superdataset/model_v2/lD/xgboost`
 
+
+
+#### 2.3.4 Version 0 (original version (v1) but without lepton_charge)
+- Created `configs/analysis_ml_superdataset_lr_v0.yaml`
+- Created `configs/analysis_ml_superdataset_lr_catboost_v0.yaml` for catboost
+- Features are same as the v1, so they are used
+- Created `script/train_cpv_model_v0.py` for training.
+
+Input example (for catboost):
+```
+python3 scripts/train_cpv_model_v0.py \
+  --config configs/analysis_ml_superdataset_lr_catboost_v0.yaml \
+  --features outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+  --feature-set lD
+```
+
+Outputs are in `outputs/ml_superdataset/model_v0/lD`
 
 ### 2.4 Build the ML Observable
 #### 2.4.1 Build the ML Observable
@@ -345,10 +362,10 @@ Angular Observables:
 - Created `configs/analysis_ml_superdataset_lr_catboost_v2.yaml`
 
 
-Run CatBoost and compare them with the XGBoost:
-- [ ] Raw v1 (without lepton charge)
-- [ ] v1+lepton charge
-- [ ] v2
+Run CatBoost model and compare them with the XGBoost:
+- [x] Raw v1 (without lepton charge) = named as v0
+- [x] v1+lepton charge
+- [x] v2
 
 Train model input example (v1):
 ```
@@ -358,17 +375,14 @@ python3 scripts/train_cpv_model.py \
         --feature-set lD
 ```
 
-Outputs are in `outputs/ml_superdataset/model/lD/catboost`
+Outputs (for v1) are in `outputs/ml_superdataset/model/lD/catboost`
 
 ### 2.7 Fisher Information Comparison
 #### 2.7.1 Current Status of ML Analysis Data Prep for Fisher Info Comparison
 
 Create Features (both XGBoost and catboost):
 - Raw v1 (without lepton_charge):
-  - [ ] reco, cpv
-  - [ ] reco, sm
-  - [ ] gen, cpv 
-  - [ ] gen, sm 
+  - I think we can use the same feature file as v1?
 - v1 + lepton_charge:
   - [x] reco, cpv
   - [x] reco, sm
@@ -377,8 +391,23 @@ Create Features (both XGBoost and catboost):
 - v2: 
   - [x] reco, cpv
   - [x] reco, sm
-  - [ ] gen, cpv ... Error due to pT mismatch (chunk 33 and chunk 67)
-  - [ ] gen, sm 
+  - [x] gen, cpv 
+  - [ ] gen, sm ... Error (below)
+
+ 
+Error in v2, gen, sm:
+```
+Traceback (most recent call last):
+File "/data/dust/user/ozakinan/analysis/tth-cpv-observable-ilc/scripts/export_features_v2.py", line 1227, in <module>
+  raise SystemExit(main())
+                   ^^^^^^
+File "/data/dust/user/ozakinan/analysis/tth-cpv-observable-ilc/scripts/export_features_v2.py", line 1220, in main
+  export_gen(cfg, args.chunk, args.max_events, args.component)
+File "/data/dust/user/ozakinan/analysis/tth-cpv-observable-ilc/scripts/export_features_v2.py", line 575, in export_gen
+  mc_list = [col.getElementAt(k) for k in range(col.getNumberOfElements())]
+                                                ^^^^^^^^^^^^^^^^^^^^^^^^^
+ReferenceError: attempt to access a null-pointer
+```
 
 ML Observable Production: <br>
 - Raw v1 (without lepton_charge):
