@@ -61,7 +61,7 @@ python3 make_arguments.py \
   
 condor_submit submit_export_features.sub
 ```
-**STATUS: Run Complete**
+**STATUS: Re-Run Complete (2026/08/19)**
 
 Input 2 (sm, chunk1-79, gen-level, higgs_rest frame):
 ```
@@ -85,7 +85,7 @@ python3 make_arguments.py \
   
 condor_submit submit_export_features.sub
 ```
-**STATUS: Run Complete**
+**STATUS: Re-Run Complete (2026/08/19)**
 
 Input 4 (sm, chunk1-79, reco-level, higgs_rest frame):
 ```
@@ -97,7 +97,7 @@ python3 make_arguments.py \
   
 condor_submit submit_export_features.sub
 ```
-**STATUS: Run Complete**
+**STATUS: Re-Run Complete(2026/08/19)**
 
 ### 1.4  Write a new script `/scripts/merge_feature_chunks.py`
 
@@ -123,10 +123,10 @@ outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.met
 ```
 
 Status:
-- gen, cpv **Not Run Yet**
+- gen, cpv **Run Complete (2026/08/19)**
 - gen, sm **Features not produced**
-- reco, cpv **Run Complete**
-- reco, sm **Run Complete**
+- reco, cpv **Run Complete (2026/08/19)**
+- reco, sm **Run Complete (2026/08/19)**
 
 ## 2. BDT Baseline Comparison (Ch. 5.2)
 ### 2.1 Modify Files Used for ML
@@ -285,7 +285,7 @@ Outputs are in `outputs/ml_superdataset/features_v2`.
 
 Combine chunks:
 ```
-python3 ../../scripts/merge_feature_chunks_v2.py \
+python3 scripts/merge_feature_chunks_v2.py \
   --model cpv \
   --level reco \
   --chunks 1-79 
@@ -306,6 +306,10 @@ Outputs are in `outputs/ml_superdataset/model_v2/lD`
 ### 2.4 Build the ML Observable
 #### 2.4.1 Build the ML Observable
 Build the observable by the `scripts/build_ml_observable.py`.
+
+- [x] Separate electron/muon 
+- [ ] Fix the weight
+
 
 Input:
 ```
@@ -342,5 +346,5 @@ Run CatBoost and compare them with the XGBoost
 - v2
 
 
-
+### 2.6 Fisher Information Comparison
 
