@@ -300,7 +300,7 @@ python3 ../../scripts/train_cpv_model_v2.py \
         --feature-set lD
 ```
 
-Outputs are in `outputs/ml_superdataset/model_v2/lD`
+Outputs are in `outputs/ml_superdataset/model_v2/lD/xgboost`
 
 
 ### 2.4 Build the ML Observable
@@ -320,7 +320,7 @@ python3 scripts/build_ml_observable.py \
     --lepton-flavor electron
 ```
 
-Outputs are in `outputs/ml_superdataset/ml_observable_v2`.
+Outputs are in `outputs/ml_superdataset/ml_observable_v2/xgboost`.
 
 #### 2.4.2 Build the Pipeline for ML Analysis
 Build the similar pipeline as the angular observable from read models to the evaluate fisher.
@@ -329,6 +329,7 @@ File: `scripts/run_ml_observable_pipeline.sh`
 
 
 #### 2.4.5 Run All XGBoost
+Angular Observables:
 - [x] reco, cpv, electron
 - [ ] reco, cpv, muon
 - [ ] reco, sm, electron
@@ -339,12 +340,55 @@ File: `scripts/run_ml_observable_pipeline.sh`
 - [ ] gen, sm, muon
 
 ### 2.5 CatBoost
-#### 2.5.1 
-Run CatBoost and compare them with the XGBoost
-- Raw v1 (without lepton charge)
-- v1+lepton charge
-- v2
+#### 2.5.1 Prepare and Run for CatBoost
+- Created `configs/analysis_ml_superdataset_lr_catboost.yaml`
+- Created `configs/analysis_ml_superdataset_lr_catboost_v2.yaml`
 
 
-### 2.6 Fisher Information Comparison
+Run CatBoost and compare them with the XGBoost:
+- [ ] Raw v1 (without lepton charge)
+- [ ] v1+lepton charge
+- [ ] v2
 
+Train model input example (v1):
+```
+python3 scripts/train_cpv_model.py \
+        --config configs/analysis_ml_superdataset_lr_catboost.yaml \
+        --features outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --feature-set lD
+```
+
+Outputs are in `outputs/ml_superdataset/model/lD/catboost`
+
+### 2.7 Fisher Information Comparison
+#### 2.7.1 Current Status of ML Analysis Data Prep for Fisher Info Comparison
+
+Create Features (both XGBoost and catboost):
+- Raw v1 (without lepton_charge):
+  - [ ] reco, cpv
+  - [ ] reco, sm
+  - [ ] gen, cpv 
+  - [ ] gen, sm 
+- v1 + lepton_charge:
+  - [x] reco, cpv
+  - [x] reco, sm
+  - [x] gen, cpv
+  - [ ] gen, sm ... Error, NEED CHECK
+- v2: 
+  - [x] reco, cpv
+  - [x] reco, sm
+  - [ ] gen, cpv ... Error due to pT mismatch (chunk 33 and chunk 67)
+  - [ ] gen, sm 
+
+ML Observable Production: <br>
+- Raw v1 (without lepton_charge):
+  - [ ] XGBoost
+  - [ ] catboost
+- v1 + lepton_charge:
+  - [ ] XGBoost
+  - [ ] catboost
+- v2: 
+  - [ ] XGBoost
+  - [ ] catboost
+ 
+#### 2.7.2 Fisher Information Calculation
