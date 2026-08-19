@@ -269,23 +269,30 @@ Parameters and Scores:
 | Loss Curve: Validation | muon | overfit |  |  |  |  |
 
 #### 2.3.3 Version 2
+Created `configs/analysis_ml_superdataset_lr_v2.yaml` and modified the features section to input with `top_side_fermion` and `anti_top_side_fermion` rather than `lepton` and `down_type_daughter`. For their kinematics, input `E`, `pt`, `theta`, `phi`, and `down_jet_mass` (to help identify the quark flavor). 
+
+Create chunks 1-79:
 ```
-python3 make_arguments_v2.py \
-  --config ../../configs/analysis_ml_superdataset_lr_v2.yaml \
+python3 condor/export_feature/make_arguments_v2.py \
+  --config configs/analysis_ml_superdataset_lr_v2.yaml \
   --chunks 1-79 \
   --component interference \
   --level reco
   
-condor_submit submit_export_features_v2.sub
+condor_submit condor/export_feature/submit_export_features_v2.sub
 ```
+Outputs are in `outputs/ml_superdataset/features_v2`.
 
+Combine chunks:
 ```
 python3 ../../scripts/merge_feature_chunks_v2.py \
   --model cpv \
   --level reco \
   --chunks 1-79 
 ```
+Outputs are in `outputs/ml_superdataset/features_v2`.
 
+Train model:
 ```
 python3 ../../scripts/train_cpv_model_v2.py \
         --config ../../configs/analysis_ml_superdataset_lr_v2.yaml \
@@ -293,14 +300,47 @@ python3 ../../scripts/train_cpv_model_v2.py \
         --feature-set lD
 ```
 
-### 2.4 Build the Angular Observable
+Outputs are in `outputs/ml_superdataset/model_v2/lD`
+
+
+### 2.4 Build the ML Observable
+#### 2.4.1 Build the ML Observable
 Build the observable by the `scripts/build_ml_observable.py`.
 
-Make sure the physics weight for the whole dataset is same logic to the one you write for the angular observable
-Build the similar pipeline as the angular observable from read models to the evaluate fisher
+Input:
+```
+python3 scripts/build_ml_observable.py \
+    --config configs/analysis_ml_superdataset_lr_v2.yaml \
+    --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+    --model outputs/ml_superdataset/model_v2/lD/electron/cpv_xgboost.json
+    --lepton-flavor electron
+```
+
+Outputs are in `outputs/ml_superdataset/ml_observable_v2`.
+
+#### 2.4.2 Build the Pipeline for ML Analysis
+Build the similar pipeline as the angular observable from read models to the evaluate fisher.
+
+File: `scripts/run_ml_observable_pipeline.sh`
 
 
-## 3. Trial with New Feature Input
-### 3.1 Modify Config Yaml
-Created `configs/analysis_ml_superdataset_lr_v2.yaml` and modified the features section to input with `top_side_fermion` and `anti_top_side_fermion` rather than `lepton` and `down_type_daughter`. For their kinematics, input `E`, `pt`, `theta`, `phi`, and `down_jet_mass` (to help identify the quark flavor). 
+#### 2.4.5 Run All XGBoost
+- [x] reco, cpv, electron
+- [ ] reco, cpv, muon
+- [ ] reco, sm, electron
+- [ ] reco, sm, muon
+- [ ] gen, cpv, electron
+- [ ] gen, cpv, muon
+- [ ] gen, sm, electron
+- [ ] gen, sm, muon
+
+### 2.5 CatBoost
+#### 2.5.1 
+Run CatBoost and compare them with the XGBoost
+- Raw v1 (without lepton charge)
+- v1+lepton charge
+- v2
+
+
+
 
