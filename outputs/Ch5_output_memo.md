@@ -325,16 +325,19 @@ Outputs are in `outputs/ml_superdataset/model_v0/lD`
 Build the observable by the `scripts/build_ml_observable.py`.
 
 - [x] Separate electron/muon 
-- [ ] Fix the weight
+- [x] Fix the weight
 
+**NOTE (2026/08/20)**
+I fixed the `scripts/build_ml_observable.py` so that it should work for both v1 and v2, regardless of their feature name, whether they contain `down_type_daughter_...` or not (which v2 should contain and v1 does not). Now, it should be ok to use `build_ml_observable.py` for both v1 and v2, by passing the `--version v2` argument. However, just in case, I copied the original code into `build_ml_observable_v2.py`, so for v2, `build_ml_observable_v2.py` can also be used fine.
 
-Input:
+Input (reco, cpv, electron, v2):
 ```
 python3 scripts/build_ml_observable.py \
     --config configs/analysis_ml_superdataset_lr_v2.yaml \
     --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
-    --model outputs/ml_superdataset/model_v2/lD/electron/cpv_xgboost.json
-    --lepton-flavor electron
+    --model outputs/ml_superdataset/model_v2/lD/xgboost/electron/cpv_xgboost.json \
+    --lepton-flavor electron \
+    --version v2
 ```
 
 Outputs are in `outputs/ml_superdataset/ml_observable_v2/xgboost`.
@@ -346,9 +349,9 @@ File: `scripts/run_ml_observable_pipeline.sh`
 
 
 #### 2.4.5 Run All XGBoost
-Angular Observables:
-- [x] reco, cpv, electron
-- [ ] reco, cpv, muon
+ML Observables:
+- [ ] reco, cpv, electron (v0: , v1: x, v2: x)
+- [ ] reco, cpv, muon (v0: , v1: x, v2: x)
 - [ ] reco, sm, electron
 - [ ] reco, sm, muon
 - [ ] gen, cpv, electron
@@ -376,6 +379,28 @@ python3 scripts/train_cpv_model.py \
 ```
 
 Outputs (for v1) are in `outputs/ml_superdataset/model/lD/catboost`
+
+
+Building ML observable input example (v2, electron, reco):
+```
+python3 scripts/build_ml_observable.py \
+    --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+    --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+    --model outputs/ml_superdataset/model_v2/lD/catboost/electron/cpv_catboost.cbm \
+    --lepton-flavor electron \
+    --version v2
+```
+#### 2.5.2 Run All CatBoost
+ML Observables:
+- [ ] reco, cpv, electron (v0: , v1: x, v2: x)
+- [ ] reco, cpv, muon (v0: , v1: x, v2: x)
+- [ ] reco, sm, electron
+- [ ] reco, sm, muon
+- [ ] gen, cpv, electron
+- [ ] gen, cpv, muon
+- [ ] gen, sm, electron
+- [ ] gen, sm, muon
+
 
 ### 2.7 Fisher Information Comparison
 #### 2.7.1 Current Status of ML Analysis Data Prep for Fisher Info Comparison
@@ -410,10 +435,10 @@ ReferenceError: attempt to access a null-pointer
 ```
 
 ML Observable Production: <br>
-- Raw v1 (without lepton_charge):
+- v0 (= Raw v1, without lepton_charge):
   - [ ] XGBoost
   - [ ] catboost
-- v1 + lepton_charge:
+- v1 (+ lepton_charge):
   - [ ] XGBoost
   - [ ] catboost
 - v2: 
@@ -421,3 +446,27 @@ ML Observable Production: <br>
   - [ ] catboost
  
 #### 2.7.2 Fisher Information Calculation
+
+| Observable | Lepton category | Frame | ML model | version | N gen | N reco | I gen | I reco | I reco / I gen |
+|------------|-----------------|-------|----------|---------|-------|--------|-------|--------|----------------|
+| O_ML | electron | higgs_rest | xgboost | v0 |  |  |  |  |  |
+| O_ML | muon | higgs_rest | xgboost | v0 |  |  |  |  |  |
+| O_ML | electron + muon | higgs_rest | xgboost | v0 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | xgboost | v1 |  |  |  |  |  |
+| O_ML | muon | higgs_rest | xgboost | v1 |  |  |  |  |  |
+| O_ML | electron + muon | higgs_rest | xgboost | v1 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | xgboost | v2 |  |  |  |  |  |
+| O_ML | muon | higgs_rest | xgboost | v2 |  |  |  |  |  |
+| O_ML | electron + muon | higgs_rest | xgboost | v2 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | catboost | v0 |  |  |  |  |  |
+| O_ML | muon | higgs_rest | catboost | v0 |  |  |  |  |  |
+| O_ML | electron + muon | higgs_rest | catboost | v0 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | catboost | v1 |  |  |  |  |  |
+| O_ML | muon | higgs_rest | catboost | v1 |  |  |  |  |  |
+| O_ML | electron + muon | higgs_rest | catboost | v1 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | catboost | v2 |  |  |  |  |  |
+| O_ML | muon | higgs_rest | catboost | v2 |  |  |  |  |  |
+| O_ML | electron + muon | higgs_rest | catboost | v2 |  |  |  |  |  |
+
+
+
