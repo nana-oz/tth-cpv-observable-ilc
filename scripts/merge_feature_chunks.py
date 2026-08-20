@@ -7,10 +7,10 @@ lepton_flavor so channels can be filtered at training time.
 
 Usage:
     python3 scripts/merge_feature_chunks.py \
-        --input-pattern "outputs/angular_lr/features/chunk1-80/features_higgs_rest_chunk{chunk}.csv" \
-        --chunks 1-80 \
-        --out-dir outputs/ml_superdataset/features \
-        --out-name features_superdataset.csv
+        --version v1 \
+        --model cpv \
+        --level reco \
+        --chunks 1-79 
 """
 
 from __future__ import annotations
@@ -181,10 +181,10 @@ def main() -> int:
         help="Physics model: 'sm' (Standard Model) or 'cpv' (CP violation)",
     )
     parser.add_argument(
-        "--MLmodel",
-        choices=["xgboost", "catboost"],
-        default="xgboost",
-        help="ML model: 'xgboost' or 'catboost'",
+        "--version",
+        choices=["v1", "v2"],
+        default="v2",
+        help="Dataset version directory layout (default: v2)",
     )
     parser.add_argument(
         "--input-pattern",
@@ -193,7 +193,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--out-dir",
-        default="../../outputs/ml_superdataset/features/{MLmodel}/{level}_{model}",
+        default=None,
         help="Output directory for merged superdataset and metadata",
     )
     parser.add_argument(
@@ -204,15 +204,15 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    feat_folder = "features_v2" if args.version == "v2" else "features"
+    base_dir = f"outputs/ml_superdataset/{feat_folder}/{args.level}_{args.model}"
+
     # Model tag: '_sm' if sm is selected, empty string if cpv
     model_tag = "_sm" if args.model == "sm" else ""
 
-    # Build input pattern
+    # Build input pattern 
     if args.input_pattern is None:
-        input_pattern = (
-            f"../../outputs/ml_superdataset/features/{args.MLmodel}/{args.level}_{args.model}/"
-            f"features{model_tag}_{args.level}_higgs_rest_chunk{{chunk}}.csv"
-        )
+        input_pattern = f"{base_dir}/features{model_tag}_{args.level}_higgs_rest_chunk{{chunk}}.csv"
     else:
         input_pattern = args.input_pattern
 
@@ -225,9 +225,12 @@ def main() -> int:
 
     chunk_ids = parse_chunk_spec(args.chunks)
 
-    # If output directory doesn't exist, create one
-    resolved_out_dir = args.out_dir.format(level=args.level, model=args.model, MLmodel=args.MLmodel,)
-    out_dir = Path(resolved_out_dir)
+    # Build output directory
+    if args.out_dir is None:
+        out_dir = Path(base_dir)
+    else:
+        out_dir = Path(args.out_dir.format(level=args.level, model=args.model))
+
     out_dir.mkdir(parents=True, exist_ok=True)
     
     # Load and validate chunks/schema

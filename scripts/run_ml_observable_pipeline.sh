@@ -1,109 +1,116 @@
-#!/bin/bash
-set -e   # stop immediately if any command fails, rather than continuing silently
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Default configuration
-FRAME="${1:-higgs_rest}"       # Pass frame as argument (e.g., ./run_ml_observable_pipeline.sh lab), defaults to higgs_rest
-CHUNK_TAG="${2:-chunk1_79}"    # Combined dataset chunk tag
-FEATURE_SET="${4:-lD}"         # Feature set from config (e.g., lD)
-MODEL_TYPE="${5:-xgboost}"     # xgboost or catboost
-VERSION="${5:-v2}"             # v2 or original (v1)
+# Level choice: reco or gen (defaults to reco)
+LEVEL="${1:-reco}"
 
-# Configure version suffix logic
-if [ "$VERSION" = "v2" ]; then
-  VER_SUFFIX="_v2"
-  CFG_VER="_v2"
-else
-  VER_SUFFIX=""
-  CFG_VER=""
-fi
+echo "=================================================================="
+echo "=== Running Full ML Observables & Fisher Pipeline ==="
+echo "=== Level: ${LEVEL} ==="
+echo "=================================================================="
 
-# Determine directory suffix based on frame
-if [ "$FRAME" = "higgs_rest" ]; then
-  FEATURES_DIR="outputs/ml_superdataset/features${VER_SUFFIX}/${MODEL_TYPE}"
-  CONFIG="configs/analysis_ml_superdataset_lr${CFG_VER}.yaml"
-  MODEL_BASE_DIR="outputs/ml_superdataset/model${VER_SUFFIX}/${MODEL_TYPE}"
-  OBS_BASE_DIR="outputs/ml_superdataset/ml_observable${VER_SUFFIX}/${MODEL_TYPE}"
-else
-  FEATURES_DIR="outputs/ml_superdataset_${FRAME}/${MODEL_TYPE}/features${VER_SUFFIX}"
-  CONFIG="configs/analysis_ml_superdataset_lr${CFG_VER}_${FRAME}.yaml"
-  MODEL_BASE_DIR="outputs/ml_superdataset_${FRAME}/model${VER_SUFFIX}/${MODEL_TYPE}"
-  OBS_BASE_DIR="outputs/ml_superdataset_${FRAME}/ml_observable${VER_SUFFIX}/${MODEL_TYPE}"
-fi
+# ----------------------------------------------------------------------
+# STAGE 1: Build ML Observable Templates (CPV & SM)
+# ----------------------------------------------------------------------
+echo ""
+echo "=================================================================="
+echo " STAGE 1: Building ML Observable Templates"
+echo "=================================================================="
 
-# Model extension handling
-if [ "$MODEL_TYPE" = "xgboost" ]; then
-  MODEL_EXT="json"
-else
-  MODEL_EXT="cbm"
-fi
+for TAG in cpv sm; do
+  MODE="${LEVEL}_${TAG}"
+  
+  if [ "${TAG}" = "sm" ]; then
+    FEATURE_TAG="sm_"
+  else
+    FEATURE_TAG=""
+  fi
 
-SPLIT="test"   # Final ML templates are evaluated on the independent test set
+  for MODEL_TYPE in xgboost catboost; do
+    for VERSION in v2 v1 v0; do
+      for LEPTON in electron muon; do
 
-echo "=========================================================="
-echo " Running Combined ML Pipeline"
-echo " Version:     ${VERSION}"
-echo " Frame:       ${FRAME}"
-echo " Chunk Tag:   ${CHUNK_TAG}"
-echo " Feature Set: ${FEATURE_SET}"
-echo " Model Type:  ${MODEL_TYPE}"
-echo " Config:      ${CONFIG}"
-echo " Features:    ${FEATURES_DIR}"
-echo "=========================================================="
+        echo "--------------------------------------------------"
+        echo "--> Building Template | Mode: ${MODE} | Model: ${MODEL_TYPE} | Version: ${VERSION} | Lepton: ${LEPTON}"
 
-# 1. Train CP Classifier on combined RECO CPV superdataset
-echo "--> Step 1: Training $MODEL_TYPE model on combined RECO features..."
-python3 scripts/train_cpv_model${VER_SUFFIX}.py \
-  --config $CONFIG \
-  --features $FEATURES_DIR/reco_cpv/features_reco_${FRAME}_${CHUNK_TAG}.csv \
-  --feature-set $FEATURE_SET
+        # 1. Map feature directory (v2 uses features_v2, v1 & v0 use features)
+        if [ "${VERSION}" = "v2" ]; then
+          FEATURES_DIR="features_v2"
+        else
+          FEATURES_DIR="features"
+        fi
 
-# 2. Build ML Observables on combined test set
-echo "--> Step 2: Building ML Observables..."
+        # 2. Map model directory & config naming
+        if [ "${VERSION}" = "v1" ]; then
+          MODEL_DIR="model"
+          CFG_TAG=""
+        else
+          MODEL_DIR="model_${VERSION}"
+          CFG_TAG="_${VERSION}"
+        fi
 
-for level in gen reco; do
-  for lepton in electron muon; do
+        # 3. Construct specific config and model file paths
+        if [ "${MODEL_TYPE}" = "xgboost" ]; then
+          CONFIG="configs/analysis_ml_superdataset_lr${CFG_TAG}.yaml"
+          MODEL="outputs/ml_superdataset/${MODEL_DIR}/lD/xgboost/${LEPTON}/cpv_xgboost.json"
+        else
+          CONFIG="configs/analysis_ml_superdataset_lr_catboost${CFG_TAG}.yaml"
+          MODEL="outputs/ml_superdataset/${MODEL_DIR}/lD/catboost/${LEPTON}/cpv_catboost.cbm"
+        fi
 
-    MODEL_PATH="${MODEL_BASE_DIR}/${FEATURE_SET}/${lepton}/cpv_${MODEL_TYPE}.${MODEL_EXT}"
+        FEATURES="outputs/ml_superdataset/${FEATURES_DIR}/${MODE}/features_${FEATURE_TAG}${LEVEL}_higgs_rest_chunk1_79.csv"
 
-    # Generate CPV and SM templates on the combined test set
-    python3 scripts/build_ml_observable.py \
-      --config $CONFIG \
-      --features $FEATURES_DIR/${level}_cpv/features_${level}_${FRAME}_${CHUNK_TAG}.csv \
-      --model $MODEL_PATH \
-      --split $SPLIT \
-      --lepton-flavor $lepton \
-      --weight-column weight_template \
-      --output-tag "${level}_${CHUNK_TAG}"
+        python3 scripts/build_ml_observable.py \
+          --config "${CONFIG}" \
+          --features "${FEATURES}" \
+          --model "${MODEL}" \
+          --lepton-flavor "${LEPTON}" \
+          --version "${VERSION}" \
+          --output-tag "${MODE}"
 
-    python3 scripts/build_ml_observable.py \
-      --config $CONFIG \
-      --features $FEATURES_DIR/${level}_sm/features_sm_${level}_${FRAME}_${CHUNK_TAG}.csv \
-      --model $MODEL_PATH \
-      --split $SPLIT \
-      --lepton-flavor $lepton \
-      --weight-column weight_sm \
-      --output-tag "sm_${level}_${CHUNK_TAG}"
-
+      done
+    done
   done
 done
 
-# 3. Calculate Fisher Information on combined templates
-echo "--> Step 3: Calculating Fisher Information..."
+# ----------------------------------------------------------------------
+# STAGE 2: Evaluate Fisher Information
+# ----------------------------------------------------------------------
+echo ""
+echo "=================================================================="
+echo " STAGE 2: Evaluating Fisher Information"
+echo "=================================================================="
 
-for level in gen reco; do
-  for lepton in electron muon; do
+for MODEL_TYPE in xgboost catboost; do
+  for VERSION in v2 v1 v0; do
+    for LEPTON in electron muon; do
 
-    TEMPLATE="${OBS_BASE_DIR}/template_${SPLIT}_${lepton}_${level}_${CHUNK_TAG}_bins.csv"
-    SM_TEMPLATE="${OBS_BASE_DIR}/template_${SPLIT}_${lepton}_sm_${level}_${CHUNK_TAG}_bins.csv"
+      # Map version output folder name
+      if [ "${VERSION}" = "v2" ]; then
+        OBS_FOLDER="ml_observable_v2"
+      elif [ "${VERSION}" = "v0" ]; then
+        OBS_FOLDER="ml_observable_v0"
+      else
+        OBS_FOLDER="ml_observable"
+      fi
 
-    echo "Evaluating Fisher Info: ML (${FEATURE_SET}) | ${level} | ${lepton} | ${CHUNK_TAG}"
+      OBS_DIR="outputs/ml_superdataset/${OBS_FOLDER}/${MODEL_TYPE}"
+      CPV_TEMPLATE="${OBS_DIR}/template_test_${LEPTON}_${LEVEL}_cpv_bins.csv"
+      SM_TEMPLATE="${OBS_DIR}/template_test_${LEPTON}_${LEVEL}_sm_bins.csv"
 
-    python3 scripts/evaluate_fisher.py \
-      --template "$TEMPLATE" \
-      --sm-template "$SM_TEMPLATE" \
-      --luminosity-scale 8000
+      echo "--------------------------------------------------"
+      echo "--> Fisher Eval | Model: ${MODEL_TYPE} | Version: ${VERSION} | Lepton: ${LEPTON}"
 
+      python3 scripts/evaluate_fisher.py \
+        --template "${CPV_TEMPLATE}" \
+        --sm-template "${SM_TEMPLATE}" \
+        --luminosity-scale 8000
+
+    done
   done
 done
 
-echo "ML pipeline complete."
+echo ""
+echo "=================================================================="
+echo "=== All Pipeline Steps Completed Successfully for Level: ${LEVEL} ==="
+echo "=================================================================="
