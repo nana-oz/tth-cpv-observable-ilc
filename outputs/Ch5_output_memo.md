@@ -478,20 +478,20 @@ OR you can also use `script/run_ml_observable_pipeline.sh` mentioned above, whic
 
 | Observable | Lepton category | Frame | ML model | version | N gen | N reco | I gen | I reco | I reco / I gen |
 |------------|-----------------|-------|----------|---------|-------|--------|-------|--------|----------------|
-| O_ML | electron | higgs_rest | xgboost | v0 |  |  |  |  |  |
-| O_ML | muon | higgs_rest | xgboost | v0 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | xgboost | v0 |  |  |  | 0.030311 |  |
+| O_ML | muon | higgs_rest | xgboost | v0 |  |  |  | 0.0175953 |  |
 | O_ML | electron + muon | higgs_rest | xgboost | v0 |  |  |  |  |  |
-| O_ML | electron | higgs_rest | xgboost | v1 |  |  |  |  |  |
-| O_ML | muon | higgs_rest | xgboost | v1 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | xgboost | v1 |  |  |  | 0.0391572 |  |
+| O_ML | muon | higgs_rest | xgboost | v1 |  |  |  | 0.0270757 |  |
 | O_ML | electron + muon | higgs_rest | xgboost | v1 |  |  |  |  |  |
 | O_ML | electron | higgs_rest | xgboost | v2 |  |  |  | 0.8781519013438279 |  |
 | O_ML | muon | higgs_rest | xgboost | v2 |  |  |  |  | 0.883595206181391 |
 | O_ML | electron + muon | higgs_rest | xgboost | v2 |  |  |  |  |  |
-| O_ML | electron | higgs_rest | catboost | v0 |  |  |  |  |  |
-| O_ML | muon | higgs_rest | catboost | v0 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | catboost | v0 |  |  |  | 0.00316548 |  |
+| O_ML | muon | higgs_rest | catboost | v0 |  |  |  | 0.00219951 |  |
 | O_ML | electron + muon | higgs_rest | catboost | v0 |  |  |  |  |  |
-| O_ML | electron | higgs_rest | catboost | v1 |  |  |  |  |  |
-| O_ML | muon | higgs_rest | catboost | v1 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | catboost | v1 |  |  |  | 0.826041 |  |
+| O_ML | muon | higgs_rest | catboost | v1 |  |  |  | 0.88406 |  |
 | O_ML | electron + muon | higgs_rest | catboost | v1 |  |  |  |  |  |
 | O_ML | electron | higgs_rest | catboost | v2 |  |  |  | 1.156579449909343 |  |
 | O_ML | muon | higgs_rest | catboost | v2 |  |  |  | 1.1259856676365156 |  |
