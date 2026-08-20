@@ -3310,7 +3310,7 @@ As time permits, repeat the selected setup with the following options
   * Plain ML observable distribution(with only l,D feature input): sm vs cpv, ML vs angular O_lD
   * Best ML observable distribution after 5.5 marked by **priority for 9.1** 
   * Bar chart of the Fisher of all observables we studied.
-**Background introduction and equations**: Don't assume our colleagues has enough QFT knowledge...but they also don't like too much equations, only necessary. Be clear what we present come from and what the goal/physics question we are trying to explore for each plots.
+**Background introduction and equations**: Don't assume our colleagues has enough QFT knowledge...but they also don't like too much equations and numbers, only necessary. The main line of the story maybe how to reconstruct the identity of the "down-type" quark and the order of the fermions. Be clear what we present come from and what the goal/physics question we are trying to explore for each plots. We may have more discussion on this part later.
 **After 9.1** Hope the last week still working week, so we can do the next chapter 6 and 8. Hope they just need you to implement the current scripts. Then it will be enough for your poster. 
 
 ---
