@@ -97,7 +97,7 @@ python3 make_arguments.py \
   
 condor_submit submit_export_features.sub
 ```
-**STATUS: Re-Run Complete(2026/08/19)**
+**STATUS: Re-Run Complete(2026/08/20)**
 
 ### 1.4  Write a new script `/scripts/merge_feature_chunks.py`
 
@@ -342,16 +342,10 @@ python3 scripts/build_ml_observable.py \
 
 Outputs are in `outputs/ml_superdataset/ml_observable_v2/xgboost`.
 
-#### 2.4.2 Build the Pipeline for ML Analysis
-Build the similar pipeline as the angular observable from read models to the evaluate fisher.
-
-File: `scripts/run_ml_observable_pipeline.sh`
-
-
-#### 2.4.5 Run All XGBoost
+#### 2.4.3 Run All XGBoost
 ML Observables:
-- [ ] reco, cpv, electron (v0: , v1: x, v2: x)
-- [ ] reco, cpv, muon (v0: , v1: x, v2: x)
+- [x] reco, cpv, electron (v0: x, v1: x, v2: x)
+- [x] reco, cpv, muon (v0: x, v1: x, v2: x)
 - [ ] reco, sm, electron
 - [ ] reco, sm, muon
 - [ ] gen, cpv, electron
@@ -364,12 +358,6 @@ ML Observables:
 - Created `configs/analysis_ml_superdataset_lr_catboost.yaml`
 - Created `configs/analysis_ml_superdataset_lr_catboost_v2.yaml`
 
-
-Run CatBoost model and compare them with the XGBoost:
-- [x] Raw v1 (without lepton charge) = named as v0
-- [x] v1+lepton charge
-- [x] v2
-
 Train model input example (v1):
 ```
 python3 scripts/train_cpv_model.py \
@@ -380,7 +368,6 @@ python3 scripts/train_cpv_model.py \
 
 Outputs (for v1) are in `outputs/ml_superdataset/model/lD/catboost`
 
-
 Building ML observable input example (v2, electron, reco):
 ```
 python3 scripts/build_ml_observable.py \
@@ -390,16 +377,37 @@ python3 scripts/build_ml_observable.py \
     --lepton-flavor electron \
     --version v2
 ```
-#### 2.5.2 Run All CatBoost
-ML Observables:
-- [ ] reco, cpv, electron (v0: , v1: x, v2: x)
-- [ ] reco, cpv, muon (v0: , v1: x, v2: x)
-- [ ] reco, sm, electron
-- [ ] reco, sm, muon
+#### 2.5.2 Run All CatBoost 
+Run CatBoost model (Train Model):
+- [x] Raw v1 (without lepton charge) = named as v0
+- [x] v1+lepton charge
+- [x] v2
+
+Build ML Observables:
+- [x] reco, cpv, electron (v0: x, v1: x, v2: x)
+- [x] reco, cpv, muon (v0: x, v1: x, v2: x)
+- [x] reco, sm, electron
+- [x] reco, sm, muon
 - [ ] gen, cpv, electron
 - [ ] gen, cpv, muon
 - [ ] gen, sm, electron
 - [ ] gen, sm, muon
+
+
+### 2.6 the Build Pipeline for ML Analysis
+Build the similar pipeline as the angular observable from read models to the evaluate fisher.
+
+#### 2.6.1 Build ML Observables
+File: `scripts/run_ml_observable_pipeline.sh`
+
+How to run:
+- `./scripts/run_ml_observable_pipeline.sh reco_cpv`
+- You need to specify if you want to run for reco/gen, and cpv/sm. ex) `reco_cpv`.
+
+Running this file creates ML observables for all:
+- different versions (v0, v1, and v2). They are contained in different folders (`outputs/ml_superdataset/ml_observable`, `outputs/ml_superdataset/ml_observable_v0`, and `outputs/ml_superdataset/ml_observable_v2`).
+- xgboost and catboost (in separate folders)
+- electron and muon (they have different file names, either `electron` or `muon`
 
 
 ### 2.7 Fisher Information Comparison
@@ -407,7 +415,7 @@ ML Observables:
 
 Create Features (both XGBoost and catboost):
 - Raw v1 (without lepton_charge):
-  - I think we can use the same feature file as v1?
+  - I think we can use the same feature file as v1
 - v1 + lepton_charge:
   - [x] reco, cpv
   - [x] reco, sm
@@ -415,7 +423,7 @@ Create Features (both XGBoost and catboost):
   - [ ] gen, sm ... Error, NEED CHECK
 - v2: 
   - [x] reco, cpv
-  - [x] reco, sm
+  - [x] reco, sm 
   - [x] gen, cpv 
   - [ ] gen, sm ... Error (below)
 
