@@ -110,10 +110,11 @@ Condition for the new code:
 
 To Run (example: cpv, reco)
 ```
-python3 ../../scripts/merge_feature_chunks.py \
-  --model cpv \
-  --level reco \
-  --chunks 1-79 
+python3 scripts/merge_feature_chunks.py \
+    --version v1 \
+    --model cpv \
+    --level reco \
+    --chunks 1-79 
 ```
 
 Output file example:
@@ -285,10 +286,11 @@ Outputs are in `outputs/ml_superdataset/features_v2`.
 
 Combine chunks:
 ```
-python3 scripts/merge_feature_chunks_v2.py \
-  --model cpv \
-  --level reco \
-  --chunks 1-79 
+python3 scripts/merge_feature_chunks.py \
+      --version v2 \
+      --model cpv \
+      --level reco \
+      --chunks 1-79 
 ```
 Outputs are in `outputs/ml_superdataset/features_v2`.
 
@@ -346,8 +348,8 @@ Outputs are in `outputs/ml_superdataset/ml_observable_v2/xgboost`.
 ML Observables:
 - [x] reco, cpv, electron (v0: x, v1: x, v2: x)
 - [x] reco, cpv, muon (v0: x, v1: x, v2: x)
-- [ ] reco, sm, electron
-- [ ] reco, sm, muon
+- [x] reco, sm, electron
+- [x] reco, sm, muon
 - [ ] gen, cpv, electron
 - [ ] gen, cpv, muon
 - [ ] gen, sm, electron
@@ -388,8 +390,8 @@ Build ML Observables:
 - [x] reco, cpv, muon (v0: x, v1: x, v2: x)
 - [x] reco, sm, electron
 - [x] reco, sm, muon
-- [ ] gen, cpv, electron
-- [ ] gen, cpv, muon
+- [ ] gen, cpv, electron ... error when building v1, need to check
+- [ ] gen, cpv, muon ... error when building v1, need to check
 - [ ] gen, sm, electron
 - [ ] gen, sm, muon
 
@@ -397,17 +399,22 @@ Build ML Observables:
 ### 2.6 the Build Pipeline for ML Analysis
 Build the similar pipeline as the angular observable from read models to the evaluate fisher.
 
-#### 2.6.1 Build ML Observables
 File: `scripts/run_ml_observable_pipeline.sh`
 
 How to run:
-- `./scripts/run_ml_observable_pipeline.sh reco_cpv`
-- You need to specify if you want to run for reco/gen, and cpv/sm. ex) `reco_cpv`.
+- `./scripts/run_ml_observable_pipeline.sh reco` or `./scripts/run_ml_observable_pipeline.sh gen`
+- You need to specify if you want to run for reco/gen.
 
-Running this file creates ML observables for all:
-- different versions (v0, v1, and v2). They are contained in different folders (`outputs/ml_superdataset/ml_observable`, `outputs/ml_superdataset/ml_observable_v0`, and `outputs/ml_superdataset/ml_observable_v2`).
-- xgboost and catboost (in separate folders)
-- electron and muon (they have different file names, either `electron` or `muon`
+Running this file ...:
+- creates ML observables for all:
+  - different versions (v0, v1, and v2). They are contained in different folders (`outputs/ml_superdataset/ml_observable`, `outputs/ml_superdataset/ml_observable_v0`, and `outputs/ml_superdataset/ml_observable_v2`).
+  - xgboost and catboost (in separate folders)
+  - electron and muon (they have different file names, either `electron` or `muon`
+  - cpv and sm
+- evaluates fisher information for all:
+  - different versions
+  - electron and muon
+  - cpv and sm
 
 
 ### 2.7 Fisher Information Comparison
@@ -454,6 +461,20 @@ ML Observable Production: <br>
   - [ ] catboost
  
 #### 2.7.2 Fisher Information Calculation
+Input example:
+```
+python3 scripts/evaluate_fisher.py \
+  --template outputs/ml_superdataset/ml_observable_v2/xgboost/template_test_electron_reco_cpv_bins.csv \
+  --sm-template outputs/ml_superdataset/ml_observable_v2/xgboost/template_test_electron_reco_sm_bins.csv \
+  --luminosity-scale 8000
+```
+
+Output example:
+```
+outputs/ml_superdataset/ml_observable_v2/xgboost/template_test_electron_reco_cpv_bins.fisher.json
+```
+
+OR you can also use `script/run_ml_observable_pipeline.sh` mentioned above, which will creates ML observables and evaluate fisher for all!
 
 | Observable | Lepton category | Frame | ML model | version | N gen | N reco | I gen | I reco | I reco / I gen |
 |------------|-----------------|-------|----------|---------|-------|--------|-------|--------|----------------|
@@ -463,8 +484,8 @@ ML Observable Production: <br>
 | O_ML | electron | higgs_rest | xgboost | v1 |  |  |  |  |  |
 | O_ML | muon | higgs_rest | xgboost | v1 |  |  |  |  |  |
 | O_ML | electron + muon | higgs_rest | xgboost | v1 |  |  |  |  |  |
-| O_ML | electron | higgs_rest | xgboost | v2 |  |  |  |  |  |
-| O_ML | muon | higgs_rest | xgboost | v2 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | xgboost | v2 |  |  |  | 0.8781519013438279 |  |
+| O_ML | muon | higgs_rest | xgboost | v2 |  |  |  |  | 0.883595206181391 |
 | O_ML | electron + muon | higgs_rest | xgboost | v2 |  |  |  |  |  |
 | O_ML | electron | higgs_rest | catboost | v0 |  |  |  |  |  |
 | O_ML | muon | higgs_rest | catboost | v0 |  |  |  |  |  |
@@ -472,8 +493,8 @@ ML Observable Production: <br>
 | O_ML | electron | higgs_rest | catboost | v1 |  |  |  |  |  |
 | O_ML | muon | higgs_rest | catboost | v1 |  |  |  |  |  |
 | O_ML | electron + muon | higgs_rest | catboost | v1 |  |  |  |  |  |
-| O_ML | electron | higgs_rest | catboost | v2 |  |  |  |  |  |
-| O_ML | muon | higgs_rest | catboost | v2 |  |  |  |  |  |
+| O_ML | electron | higgs_rest | catboost | v2 |  |  |  | 1.156579449909343 |  |
+| O_ML | muon | higgs_rest | catboost | v2 |  |  |  | 1.1259856676365156 |  |
 | O_ML | electron + muon | higgs_rest | catboost | v2 |  |  |  |  |  |
 
 
