@@ -3279,13 +3279,15 @@ exploit them for CPV, or just treat them as noise?**
 **Physics motivation: See whether the model can learn the order of the w-daughter rather than we choose one by ourself and can it save the O_jj from reco level?**
 
 Compare the next two options on W
-1. Add the kinematics of the second W daughter jet into features ( First with higher likelihood, second with lower, no other auxiliary )
-2. Different permutation input once （ One events, two rows)
+1. **Priority for 9.1** Add the kinematics of the second W daughter jet into features ( First with higher likelihood, second with lower, no other auxiliary )
+   * Better using v1+lepton charge with Catboost, don't need to modify the export features.
+2. Optional: Different jet as down-type input once （ One events, two rows)
+   * With CatBoost v2, but each jet of the hadronic decay will be chosen as top/anti-side-top fermion filling the row once, weighted by the likelihood
 
 ## 5.4 Adding the fitted neutrino
 **Physics motivation: See if the potential different sign of the delta_lnu, delta_jj, delta_lD will confuse the model?**
 (I will provide some statistic comparison of the different angular observables)
-
+**Priority for 9.1**
 Add the fitted-neutrino kinematics to the selected $O_{\ell D}$-branch feature
 set and test whether the learned observable retains more Fisher information
 than the lepton-plus-down-type-jet baseline.
@@ -3294,9 +3296,22 @@ than the lepton-plus-down-type-jet baseline.
 
 As time permits, repeat the selected setup with the following options
 
+* **Priority for 9.1** Enlarge the input with the complete reconstructed W products and top-decay $b/\bar b$ objects to test whether additional physical information helps or confuses the model.
 * Study an SM-inclusive three-class model
-* Enlarge the input to the complete reconstructed W products and top-decay $b/\bar b$ objects to test whether additional physical information helps or confuses the model.
 * A neural network and revisit the W-daughter permutation problem, train using the two W jets alone to test whether NN can avoid or resolve the jet-ordering problem
+
+## Ideal Case for 9.1
+
+**Project summary**: Study the sensitivity of the CPV observables induced by the t-tbar spin correlation on reconstruction level in e-e+>tth process at 550GeV linear collider. Compare the Fisher from cpv/sm without other background, assuming the new physics coefficient is 1.
+**Plots**: 
+  * Angular observable distribution: O_jj, O_lD, reco vs gen, sm vs cpv at Higgs rest frame with 10 chunks
+  * Bar chart of the Fisher at different frame, showing the challenge of reconstruct the Higgs rest frame though it owns huge theoretical advantages.
+  * ML observable training information: Compare the ROC,importance of the v1+lepton charge/v2 XGBoost,CatBoost in 5.2
+  * Plain ML observable distribution(with only l,D feature input): sm vs cpv, ML vs angular O_lD
+  * Best ML observable distribution after 5.5 marked by **priority for 9.1** 
+  * Bar chart of the Fisher of all observables we studied.
+**Background introduction and equations**: Don't assume our colleagues has enough QFT knowledge...but they also don't like too much equations, only necessary. Be clear what we present come from and what the goal/physics question we are trying to explore for each plots.
+**After 9.1** Hope the last week still working week, so we can do the next chapter 6 and 8. Hope they just need you to implement the current scripts. Then it will be enough for your poster. 
 
 ---
 
