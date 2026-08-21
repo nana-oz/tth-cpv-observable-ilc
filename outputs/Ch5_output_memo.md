@@ -553,16 +553,87 @@ outputs/ml_superdataset/ml_observable_v2/xgboost/ml_observable_reco_sm_vs_cpv_mu
 ```
 
 ### 2.8 Adding auxiliary variables
-#### 2.8.1 Try with 2 lD_auxiliary values
-Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_v2.yaml`, to contain only first two values for trial.
+#### 2.8.1 Try with fewer lD_auxiliary values
+Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_v2.yaml`, to contain include only:
+- auxiliary
+  - w_assignment_likelihood_selected
+  - final_selection_score
+  - m_ttbar
+  - down_jet_mass
 
 Training Input:
 ```
 python3 scripts/train_cpv_model.py \
-        --config configs/analysis_ml_superdataset_lr_v2.yaml \
+        --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
         --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
         --version v2 \
         --feature-set lD_auxiliary
 ```
 
+Building ML observable:
+```
+ python3 scripts/build_ml_observable.py \
+    --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+    --features outputs/ml_superdataset/features_v2/reco_sm/features_sm_reco_higgs_rest_chunk1_79.csv \
+    --model outputs/ml_superdataset/model_v2/lD_auxiliary/catboost/electron/cpv_catboost.cbm \
+    --lepton-flavor electron \
+    --output-tag sm \
+    --version v2
+```
 
+Output: `outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/minimal/catboost`
+
+Calculate fisher information:
+```
+python3 scripts/evaluate_fisher.py \
+  --template outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/minimal/catboost/template_test_electron_reco_cpv_bins.csv \
+  --sm-template outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/minimal/catboost/template_test_electron_reco_sm_bins.csv \
+  --luminosity-scale 8000
+```
+
+Fisher information:
+- electron: 1.23386
+- muon: 1.35247
+
+
+#### 2.8.2 Try with all lD_auxiliary values
+Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_v2.yaml`, to contain include all:
+- auxiliary
+  - w_assignment_likelihood_selected
+  - final_selection_score
+  - m_W_had
+  - m_top_had
+  - m_top_lep
+  - m_ttbar
+  - down_jet_mass
+ 
+Building ML observable:
+```
+ python3 scripts/build_ml_observable.py \
+    --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+    --features outputs/ml_superdataset/features_v2/reco_sm/features_sm_reco_higgs_rest_chunk1_79.csv \
+    --model outputs/ml_superdataset/model_v2/lD_auxiliary/catboost/electron/cpv_catboost.cbm \
+    --lepton-flavor electron \
+    --output-tag sm \
+    --version v2
+```
+
+Output: `outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/full/catboost`
+
+Calculate fisher information:
+```
+python3 scripts/evaluate_fisher.py \
+  --template outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/full/catboost/template_test_electron_reco_cpv_bins.csv \
+  --sm-template outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/full/catboost/template_test_electron_reco_sm_bins.csv \
+  --luminosity-scale 8000
+```
+
+Fisher information:
+- electron: 1.17279
+- muon: 1.22341
+
+
+## 3. W-daughter representation and assignment study (Ch. 5.3)
+### 3.1 
+
+Modify `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` and add `second_w_daughter` in features.
