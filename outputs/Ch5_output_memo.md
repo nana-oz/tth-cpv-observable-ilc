@@ -575,7 +575,7 @@ Building ML observable:
  python3 scripts/build_ml_observable.py \
     --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
     --features outputs/ml_superdataset/features_v2/reco_sm/features_sm_reco_higgs_rest_chunk1_79.csv \
-    --model outputs/ml_superdataset/model_v2/lD_auxiliary/catboost/electron/cpv_catboost.cbm \
+    --model outputs/ml_superdataset/model_v2/lD_auxiliary/minimal/catboost/electron/cpv_catboost.cbm \
     --lepton-flavor electron \
     --output-tag sm \
     --version v2
@@ -612,7 +612,7 @@ Building ML observable:
  python3 scripts/build_ml_observable.py \
     --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
     --features outputs/ml_superdataset/features_v2/reco_sm/features_sm_reco_higgs_rest_chunk1_79.csv \
-    --model outputs/ml_superdataset/model_v2/lD_auxiliary/catboost/electron/cpv_catboost.cbm \
+    --model outputs/ml_superdataset/model_v2/lD_auxiliary/full/catboost/electron/cpv_catboost.cbm \
     --lepton-flavor electron \
     --output-tag sm \
     --version v2
@@ -631,6 +631,44 @@ python3 scripts/evaluate_fisher.py \
 Fisher information:
 - electron: 1.17279
 - muon: 1.22341
+
+#### 2.8.3 Guide to lD_auxiliary pipeline
+1. Modify `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` accordingly
+
+2. Train the model using the modified config file
+
+Training Input fir both full and minimal:
+```
+python3 scripts/train_cpv_model.py \
+        --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+        --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --version v2 \
+        --feature-set lD_auxiliary
+```
+
+3. Run script `./scripts/run_lD_auxiliary_pipeline.sh full` or `./scripts/run_lD_auxiliary_pipeline.sh minimal`
+
+It will:
+- build ML observable for both electron/muon, sm/cpv
+- evaluate fisher info for both electron/muon
+- output in `outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/full/catboost` or `outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/minimal/catboost`
+
+#### 2.8.4 Fisher Information Comparison (lD, lD_auxiliary)
+Common for all:
+- frame: `higgs_rest`
+- version: `v2`
+
+| Observable | Lepton category | ML model | feature | min/full | N reco | I reco |
+|------------|-----------------|----------|---------|----------|--------|--------|
+| O_ML | electron | catboost | lD | -- |  | 1.15657 |
+| O_ML | muon | catboost | lD | -- |  | 1.12598 |
+| O_ML | electron + muon | catboost | lD | -- |  |  |
+| O_ML | electron | catboost | lD_auxiliary | minimal |  | 1.23386 |
+| O_ML | muon | catboost | lD_auxiliary | minimal |  | 1.35247 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal |  |  |
+| O_ML | electron | catboost | lD_auxiliary | full |  | 1.17279 |
+| O_ML | muon | catboost | lD_auxiliary | full |  | 1.22341 |
+| O_ML | electron + muon | catboost | lD_auxiliary | full |  |  |
 
 
 ## 3. W-daughter representation and assignment study (Ch. 5.3)
