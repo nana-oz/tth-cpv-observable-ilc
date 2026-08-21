@@ -1,3 +1,39 @@
+## 0. Whole ML Analysis Pipeline Summary
+
+1. Produce Features, Merge Chunks
+```
+python3 make_arguments.py \
+  --config ../../configs/analysis_ml_superdataset_lr.yaml \
+  --chunks 1-79 \
+  --component interference \
+  --level reco
+
+condor_submit submit_export_features.sub
+```
+
+Merge Chunks
+```
+python3 scripts/merge_feature_chunks.py \
+    --version v1 \
+    --model cpv \
+    --level reco \
+    --chunks 1-79 
+```
+
+2. Training
+```
+python3 scripts/train_cpv_model.py \
+        --config configs/analysis_ml_superdataset_lr_v2.yaml \
+        --features outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --feature-set lD
+```
+
+3. Build Observables
+```
+./scripts/run_ml_observable_pipeline.sh reco
+```
+
+
 ## 1. Data Preparation (Ch. 5.1)
 
 ### 1.1 Check/Edit `export_features.py`
@@ -61,7 +97,8 @@ python3 make_arguments.py \
   
 condor_submit submit_export_features.sub
 ```
-**STATUS: Re-Run Complete (2026/08/19)**
+STATUS: Re-Run Complete (2026/08/19)
+
 
 Input 2 (sm, chunk1-79, gen-level, higgs_rest frame):
 ```
@@ -73,7 +110,8 @@ python3 make_arguments.py \
   
 condor_submit submit_export_features.sub
 ```
-**STATUS: Error**
+STATUS: Error
+
 
 Input 3 (cpv, chunk1-79, reco-level, higgs_rest frame):
 ```
@@ -85,7 +123,8 @@ python3 make_arguments.py \
   
 condor_submit submit_export_features.sub
 ```
-**STATUS: Re-Run Complete (2026/08/19)**
+STATUS: Re-Run Complete (2026/08/19)
+
 
 Input 4 (sm, chunk1-79, reco-level, higgs_rest frame):
 ```
@@ -97,7 +136,8 @@ python3 make_arguments.py \
   
 condor_submit submit_export_features.sub
 ```
-**STATUS: Re-Run Complete(2026/08/20)**
+STATUS: Re-Run Complete(2026/08/20)
+
 
 ### 1.4  Write a new script `/scripts/merge_feature_chunks.py`
 
@@ -296,9 +336,10 @@ Outputs are in `outputs/ml_superdataset/features_v2`.
 
 Train model:
 ```
-python3 scripts/train_cpv_model_v2.py \
+python3 scripts/train_cpv_model.py \
         --config configs/analysis_ml_superdataset_lr_v2.yaml \
         --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --version v2 \
         --feature-set lD
 ```
 
@@ -310,13 +351,14 @@ Outputs are in `outputs/ml_superdataset/model_v2/lD/xgboost`
 - Created `configs/analysis_ml_superdataset_lr_v0.yaml`
 - Created `configs/analysis_ml_superdataset_lr_catboost_v0.yaml` for catboost
 - Features are same as the v1, so they are used
-- Created `script/train_cpv_model_v0.py` for training.
+- For training, the same `script/train_cpv_model.py` cab be used. Specify `--version v0` in input argument.
 
 Input example (for catboost):
 ```
-python3 scripts/train_cpv_model_v0.py \
+python3 scripts/train_cpv_model.py \
   --config configs/analysis_ml_superdataset_lr_catboost_v0.yaml \
   --features outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+  --version v0 \
   --feature-set lD
 ```
 
@@ -365,6 +407,7 @@ Train model input example (v1):
 python3 scripts/train_cpv_model.py \
         --config configs/analysis_ml_superdataset_lr_catboost.yaml \
         --features outputs/ml_superdataset/features/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --version v1 \
         --feature-set lD
 ```
 
@@ -450,16 +493,6 @@ File "/data/dust/user/ozakinan/analysis/tth-cpv-observable-ilc/scripts/export_fe
 ReferenceError: attempt to access a null-pointer
 ```
 
-ML Observable Production: <br>
-- v0 (= Raw v1, without lepton_charge):
-  - [ ] XGBoost
-  - [ ] catboost
-- v1 (+ lepton_charge):
-  - [ ] XGBoost
-  - [ ] catboost
-- v2: 
-  - [ ] XGBoost
-  - [ ] catboost
  
 #### 2.7.2 Fisher Information Calculation
 Input example:
@@ -518,4 +551,18 @@ Output example:
 outputs/ml_superdataset/ml_observable_v2/xgboost/ml_observable_reco_sm_vs_cpv_electron_bins.png
 outputs/ml_superdataset/ml_observable_v2/xgboost/ml_observable_reco_sm_vs_cpv_muon_bins.png
 ```
+
+### 2.8 Adding auxiliary variables
+#### 2.8.1 Try with 2 lD_auxiliary values
+Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_v2.yaml`, to contain only first two values for trial.
+
+Training Input:
+```
+python3 scripts/train_cpv_model.py \
+        --config configs/analysis_ml_superdataset_lr_v2.yaml \
+        --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --version v2 \
+        --feature-set lD_auxiliary
+```
+
 
