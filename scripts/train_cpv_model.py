@@ -194,6 +194,12 @@ def main() -> int:
         default=None,
         help="Named feature set from features.sets in the YAML config",
     )
+    parser.add_argument(
+        "--version",
+        choices=("v0", "v1", "v2"),
+        default="v1",
+        help="Dataset/model version (v0, v1 or v2)",
+    )
 
     parser.add_argument("--out-dir", default=None)
 
@@ -392,12 +398,14 @@ def main() -> int:
         
         print(f"[{lepton_flavor}] Test Precision: {test_precision:.4f}")
 
+        version_dir = "model" if args.version == "v1" else f"model_{args.version}"
+
         out_dir = (
             Path(args.out_dir)
             if args.out_dir
             else repo_root()
             / cfg["outputs"]["base_dir"]
-            / "model"
+            / version_dir
             / feature_set_name
             / model_type
             / lepton_flavor
@@ -426,7 +434,7 @@ def main() -> int:
         plt.ylabel("Log Loss")
         plt.title(f"Training Loss Curve — {lepton_flavor}")
         plt.legend()
-        plt.grid(True, linestyle="--", alpha=0.6)
+        #plt.grid(True, linestyle="--", alpha=0.6)
         plt.tight_layout()
         plt.savefig(out_dir / "training_loss.png", dpi=300)
         plt.close()
@@ -457,7 +465,7 @@ def main() -> int:
         plt.ylabel("True Positive Rate")
         plt.title(f"ROC Curves — {lepton_flavor}")
         plt.legend(loc="lower right")
-        plt.grid(True, linestyle="--", alpha=0.6)
+        #plt.grid(True, linestyle="--", alpha=0.6)
         plt.tight_layout()
         plt.savefig(out_dir / "roc_curve.png", dpi=300)
         plt.close()

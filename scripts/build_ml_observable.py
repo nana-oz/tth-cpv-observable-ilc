@@ -39,21 +39,43 @@ def filter_rows(rows: list, split: str = "all", lepton_flavor: str = "all") -> l
         rows = [row for row in rows if row["lepton_flavor"] == lepton_flavor]
     return rows
 
+
+def to_float(val) -> float:
+    """Safely convert values to finite floats or NaN."""
+    if val is None or val == "":
+        return float("nan")
+    try:
+        fval = float(val)
+        return fval if math.isfinite(fval) else float("nan")
+    except (TypeError, ValueError):
+        return float("nan")
+    
+
 def extract_feature_value(row: dict, feature_name: str) -> float:
-    """Extract feature value: reads directly from row (v2), falling back 
-    to dynamic down-type resolution if the column is missing (v1).
+    """Extract feature value using direct lookup with dynamic fallback resolution
+    for derived features (w_assignment_likelihood_selected, down_type_daughter_*).
     """
     # 1. Try direct column lookup (works for v2 and all standard features)
-    val = row.get(feature_name)
-    if val is not None and val != "":
-        try:
-            fval = float(val)
-            if math.isfinite(fval):
-                return fval
-        except (TypeError, ValueError):
-            pass
+    fval = to_float(row.get(feature_name))
+    if math.isfinite(fval):
+        return fval
 
-    # 2. Fallback dynamic resolution for missing v1 down_type_daughter_* columns
+    # 2. Dynamic resolution for w_assignment_likelihood_selected
+    if feature_name == "w_assignment_likelihood_selected":
+        preference = row.get("w_orientation_status")
+        L12 = row.get("L12")
+        L21 = row.get("L21")
+
+        if preference == "L12_preferred":
+            selected_L = L12
+        elif preference == "L21_preferred":
+            selected_L = L21
+        else:
+            selected_L = None
+
+        return to_float(selected_L)
+
+    # 3. Fallback dynamic resolution for missing v1 down_type_daughter_* columns
     if feature_name.startswith("down_type_daughter_"):
         variable = feature_name.removeprefix("down_type_daughter_")
         try:
@@ -103,6 +125,7 @@ def main() -> int:
     feature_cols = model_meta["feature_list"]
     classes = [int(c) for c in model_meta["class_order_model"]]
     model_type = model_meta.get("model_type", "xgboost")
+    feature_set_name = model_meta.get("feature_set", "lD")
 
     # Identify the ML model type (XGBoost/caboost)
     if model_type == "xgboost":
@@ -229,7 +252,7 @@ def main() -> int:
         obs_folder = "ml_observable"  # Default for v1
 
 
-    out_dir = repo_root() / cfg["outputs"]["base_dir"] / obs_folder / model_type
+    out_dir = repo_root() / cfg["outputs"]["base_dir"] / obs_folder / feature_set_name / model_type
     out_dir.mkdir(parents=True, exist_ok=True)
     if not score_rows:
         raise SystemExit(
@@ -275,6 +298,23 @@ def main() -> int:
     weight_unit = "shape fraction" if args.weight_column == "weight_sm_shape" else "fb"
     print(f"signed integral = {hist.integral_signed():+.6g} {weight_unit} "
           f"z_signed={weight_report['z_signed']:+.2f}")
+
+    stem = f"template_{args.split}{lepton_flavor_tag}{tag}"
+    observable = "O_ML"
+    frame = "score"
+
+    try:
+        from ilc_tth_cpv.plotting import plot_signed_histogram
+
+        png = plot_signed_histogram(
+            hist,
+            out_dir / f"{stem}.png",
+            title=f"{observable} [{frame}] split={args.split}",
+            xlabel=f"ML Score O_ML = P(+) - P(-)",
+        )
+        print(f"plot   -> {png}")
+    except Exception as exc:  # matplotlib may be absent in minimal envs
+        print(f"plot skipped ({exc})")
     return 0
 
 
