@@ -116,6 +116,12 @@ def main() -> int:
     parser.add_argument("--logit", action="store_true", help="also compute log(P+/P-)")
     args = parser.parse_args()
 
+    output_tag = args.output_tag
+    if not output_tag:
+        features_parent = Path(args.features).parent.name
+        if features_parent and not features_parent.startswith("features"):
+            output_tag = features_parent
+
     cfg = load_analysis_config(Path(args.config))
     meta_path = Path(args.model).parent / "model_metadata.json"
 
@@ -149,7 +155,7 @@ def main() -> int:
     split_cfg   = cfg.get("split", {})
 
     # Determine if sm or cpv
-    is_sm = "sm" in args.output_tag.lower() or args.weight_column == "weight_sm"
+    is_sm = "sm" in output_tag.lower() or args.weight_column == "weight_sm"
 
     # Select cross section based on process (SM vs CPV)
     if is_sm:
@@ -254,12 +260,14 @@ def main() -> int:
 
     out_dir = repo_root() / cfg["outputs"]["base_dir"] / obs_folder / feature_set_name / model_type
     out_dir.mkdir(parents=True, exist_ok=True)
+
     if not score_rows:
         raise SystemExit(
             f"No finite {args.weight_column} values for split {args.split}. "
             "For SM physical templates, check cross_section_fb in samples.yaml."
         )
-    tag = f"_{args.output_tag}" if args.output_tag else ""
+
+    tag = f"_{output_tag}" if output_tag else ""   
     lepton_flavor_tag = f"_{args.lepton_flavor}" if args.lepton_flavor != "all" else ""
 
     write_table(
@@ -273,9 +281,10 @@ def main() -> int:
         "n_dropped_invalid": len(eval_rows) - len(kept),
         "score_definition": "P(+) - P(-)",
         "weight_column": args.weight_column,
-        "output_tag": args.output_tag,
+        "output_tag": output_tag,
         "created": datetime.datetime.now().isoformat(),
     })
+
     write_table(
         out_dir / f"template_{args.split}{lepton_flavor_tag}{tag}_bins.csv",
         hist.as_rows(frame="score", observable="O_ML"),
@@ -285,7 +294,7 @@ def main() -> int:
             "split": args.split,
             "lepton_flavor": args.lepton_flavor,
             "weight_column": args.weight_column,
-            "output_tag": args.output_tag,
+            "output_tag": output_tag,
             "n_events_filled": len(score_rows),
             "integral_signed_fb": hist.integral_signed(),
             "integral_abs_fb": hist.integral_abs(),
@@ -293,6 +302,7 @@ def main() -> int:
             "created": datetime.datetime.now().isoformat(),
         },
     )
+
     print(f"scores   -> {out_dir / f'scores_{args.split}{lepton_flavor_tag}{tag}.csv'} ({len(score_rows)} events)")
     print(f"template -> {out_dir / f'template_{args.split}{lepton_flavor_tag}{tag}_bins.csv'}")
     weight_unit = "shape fraction" if args.weight_column == "weight_sm_shape" else "fb"

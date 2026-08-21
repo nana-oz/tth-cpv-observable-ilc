@@ -72,6 +72,7 @@ def resolve_feature_value(row, feature_name: str) -> float:
     idx_W_quark          = float(row.get("idx_W_quark"))
     idx_W_antiquark      = float(row.get("idx_W_antiquark"))
 
+    # Candiate 1 (Down-type daughter jet)
     if feature_name.startswith("down_type_daughter_"):
         variable = feature_name.removeprefix("down_type_daughter_")
     
@@ -90,11 +91,31 @@ def resolve_feature_value(row, feature_name: str) -> float:
         if selected_prefix is None:
             return float("nan")
 
-        return to_float(row[f"{selected_prefix}_{variable}"])
+        return to_float(row.get(f"{selected_prefix}_{variable}"))
+
+    # Candidate 2 (Second W daugher jet - opposite for Candidate 1)
+    if feature_name.startswith("second_w_daughter_"):
+        variable = feature_name.removeprefix("second_w_daughter_")
+
+        if idx_W_down_candidate not in (None, -1.0):
+            if idx_W_down_candidate == idx_W_quark:
+                # Primary is quark -> Second jet is antiquark
+                selected_prefix = "wjet_antiquark"
+            elif idx_W_down_candidate == idx_W_antiquark:
+                # Primary is antiquark -> Second jet is quark
+                selected_prefix = "wjet_quark"
+            else:
+                selected_prefix = None
+        else:
+            selected_prefix = None
+
+        if selected_prefix is None:
+            return float("nan")
+
+        return to_float(row.get(f"{selected_prefix}_{variable}"))
 
 
     # Resolve w_assignment_likelihood_selected from L12/L21 preferene by the w_orientation_status
-    
     if feature_name == "w_assignment_likelihood_selected":
         preference = row.get("w_orientation_status")
         L12 = row.get("L12")
