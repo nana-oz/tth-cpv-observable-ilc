@@ -411,6 +411,7 @@ Running this file ...:
   - xgboost and catboost (in separate folders)
   - electron and muon (they have different file names, either `electron` or `muon`
   - cpv and sm
+- produces histogram of ML observables
 - evaluates fisher information for all:
   - different versions
   - electron and muon
@@ -485,7 +486,7 @@ OR you can also use `script/run_ml_observable_pipeline.sh` mentioned above, whic
 | O_ML | muon | higgs_rest | xgboost | v1 |  |  |  | 0.0270757 |  |
 | O_ML | electron + muon | higgs_rest | xgboost | v1 |  |  |  |  |  |
 | O_ML | electron | higgs_rest | xgboost | v2 |  |  |  | 0.8781519013438279 |  |
-| O_ML | muon | higgs_rest | xgboost | v2 |  |  |  |  | 0.883595206181391 |
+| O_ML | muon | higgs_rest | xgboost | v2 |  |  |  | 0.883595206181391 |  |
 | O_ML | electron + muon | higgs_rest | xgboost | v2 |  |  |  |  |  |
 | O_ML | electron | higgs_rest | catboost | v0 |  |  |  | 0.00316548 |  |
 | O_ML | muon | higgs_rest | catboost | v0 |  |  |  | 0.00219951 |  |
@@ -498,4 +499,23 @@ OR you can also use `script/run_ml_observable_pipeline.sh` mentioned above, whic
 | O_ML | electron + muon | higgs_rest | catboost | v2 |  |  |  |  |  |
 
 
+#### 2.7.3 Plotting Combined Histogram
+For simply plotting the histograms like `template_test_electron_reco_cpv.png`, the pipeline `scripts/run_ml_observable_pipeline.sh` will automatically produce histograms. 
+
+For combined histogram (reco cpv and scaled reco sm), use `plot_conbined_hist.py` to plot. It will produce histograms for both electron and muon automatically. Make sure to set mode `ml`, as this code is also used for plotting combined angular observable histograms.
+
+Input example (xgboost, v2, test)
+```
+python3 src/ilc_tth_cpv/plot_conbined_hist.py \
+  --mode ml \
+  --model-type xgboost \
+  --version v2 \
+  --split test
+```
+
+Output example:
+```
+outputs/ml_superdataset/ml_observable_v2/xgboost/ml_observable_reco_sm_vs_cpv_electron_bins.png
+outputs/ml_superdataset/ml_observable_v2/xgboost/ml_observable_reco_sm_vs_cpv_muon_bins.png
+```
 
