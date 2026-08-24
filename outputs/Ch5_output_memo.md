@@ -762,3 +762,46 @@ Then run `./scripts/run_lD_auxiliary_pipeline.sh minimal_w2` to create observabl
 | O_ML | electron + muon | catboost | lD_auxiliary | minimal_w2 |  | 2.5743 |
 
 
+## 4. Adding the fitted neutrino (Ch. 5.4)
+### 4.1 Add nu_fit features (minimal_w2)
+
+Modify `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` and add `nu_fit` in features. (Use catboost, v2, lD_auxiliary minimal_2 model for study for this.)
+- There is no `second_w_daughter` kinematics features in this model.
+
+Added following in `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` features section:
+- nu_fit:
+  - E
+  - pt
+  - theta
+  - phi
+
+I have not updated `scripts/build_ml_observable.py` and `scripts/train_cpv_model.py` because csv already contains the nu_fit kinematics with the column name `nu_fit_*`.
+
+Input (train model):
+```
+python3 scripts/train_cpv_model.py \
+  --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+  --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+  --version v2 \
+  --feature-set lD_auxiliary
+```
+
+Output is moved to: `outputs/ml_superdataset/model_v2/lD_auxiliary/minimal_nufit`
+
+Then run `./scripts/run_lD_auxiliary_pipeline.sh minimal_nufit` to create observable and evaluate fisher.
+
+### 4.2 Fisher information comparison
+| Observable | Lepton category | ML model | feature | min/full | N reco | I reco |
+|------------|-----------------|----------|---------|----------|--------|--------|
+| O_ML | electron | catboost | lD_auxiliary | minimal_2 |  | 1.31001 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_2 |  | 1.30644 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_2 |  | 2.61645 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_w2 |  | 1.19654 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_w2 |  | 1.28715 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_w2 |  | 2.5743 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_nufit |  | 2.34656 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_nufit |  | 2.25636 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_nufit |  | 4.60292 |
+
+
+## 5. Optional studies (Ch. 5.5)
