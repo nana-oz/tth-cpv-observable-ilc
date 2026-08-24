@@ -131,6 +131,7 @@ def extract_feature_value(row: dict, feature_name: str) -> float:
             return p * math.sin(theta)
 
         return to_float(row.get(f"{prefix}_{variable}"))
+        
     return float("nan")
 
         
@@ -145,6 +146,7 @@ def main() -> int:
     parser.add_argument("--weight-column", default="weight_template")
     parser.add_argument("--output-tag", default="",
                         help="optional filename tag, e.g. sm")
+    parser.add_argument("--out-dir", default="", help="custom output directory path") 
     parser.add_argument("--version", default="", choices=("", "v0", "v1", "v2"),
                         help="explicit version tag (v0, v1, v2); auto-detected if omitted")
     parser.add_argument("--logit", action="store_true", help="also compute log(P+/P-)")
@@ -291,8 +293,11 @@ def main() -> int:
     else:
         obs_folder = "ml_observable"  # Default for v1
 
+    if args.out_dir:
+        out_dir = Path(args.out_dir)
+    else:
+        out_dir = repo_root() / cfg["outputs"]["base_dir"] / obs_folder / feature_set_name / model_type
 
-    out_dir = repo_root() / cfg["outputs"]["base_dir"] / obs_folder / feature_set_name / model_type
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if not score_rows:

@@ -45,7 +45,7 @@ observable:
   object_b: lepton
   basis: lab_axes                # production_plane is reserved for Ma2018 sign observables
   frames: [lab, higgs_rest, ttbar_rest]
-  default_frame: higgs_rest      # strongest O_W frame in the theory study
+  default_frame: lab    
   n_bins: 20
   range: [-1.0, 1.0]
 

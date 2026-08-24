@@ -442,7 +442,7 @@ def main() -> int:
         version_dir = "model" if args.version == "v1" else f"model_{args.version}"
 
         out_dir = (
-            Path(args.out_dir)
+            Path(args.out_dir) / lepton_flavor
             if args.out_dir
             else repo_root()
             / cfg["outputs"]["base_dir"]
