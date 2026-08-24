@@ -553,8 +553,8 @@ outputs/ml_superdataset/ml_observable_v2/xgboost/ml_observable_reco_sm_vs_cpv_mu
 ```
 
 ### 2.8 Adding auxiliary variables
-#### 2.8.1 Try with fewer lD_auxiliary values
-Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_v2.yaml`, to contain include only:
+#### 2.8.1 Try with fewer lD_auxiliary values (minimal_1)
+Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_catboost_v2.yaml`, to contain include only:
 - auxiliary
   - w_assignment_likelihood_selected
   - final_selection_score
@@ -596,8 +596,8 @@ Fisher information:
 - muon: 1.35247
 
 
-#### 2.8.2 Try with all lD_auxiliary values
-Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_v2.yaml`, to contain include all:
+#### 2.8.2 Try with all lD_auxiliary values (full)
+Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_catboost__v2.yaml`, to contain include all:
 - auxiliary
   - w_assignment_likelihood_selected
   - final_selection_score
@@ -632,12 +632,59 @@ Fisher information:
 - electron: 1.17279
 - muon: 1.22341
 
-#### 2.8.3 Guide to lD_auxiliary pipeline
+
+#### 2.8.3 Update the lD_auxiliary minimal model (minimal_2)
+From the 2.8.1's result, we see the slight improvement on fisher information, so we try improve more by modifying lD_auxiliary minimal model. Now we add `m_H` to the minimal model
+Modified `auxiliary:` under `lD_auxiliary:` in `configs/analysis_ml_superdataset_lr_catboost_v2.yaml`, to contain include only:
+- auxiliary
+  - w_assignment_likelihood_selected
+  - final_selection_score
+  - m_H
+  - m_ttbar
+  - down_jet_mass
+
+Training Input:
+```
+python3 scripts/train_cpv_model.py \
+        --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+        --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --version v2 \
+        --feature-set lD_auxiliary
+```
+
+Building ML observable:
+```
+ python3 scripts/build_ml_observable.py \
+    --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+    --features outputs/ml_superdataset/features_v2/reco_sm/features_sm_reco_higgs_rest_chunk1_79.csv \
+    --model outputs/ml_superdataset/model_v2/lD_auxiliary/minimal/catboost/electron/cpv_catboost.cbm \
+    --lepton-flavor electron \
+    --output-tag sm \
+    --version v2
+```
+
+Output: `outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/minimal/catboost`
+
+Calculate fisher information:
+```
+python3 scripts/evaluate_fisher.py \
+  --template outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/minimal/catboost/template_test_electron_reco_cpv_bins.csv \
+  --sm-template outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/minimal/catboost/template_test_electron_reco_sm_bins.csv \
+  --luminosity-scale 8000
+```
+
+Fisher information:
+- electron: 1.23386
+- muon: 1.35247
+
+
+
+#### 2.8.4 Guide to lD_auxiliary pipeline
 1. Modify `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` accordingly
 
 2. Train the model using the modified config file
 
-Training Input fir both full and minimal:
+Training Input for both full and minimal:
 ```
 python3 scripts/train_cpv_model.py \
         --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
@@ -653,7 +700,7 @@ It will:
 - evaluate fisher info for both electron/muon
 - output in `outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/full/catboost` or `outputs/ml_superdataset/ml_observable_v2/lD_auxiliary/minimal/catboost`
 
-#### 2.8.4 Fisher Information Comparison (lD, lD_auxiliary)
+#### 2.8.5 Fisher Information Comparison (lD, lD_auxiliary)
 Common for all:
 - frame: `higgs_rest`
 - version: `v2`
@@ -662,13 +709,16 @@ Common for all:
 |------------|-----------------|----------|---------|----------|--------|--------|
 | O_ML | electron | catboost | lD | -- |  | 1.15657 |
 | O_ML | muon | catboost | lD | -- |  | 1.12598 |
-| O_ML | electron + muon | catboost | lD | -- |  |  |
-| O_ML | electron | catboost | lD_auxiliary | minimal |  | 1.23386 |
-| O_ML | muon | catboost | lD_auxiliary | minimal |  | 1.35247 |
-| O_ML | electron + muon | catboost | lD_auxiliary | minimal |  |  |
+| O_ML | electron + muon | catboost | lD | -- |  | 2.28255 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_1 |  | 1.23386 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_1 |  | 1.35247 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_1 |  | 2.58633 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_2 |  | 1.31001 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_2 |  | 1.30644 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_2 |  | 2.61645 |
 | O_ML | electron | catboost | lD_auxiliary | full |  | 1.17279 |
 | O_ML | muon | catboost | lD_auxiliary | full |  | 1.22341 |
-| O_ML | electron + muon | catboost | lD_auxiliary | full |  |  |
+| O_ML | electron + muon | catboost | lD_auxiliary | full |  | 2.3962 |
 
 
 ## 3. W-daughter representation and assignment study (Ch. 5.3)
