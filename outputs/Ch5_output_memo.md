@@ -17,6 +17,7 @@ python3 scripts/merge_feature_chunks.py \
     --version v1 \
     --model cpv \
     --level reco \
+    --frame higgs_rest \
     --chunks 1-79 
 ```
 
@@ -779,7 +780,7 @@ Added following in `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` featur
   - theta
   - phi
 
-I have not updated `scripts/build_ml_observable.py` and `scripts/train_cpv_model.py` because csv already contains the nu_fit kinematics with the column name `nu_fit_*`.
+I didn't update `scripts/build_ml_observable.py` and `scripts/train_cpv_model.py` because csv already contains the nu_fit kinematics with the column name `nu_fit_*`.
 
 Input (train model):
 ```
@@ -852,10 +853,55 @@ Input for building ML observable: `./scripts/run_lD_auxiliary_pipeline.sh wbjets
 
 
 ### 5.2 Try with lab frame
-#### 5.2.1
+#### 5.2.1 Produce features for lab frame
 Crated `configs/analysis_ml_superdataset_lr_catboost_v2_lab.yaml`, which is a copy from the yaml file (lD_auxiliary_wbjets model), changed frame to `lab`.
 
+Input to create features:
+```
+ python3 condor/export_feature/make_arguments_v2.py \
+  --config configs/analysis_ml_superdataset_lr_catboost_v2_lab.yaml \
+  --chunks 1-79 \
+  --component interference \
+  --level reco
 
+condor_submit condor/export_feature/submit_export_features_v2.sub
+```
 
+Input to merge chunks:
+```
+python3 scripts/merge_feature_chunks.py \
+    --version v2 \
+    --model cpv \
+    --level reco \
+    --frame lab \
+    --chunks 1-79 
+```
 
+Outputs for are in `outputs/ml_superdataset/features_v2`. Example output: `reco_cpv/features_reco_lab_chunk1.csv`.
+
+#### 5.2.2 Training and Building ML Observable
+
+Input for training:
+```
+python3 scripts/train_cpv_model.py \
+  --config configs/analysis_ml_superdataset_lr_catboost_v2_lab.yaml \
+  --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_lab_chunk1_79.csv \
+  --version v2 \
+  --feature-set lD_auxiliary_wbjets \
+  --out-dir outputs/ml_superdataset/model_v2_lab/lD_auxiliary_wbjets/catboost
+```
+
+Input for building ML observable: `./scripts/run_lD_auxiliary_pipeline.sh wbjets lab` to create observable and evaluate fisher.
+
+Outputs are in `outputs/ml_superdataset/ml_observable_v2_lab/lD_auxiliary_wbjets/catboost`.
+
+#### 5.2.3 Fisher information comparison
+| Observable | Lepton category | ML model | feature | frame | N reco | I reco |
+|------------|-----------------|----------|---------|----------|--------|--------|
+| O_ML | electron | catboost | lD_auxiliary_wbjets | higgs_rest |  | 3.10539 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets | higgs_rest |  | 3.15016 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | higgs_rest |  | 6.25555 |
+| O_ML | electron | catboost | lD_auxiliary_wbjets | lab |  | 2.84717 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets | lab |  | 2.19773 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | lab |  | 5.0449 |
 
