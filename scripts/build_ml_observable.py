@@ -53,14 +53,14 @@ def to_float(val) -> float:
 
 def extract_feature_value(row: dict, feature_name: str) -> float:
     """Extract feature value using direct lookup with dynamic fallback resolution
-    for derived features (w_assignment_likelihood_selected, down_type_daughter_*).
+    for derived features (w_assignment_likelihood_selected, down_type_daughter_*, second_w_daughter_*).
     """
-    # 1. Try direct column lookup (works for v2 and all standard features)
+    # Try direct column lookup (works for v2 and all standard features)
     fval = to_float(row.get(feature_name))
     if math.isfinite(fval):
         return fval
 
-    # 2. Dynamic resolution for w_assignment_likelihood_selected
+    # Dynamic resolution for w_assignment_likelihood_selected
     if feature_name == "w_assignment_likelihood_selected":
         preference = row.get("w_orientation_status")
         L12 = row.get("L12")
@@ -75,7 +75,7 @@ def extract_feature_value(row: dict, feature_name: str) -> float:
 
         return to_float(selected_L)
 
-    # 3. Fallback dynamic resolution for missing v1 down_type_daughter_* columns
+    # Fallback dynamic resolution for missing v1 down_type_daughter_* columns
     if feature_name.startswith("down_type_daughter_"):
         variable = feature_name.removeprefix("down_type_daughter_")
         try:
@@ -98,8 +98,42 @@ def extract_feature_value(row: dict, feature_name: str) -> float:
         val = row.get(f"{prefix}_{variable}")
         return float(val) if val is not None else float("nan")
 
+    # Fallback dynamic resolution for second_w_daughter_* features
+    if feature_name.startswith("second_w_daughter_"):
+        variable = feature_name.removeprefix("second_w_daughter_")
+
+        idx_W2          = to_float(row.get("idx_W2"))
+        idx_W_quark     = to_float(row.get("idx_W_quark"))
+        idx_W_antiquark = to_float(row.get("idx_W_antiquark"))
+
+        if not (math.isfinite(idx_W2) and math.isfinite(idx_W_quark) and math.isfinite(idx_W_antiquark)):
+            return float("nan")
+
+        if idx_W2 == idx_W_quark:
+            prefix = "wjet_quark"
+        elif idx_W2 == idx_W_antiquark:
+            prefix = "wjet_antiquark"
+        else:
+            prefix = "wjet_antiquark"
+
+        # Calculate pT from E, theta, mass
+        if variable == "pt":
+            E     = to_float(row.get(f"{prefix}_E"))
+            theta = to_float(row.get(f"{prefix}_theta"))
+            m     = to_float(row.get(f"{prefix}_mass"))
+
+            if not (math.isfinite(E) and math.isfinite(theta)):
+                return float("nan")
+
+            m_val = m if math.isfinite(m) else 0.0
+
+            p = math.sqrt(max(0.0, E**2 - m_val**2))
+            return p * math.sin(theta)
+
+        return to_float(row.get(f"{prefix}_{variable}"))
     return float("nan")
 
+        
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True)

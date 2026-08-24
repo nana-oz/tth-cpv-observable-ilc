@@ -22,6 +22,7 @@ import datetime
 import json
 import sys
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 from pathlib import Path
 from sklearn.metrics import roc_curve, auc, precision_score
@@ -63,18 +64,25 @@ def feature_columns_from_config(cfg, feature_set_name: str):
 
 
 def resolve_feature_value(row, feature_name: str) -> float:
-    """Resolve one configured feature for one event."""
+    """Extract feature value using direct lookup with dynamic fallback resolution
+    for derived features (w_assignment_likelihood_selected, down_type_daughter_*, second_w_daughter_*).
+    """
+
+    # Try direct columl lookup first
+    fval = to_float(row.get(feature_name))
+    if math.isfinite(fval):
+        return fval
 
     # Decide whther the selected down-type jet corresponds to wjet_quark or wjet_antiquark
     # then read the requested variable from that object
 
-    idx_W_down_candidate = float(row.get("idx_W_down_candidate"))
-    idx_W_quark          = float(row.get("idx_W_quark"))
-    idx_W_antiquark      = float(row.get("idx_W_antiquark"))
-
     # Candiate 1 (Down-type daughter jet)
     if feature_name.startswith("down_type_daughter_"):
         variable = feature_name.removeprefix("down_type_daughter_")
+
+        idx_W_down_candidate = to_float(row.get("idx_W_down_candidate"))
+        idx_W_quark          = to_float(row.get("idx_W_quark"))
+        idx_W_antiquark      = to_float(row.get("idx_W_antiquark"))
     
         if idx_W_down_candidate not in (None, -1.0):
             if idx_W_down_candidate == idx_W_quark:
@@ -97,22 +105,34 @@ def resolve_feature_value(row, feature_name: str) -> float:
     if feature_name.startswith("second_w_daughter_"):
         variable = feature_name.removeprefix("second_w_daughter_")
 
-        if idx_W_down_candidate not in (None, -1.0):
-            if idx_W_down_candidate == idx_W_quark:
-                # Primary is quark -> Second jet is antiquark
-                selected_prefix = "wjet_antiquark"
-            elif idx_W_down_candidate == idx_W_antiquark:
-                # Primary is antiquark -> Second jet is quark
-                selected_prefix = "wjet_quark"
-            else:
-                selected_prefix = None
-        else:
-            selected_prefix = None
+        idx_W2          = to_float(row.get("idx_W2"))
+        idx_W_quark     = to_float(row.get("idx_W_quark"))
+        idx_W_antiquark = to_float(row.get("idx_W_antiquark"))
 
-        if selected_prefix is None:
+        if not (math.isfinite(idx_W2) and math.isfinite(idx_W_quark) and math.isfinite(idx_W_antiquark)):
             return float("nan")
 
-        return to_float(row.get(f"{selected_prefix}_{variable}"))
+        if idx_W2 == idx_W_quark:
+            prefix = "wjet_quark"
+        elif idx_W2 == idx_W_antiquark:
+            prefix = "wjet_antiquark"
+        else:
+            prefix = "wjet_antiquark"
+
+        # Calculate pT from E, theta, mass if requested
+        if variable == "pt":
+            E     = to_float(row.get(f"{prefix}_E"))
+            theta = to_float(row.get(f"{prefix}_theta"))
+            m     = to_float(row.get(f"{prefix}_mass"))
+
+            if not (math.isfinite(E) and math.isfinite(theta)):
+                return float("nan")
+
+            m_val = m if math.isfinite(m) else 0.0
+            p = math.sqrt(max(0.0, E**2 - m_val**2))
+            return p * math.sin(theta)
+
+        return to_float(row.get(f"{prefix}_{variable}"))
 
 
     # Resolve w_assignment_likelihood_selected from L12/L21 preferene by the w_orientation_status
@@ -131,7 +151,7 @@ def resolve_feature_value(row, feature_name: str) -> float:
         if selected_L is None:
             return float("nan")
 
-        return float(selected_L)
+        return to_float(selected_L)
 
     return to_float(row.get(feature_name))
 

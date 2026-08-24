@@ -103,7 +103,7 @@ features:
         #- m_W_had
         #- m_top_had
         #- m_top_lep
-        #- m_H
+        - m_H
         - m_ttbar
         - down_jet_mass
 

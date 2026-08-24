@@ -92,8 +92,8 @@ features:
       #  - m_top_had
       #  - m_top_lep
       #  - m_H
-      #  - m_ttbar
-      #  - down_jet_mass
+        - m_ttbar
+        - down_jet_mass
 
 training:
   lepton_flavors:
