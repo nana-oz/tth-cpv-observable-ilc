@@ -567,7 +567,8 @@ python3 scripts/train_cpv_model.py \
         --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
         --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
         --version v2 \
-        --feature-set lD_auxiliary
+        --feature-set lD_auxiliary \
+        --out-dir outputs/ml_superdataset/model_v2/lD_auxiliary/minimal_1/catboost
 ```
 
 Building ML observable:
@@ -649,7 +650,8 @@ python3 scripts/train_cpv_model.py \
         --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
         --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
         --version v2 \
-        --feature-set lD_auxiliary
+        --feature-set lD_auxiliary \
+        --out-dir outputs/ml_superdataset/model_v2/lD_auxiliary/minimal_2/catboost
 ```
 
 Building ML observable:
@@ -690,7 +692,8 @@ python3 scripts/train_cpv_model.py \
         --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
         --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
         --version v2 \
-        --feature-set lD_auxiliary
+        --feature-set lD_auxiliary \
+        --out-dir outputs/ml_superdataset/model_v2/lD_auxiliary/full/catboost
 ```
 
 3. Run script `./scripts/run_lD_auxiliary_pipeline.sh full` or `./scripts/run_lD_auxiliary_pipeline.sh minimal`
@@ -741,7 +744,8 @@ python3 scripts/train_cpv_model.py \
   --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
   --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
   --version v2 \
-  --feature-set lD_auxiliary
+  --feature-set lD_auxiliary \
+  --out-dir outputs/ml_superdataset/model_v2/lD_auxiliary/minimal_w2/catboost
 ```
 
 Output is moved to: `outputs/ml_superdataset/model_v2/lD_auxiliary/minimal_w2`
@@ -783,10 +787,11 @@ python3 scripts/train_cpv_model.py \
   --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
   --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
   --version v2 \
-  --feature-set lD_auxiliary
+  --feature-set lD_auxiliary \
+  --out-dir outputs/ml_superdataset/model_v2/lD_auxiliary/minimal_nufit/catboost
 ```
 
-Output is moved to: `outputs/ml_superdataset/model_v2/lD_auxiliary/minimal_nufit`
+Outputs are in: `outputs/ml_superdataset/model_v2/lD_auxiliary/minimal_nufit`
 
 Then run `./scripts/run_lD_auxiliary_pipeline.sh minimal_nufit` to create observable and evaluate fisher.
 
@@ -805,3 +810,52 @@ Then run `./scripts/run_lD_auxiliary_pipeline.sh minimal_nufit` to create observ
 
 
 ## 5. Optional studies (Ch. 5.5)
+### 5.1 Add W & b jets kinematic features into lD_auxiliary minimal_nufit model
+#### 5.1.1 Training and Build ML Observable with lD_auxiliary_wbjets model
+
+In `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` feature part, added ` lD_auxiliary_wbjets` sets. This change adds kinematics (E, pt, theta, phi) of:
+- W decay products
+  - wjet_quark
+  - wjet_antiquark
+- Top-decay b/bbar object
+  - top_b
+ 
+(Used lD_auxiliary, minimal_nufit model as the original and modified from it as above.)
+
+Input for training:
+```
+python3 scripts/train_cpv_model.py \
+        --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+        --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --version v2 \
+        --feature-set lD_auxiliary_wbjets \
+        --out-dir outputs/ml_superdataset/model_v2/lD_auxiliary_wbjets/catboost
+```
+
+Input for building ML observable: `./scripts/run_lD_auxiliary_pipeline.sh wbjets` to create observable and evaluate fisher.
+
+#### 5.1.2 Fisher information comparison
+| Observable | Lepton category | ML model | feature | min/full | N reco | I reco |
+|------------|-----------------|----------|---------|----------|--------|--------|
+| O_ML | electron | catboost | lD_auxiliary | minimal_2 |  | 1.31001 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_2 |  | 1.30644 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_2 |  | 2.61645 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_w2 |  | 1.19654 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_w2 |  | 1.28715 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_w2 |  | 2.5743 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_nufit |  | 2.34656 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_nufit |  | 2.25636 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_nufit |  | 4.60292 |
+| O_ML | electron | catboost | lD_auxiliary_wbjets | -- |  | 3.10539 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets | -- |  | 3.15016 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | -- |  | 6.25555 |
+
+
+### 5.2 Try with lab frame
+#### 5.2.1
+Crated `configs/analysis_ml_superdataset_lr_catboost_v2_lab.yaml`, which is a copy from the yaml file (lD_auxiliary_wbjets model), changed frame to `lab`.
+
+
+
+
+
