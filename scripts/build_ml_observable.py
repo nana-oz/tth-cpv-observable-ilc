@@ -102,19 +102,19 @@ def extract_feature_value(row: dict, feature_name: str) -> float:
     if feature_name.startswith("second_w_daughter_"):
         variable = feature_name.removeprefix("second_w_daughter_")
 
-        idx_W2          = to_float(row.get("idx_W2"))
-        idx_W_quark     = to_float(row.get("idx_W_quark"))
-        idx_W_antiquark = to_float(row.get("idx_W_antiquark"))
+        idx_W_down_candidate = to_float(row.get("idx_W_down_candidate"))
+        idx_W_quark          = to_float(row.get("idx_W_quark"))
+        idx_W_antiquark      = to_float(row.get("idx_W_antiquark"))
 
-        if not (math.isfinite(idx_W2) and math.isfinite(idx_W_quark) and math.isfinite(idx_W_antiquark)):
+        if not (math.isfinite(idx_W_down_candidate) and math.isfinite(idx_W_quark) and math.isfinite(idx_W_antiquark)):
             return float("nan")
 
-        if idx_W2 == idx_W_quark:
+        if idx_W_down_candidate == idx_W_quark:
+            prefix = "wjet_antiquark"
+        elif idx_W_down_candidate == idx_W_antiquark:
             prefix = "wjet_quark"
-        elif idx_W2 == idx_W_antiquark:
-            prefix = "wjet_antiquark"
         else:
-            prefix = "wjet_antiquark"
+            return float("nan")
 
         # Calculate pT from E, theta, mass
         if variable == "pt":
@@ -131,8 +131,27 @@ def extract_feature_value(row: dict, feature_name: str) -> float:
             return p * math.sin(theta)
 
         return to_float(row.get(f"{prefix}_{variable}"))
+
+    # Dynamic resolution for nu_fit_* features
+    if feature_name.startswith("nu_fit_"):
         
-    return float("nan")
+        # 1. Try to read the column directly from the CSV
+        val = row.get(feature_name)
+        if val is not None:
+            parsed_val = to_float(val)
+            if math.isfinite(parsed_val):
+                return parsed_val
+
+        # 2. Safety fallback: calculate pt from E and theta if nu_fit_pt is missing
+        if feature_name == "nu_fit_pt":
+            E     = to_float(row.get("nu_fit_E"))
+            theta = to_float(row.get("nu_fit_theta"))
+            if math.isfinite(E) and math.isfinite(theta):
+                return E * math.sin(theta)
+
+        return float("nan")
+        
+    return to_float(row.get(feature_name))
 
         
 def main() -> int:

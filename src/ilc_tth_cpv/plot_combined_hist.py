@@ -9,7 +9,7 @@ from ilc_tth_cpv.plotting import import_plotting
 from ilc_tth_cpv.histograms import SignedHistogram
 
 
-def load_signed_histogram(path) -> SignedHistogram:
+def load_signed_histogram(path: Path) -> SignedHistogram:
     """Load a CSV file into a SignedHistogram object."""
     if not path.exists():
         raise FileNotFoundError(f"Missing required template file: {path}")
@@ -23,20 +23,54 @@ def load_signed_histogram(path) -> SignedHistogram:
     return SignedHistogram(edges=edges, signed=signed)
 
 
+def find_existing_file(candidates: list[Path]) -> Path:
+    """Return the first candidate path that exists, or the primary path if none exist."""
+    for p in candidates:
+        if p.exists():
+            return p
+    return candidates[0]
+
+
 def build_angular_config(args, lepton: str) -> tuple[dict[str, tuple[Path, str, str, float]], str, str, Path]:
     frame_suffix = "" if args.frame == "higgs_rest" else f"_{args.frame}"
-    obs_dir = Path(f"{args.base_dir}{frame_suffix}/angular/{args.observable}")
+    obs = args.observable
+    chunks = args.chunks
+
+    # Base folder path including chunk directory
+    obs_dir_chunk = Path(f"{args.base_dir}{frame_suffix}/angular/{obs}/{chunks}")
+    obs_dir_flat = Path(f"{args.base_dir}{frame_suffix}/angular/{obs}")
+
+    # Build candidate paths for each curve
+    reco_cpv_path = find_existing_file([
+        obs_dir_chunk / f"{obs}_{lepton}_{chunks}_reco_combined_bins.csv",
+        obs_dir_flat / f"{obs}_all_reco_{lepton}_bins.csv",
+    ])
+    reco_sm_path = find_existing_file([
+        obs_dir_chunk / f"{obs}_{lepton}_{chunks}_sm_reco_combined_bins.csv",
+        obs_dir_chunk / f"{obs}_{lepton}_{chunks}_reco_sm_combined_bins.csv",
+        obs_dir_flat / f"{obs}_all_sm_reco_{lepton}_bins.csv",
+    ])
+    gen_cpv_path = find_existing_file([
+        obs_dir_chunk / f"{obs}_{lepton}_{chunks}_gen_combined_bins.csv",
+        obs_dir_flat / f"{obs}_all_gen_{lepton}_bins.csv",
+    ])
+    gen_sm_path = find_existing_file([
+        obs_dir_chunk / f"{obs}_{lepton}_{chunks}_sm_gen_combined_bins.csv",
+        obs_dir_chunk / f"{obs}_{lepton}_{chunks}_gen_sm_combined_bins.csv",
+        obs_dir_flat / f"{obs}_all_sm_gen_{lepton}_bins.csv",
+    ])
 
     curves = {
-        "reco CPV":    (obs_dir / f"{args.observable}_all_reco_{lepton}_bins.csv",    "#2458a4", "-",  1.0),
-        "reco SM / 10": (obs_dir / f"{args.observable}_all_sm_reco_{lepton}_bins.csv", "#2458a4", "--", 0.1),
-        "gen CPV":     (obs_dir / f"{args.observable}_all_gen_{lepton}_bins.csv",     "#b34d2e", "-",  1.0),
-        "gen SM / 10":  (obs_dir / f"{args.observable}_all_sm_gen_{lepton}_bins.csv",  "#b34d2e", "--", 0.1),
+        "reco CPV":     (reco_cpv_path, "#2458a4", "-",  1.0),
+        "reco SM / 20": (reco_sm_path,  "#2458a4", "--", 1 / 20),
+        "gen CPV":      (gen_cpv_path,  "#b34d2e", "-",  1.0),
+        "gen SM / 20":  (gen_sm_path,   "#b34d2e", "--", 1 / 20),
     }
 
-    xlabel = f"{args.observable} [rad]"
-    title = f"{args.observable} ({args.frame}), {lepton}: gen vs reco, CPV vs SM (scaled)"
-    out_path = obs_dir / f"{args.observable}_all_sm_vs_cpv_gen_vs_reco_{lepton}_bins.png"
+    xlabel = f"{obs} [rad]"
+    title = f"{obs} ({args.frame}), {lepton}: gen vs reco, CPV vs SM (scaled)"
+    out_dir = obs_dir_chunk if obs_dir_chunk.exists() else obs_dir_flat
+    out_path = out_dir / f"{obs}_{chunks}_sm_vs_cpv_gen_vs_reco_{lepton}_bins.png"
     return curves, xlabel, title, out_path
 
 
@@ -51,8 +85,8 @@ def build_ml_config(args, lepton: str) -> tuple[dict[str, tuple[Path, str, str, 
     obs_dir = Path("outputs/ml_superdataset") / obs_folder / args.model_type
 
     curves = {
-        "reco CPV":    (obs_dir / f"template_{args.split}_{lepton}_reco_cpv_bins.csv", "#2458a4", "-",  1.0),
-        "reco SM / 10": (obs_dir / f"template_{args.split}_{lepton}_reco_sm_bins.csv",  "#2458a4", "--", 0.1),
+        "reco CPV":     (obs_dir / f"template_{args.split}_{lepton}_reco_cpv_bins.csv", "#2458a4", "-",  1.0),
+        "reco SM / 20": (obs_dir / f"template_{args.split}_{lepton}_reco_sm_bins.csv",  "#2458a4", "--", 1 / 20),
     }
     xlabel = r"ML Score $O_{\text{ML}} = P(+) - P(-)$"
     title = f"ML Observable ({args.model_type.upper()} {args.version}), {lepton}: reco CPV vs SM (scaled)"
@@ -70,15 +104,16 @@ def plot_observable_curves(args, lepton: str):
     plt = import_plotting()
     fig, ax = plt.subplots(figsize=(8.0, 5.0))
 
+    ax.tick_params(direction="in", top=True, right=True, which="both")
+
     for label, (path, color, linestyle, scale) in curves.items():
 
-        try: # Load SignedHistogram object
+        try:
             hist = load_signed_histogram(path)
         except FileNotFoundError as err:
             print(f"Skipping '{label}' curve: {err}")
             continue
 
-        # Scale the signed weights by the scaling factor (SM*0.1, SPV*1)
         scaled_signed = [s * scale for s in hist.signed]
 
         ax.step(
@@ -95,7 +130,6 @@ def plot_observable_curves(args, lepton: str):
     ax.set_xlabel(xlabel)
     ax.set_ylabel("signed weight [fb]")
     ax.set_title(title)
-    #ax.grid(True, alpha=0.25)
     ax.legend(frameon=False)
     fig.tight_layout()
 
@@ -103,6 +137,7 @@ def plot_observable_curves(args, lepton: str):
     fig.savefig(out_path, dpi=150)
     plt.close(fig)
     print(f"Saved plot: {out_path}")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Plot 4 curves for a given observable and lepton type.")
@@ -112,6 +147,7 @@ def main():
     parser.add_argument("--observable", choices=("O_W", "O_lD"), default="O_W")
     parser.add_argument("--frame", choices=("higgs_rest", "lab", "ttbar_rest"), default="higgs_rest")
     parser.add_argument("--base-dir", default="outputs/angular_lr")
+    parser.add_argument("--chunks", default="chunk1-10", help="Chunk folder tag, e.g. chunk1-10 or chunk1-79")
 
     # ML parameters
     parser.add_argument("--model-type", choices=("xgboost", "catboost"), default="xgboost")
@@ -122,6 +158,7 @@ def main():
 
     for lepton in ("electron", "muon"):
         plot_observable_curves(args, lepton)
+
 
 if __name__ == "__main__":
     main()

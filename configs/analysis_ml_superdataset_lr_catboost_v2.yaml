@@ -92,11 +92,11 @@ features:
           - phi
 
         # W-daughter representation and assignmnet study
-        #second_w_daughter:
-        #  - E
-        #  - pt
-        #  - theta
-        #  - phi
+        second_w_daughter:
+          - E
+          - pt
+          - theta
+          - phi
 
         # Fitted neutrino
         nu_fit:
