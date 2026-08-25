@@ -759,12 +759,12 @@ Then run `./scripts/run_lD_auxiliary_pipeline.sh minimal_w2` to create observabl
 | O_ML | electron | catboost | lD_auxiliary | minimal_1 |  | 1.23386 |
 | O_ML | muon | catboost | lD_auxiliary | minimal_1 |  | 1.35247 |
 | O_ML | electron + muon | catboost | lD_auxiliary | minimal_1 |  | 2.58633 |
-| O_ML | electron | catboost | lD_auxiliary | minimal_2 |  | 1.4228 |
-| O_ML | muon | catboost | lD_auxiliary | minimal_2 |  | 1.46083 |
-| O_ML | electron + muon | catboost | lD_auxiliary | minimal_2 |  | 2.8311 |
-| O_ML | electron | catboost | lD_auxiliary | minimal_w2 |  | 1.19654 |
-| O_ML | muon | catboost | lD_auxiliary | minimal_w2 |  | 1.28715 |
-| O_ML | electron + muon | catboost | lD_auxiliary | minimal_w2 |  | 2.5743 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_2 |  | 1.31001 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_2 |  | 1.30644 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_2 |  | 2.61645 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_w2 |  | 1.4228 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_w2 |  | 1.46083 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_w2 |  | 2.88363 |
 
 
 ## 4. Adding the fitted neutrino (Ch. 5.4)
