@@ -137,8 +137,8 @@ def resolve_feature_value(row, feature_name: str) -> float:
 
         return to_float(row.get(f"{prefix}_{variable}"))
 
-    # Dynamic resolution for nu_fit_* features
-    if feature_name.startswith("nu_fit_"):
+    # Dynamic resolution for neutrino* features
+    if feature_name.startswith("neutrino"):
         
         # 1. Try to read the column directly from the CSV
         val = row.get(feature_name)
@@ -147,10 +147,10 @@ def resolve_feature_value(row, feature_name: str) -> float:
             if math.isfinite(parsed_val):
                 return parsed_val
 
-        # 2. Safety fallback: calculate pt from E and theta if nu_fit_pt is missing
-        if feature_name == "nu_fit_pt":
-            E     = to_float(row.get("nu_fit_E"))
-            theta = to_float(row.get("nu_fit_theta"))
+        # 2. Safety fallback: calculate pt from E and theta if neutrino_pt is missing
+        if feature_name == "neutrino_pt":
+            E     = to_float(row.get("neutrino_E"))
+            theta = to_float(row.get("neutrino_theta"))
             if math.isfinite(E) and math.isfinite(theta):
                 return E * math.sin(theta)
 

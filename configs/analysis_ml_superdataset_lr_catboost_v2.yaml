@@ -99,7 +99,7 @@ features:
           - phi
 
         # Fitted neutrino
-        nu_fit:
+        neutrino:
           - E 
           - pt
           - theta
@@ -131,7 +131,7 @@ features:
           - phi
 
         # Fitted neutrino
-        nu_fit:
+        neutrino:
           - E 
           - pt
           - theta
