@@ -768,19 +768,17 @@ Then run `./scripts/run_lD_auxiliary_pipeline.sh minimal_w2` to create observabl
 
 
 ## 4. Adding the fitted neutrino (Ch. 5.4)
-### 4.1 Add nu_fit features (minimal_w2)
+### 4.1 Add neutrino features (minimal_nufit)
 
-Modify `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` and add `nu_fit` in features. (Use catboost, v2, lD_auxiliary minimal_w2 model for study for this.)
+Modify `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` and add `neutrino` in features. (Use catboost, v2, lD_auxiliary minimal_w2 model for study for this.)
 - There IS `second_w_daughter` kinematics features in this model.
 
 Added following in `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` features section:
-- nu_fit:
+- neutrino:
   - E
   - pt
   - theta
   - phi
-
-I didn't update `scripts/build_ml_observable.py` and `scripts/train_cpv_model.py` because csv already contains the nu_fit kinematics with the column name `nu_fit_*`.
 
 Input (train model):
 ```
@@ -805,9 +803,9 @@ Then run `./scripts/run_lD_auxiliary_pipeline.sh minimal_nufit` to create observ
 | O_ML | electron | catboost | lD_auxiliary | minimal_w2 |  | 1.19654 |
 | O_ML | muon | catboost | lD_auxiliary | minimal_w2 |  | 1.28715 |
 | O_ML | electron + muon | catboost | lD_auxiliary | minimal_w2 |  | 2.5743 |
-| O_ML | electron | catboost | lD_auxiliary | minimal_nufit |  | 2.38344 |
-| O_ML | muon | catboost | lD_auxiliary | minimal_nufit |  | 2.24716 |
-| O_ML | electron + muon | catboost | lD_auxiliary | minimal_nufit |  | 4.6306 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_nufit |  | 3.00304 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_nufit |  | 2.8863 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_nufit |  | 5.88934 |
 
 
 ## 5. Optional studies (Ch. 5.5)
@@ -844,9 +842,9 @@ Input for building ML observable: `./scripts/run_lD_auxiliary_pipeline.sh wbjets
 | O_ML | electron | catboost | lD_auxiliary | minimal_w2 |  | 1.19654 |
 | O_ML | muon | catboost | lD_auxiliary | minimal_w2 |  | 1.28715 |
 | O_ML | electron + muon | catboost | lD_auxiliary | minimal_w2 |  | 2.5743 |
-| O_ML | electron | catboost | lD_auxiliary | minimal_nufit |  | 2.38344 |
-| O_ML | muon | catboost | lD_auxiliary | minimal_nufit |  | 2.24716 |
-| O_ML | electron + muon | catboost | lD_auxiliary | minimal_nufit |  | 4.6306 |
+| O_ML | electron | catboost | lD_auxiliary | minimal_nufit |  | 3.00304 |
+| O_ML | muon | catboost | lD_auxiliary | minimal_nufit |  | 2.8863 |
+| O_ML | electron + muon | catboost | lD_auxiliary | minimal_nufit |  | 5.88934 |
 | O_ML | electron | catboost | lD_auxiliary_wbjets | -- |  | 3.10539 |
 | O_ML | muon | catboost | lD_auxiliary_wbjets | -- |  | 3.15016 |
 | O_ML | electron + muon | catboost | lD_auxiliary_wbjets | -- |  | 6.25555 |
