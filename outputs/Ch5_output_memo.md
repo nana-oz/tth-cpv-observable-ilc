@@ -845,9 +845,9 @@ Input for building ML observable: `./scripts/run_lD_auxiliary_pipeline.sh wbjets
 | O_ML | electron | catboost | lD_auxiliary | minimal_nufit |  | 3.00304 |
 | O_ML | muon | catboost | lD_auxiliary | minimal_nufit |  | 2.8863 |
 | O_ML | electron + muon | catboost | lD_auxiliary | minimal_nufit |  | 5.88934 |
-| O_ML | electron | catboost | lD_auxiliary_wbjets | -- |  | 3.10539 |
-| O_ML | muon | catboost | lD_auxiliary_wbjets | -- |  | 3.15016 |
-| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | -- |  | 6.25555 |
+| O_ML | electron | catboost | lD_auxiliary_wbjets | -- |  | 3.81795 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets | -- |  | 4.10482 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | -- |  | 7.92277 |
 
 
 ### 5.2 Try with lab frame
@@ -896,11 +896,11 @@ Outputs are in `outputs/ml_superdataset/ml_observable_v2_lab/lD_auxiliary_wbjets
 #### 5.2.3 Fisher information comparison
 | Observable | Lepton category | ML model | feature | frame | N reco | I reco |
 |------------|-----------------|----------|---------|----------|--------|--------|
-| O_ML | electron | catboost | lD_auxiliary_wbjets | higgs_rest |  | 3.10539 |
-| O_ML | muon | catboost | lD_auxiliary_wbjets | higgs_rest |  | 3.15016 |
-| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | higgs_rest |  | 6.25555 |
-| O_ML | electron | catboost | lD_auxiliary_wbjets | lab |  | 2.84717 |
-| O_ML | muon | catboost | lD_auxiliary_wbjets | lab |  | 2.19773 |
-| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | lab |  | 5.0449 |
+| O_ML | electron | catboost | lD_auxiliary_wbjets | higgs_rest |  | 3.81795 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets | higgs_rest |  | 4.10482 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | higgs_rest |  | 7.92277 |
+| O_ML | electron | catboost | lD_auxiliary_wbjets | lab |  | 3.15559 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets | lab |  | 2.45449 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | lab |  | 5.61008 |
 
 
