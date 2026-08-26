@@ -99,7 +99,7 @@ features:
         #  - phi
 
         # Fitted neutrino
-        nu_fit:
+        neutrino:
           - E 
           - pt
           - theta
@@ -131,7 +131,7 @@ features:
           - phi
 
         # Fitted neutrino
-        nu_fit:
+        neutrino:
           - E 
           - pt
           - theta
@@ -153,6 +153,13 @@ features:
 
         # Top-decay b/bbar object
         top_b:
+          - E
+          - pt
+          - theta
+          - phi
+
+        # antitop-decay bbar object
+        antitop_bbar:
           - E
           - pt
           - theta

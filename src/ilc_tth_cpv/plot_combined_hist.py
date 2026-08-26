@@ -82,11 +82,11 @@ def build_ml_config(args, lepton: str) -> tuple[dict[str, tuple[Path, str, str, 
     else:
         obs_folder = "ml_observable"
 
-    obs_dir = Path("outputs/ml_superdataset") / obs_folder / args.model_type
+    obs_dir = Path("outputs/ml_superdataset") / obs_folder / args.feature_set / args.model_type
 
     curves = {
         "reco CPV":     (obs_dir / f"template_{args.split}_{lepton}_reco_cpv_bins.csv", "#2458a4", "-",  1.0),
-        "reco SM / 20": (obs_dir / f"template_{args.split}_{lepton}_reco_sm_bins.csv",  "#2458a4", "--", 1 / 20),
+        "reco SM / 100": (obs_dir / f"template_{args.split}_{lepton}_reco_sm_bins.csv",  "#2458a4", "--", 1 / 100),
     }
     xlabel = r"ML Score $O_{\text{ML}} = P(+) - P(-)$"
     title = f"ML Observable ({args.model_type.upper()} {args.version}), {lepton}: reco CPV vs SM (scaled)"
@@ -152,7 +152,9 @@ def main():
     # ML parameters
     parser.add_argument("--model-type", choices=("xgboost", "catboost"), default="xgboost")
     parser.add_argument("--version", choices=("v0", "v1", "v2"), default="v2")
+    parser.add_argument("--feature-set", choices=("lD", "lD_auxiliary", "lD_auxiliary_wbjets"), default="lD", help="Feature set directory (e.g., lD)")
     parser.add_argument("--split", choices=("validation", "test"), default="test")
+    
 
     args = parser.parse_args()
 

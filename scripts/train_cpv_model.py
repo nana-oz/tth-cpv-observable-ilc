@@ -264,6 +264,12 @@ def main() -> int:
         help="Dataset/model version (v0, v1 or v2)",
     )
 
+    parser.add_argument(
+        "--tag",
+        default=None,
+        help="Explicit folder tag for hyperparameter runs (e.g. trial1, depth_6, lr_005)",
+    )
+
     parser.add_argument("--out-dir", default=None)
 
     args = parser.parse_args()
@@ -463,7 +469,7 @@ def main() -> int:
 
         version_dir = "model" if args.version == "v1" else f"model_{args.version}"
 
-        out_dir = (
+        base_out_dir = (
             Path(args.out_dir) / lepton_flavor
             if args.out_dir
             else repo_root()
@@ -473,6 +479,9 @@ def main() -> int:
             / model_type
             / lepton_flavor
         )
+
+        # Append tag only if provided by user
+        out_dir = base_out_dir / args.tag if args.tag else base_out_dir
         
 
         out_dir.mkdir(
@@ -496,7 +505,8 @@ def main() -> int:
         plt.xlabel("Boosting Iterations / Trees")
         plt.ylabel("Log Loss")
         plt.title(f"Training Loss Curve — {lepton_flavor}")
-        plt.legend()
+        plt.legend(frameon=False)
+        plt.tick_params(direction="in", top=True, right=True)
         #plt.grid(True, linestyle="--", alpha=0.6)
         plt.tight_layout()
         plt.savefig(out_dir / "training_loss.png", dpi=300)
@@ -527,7 +537,8 @@ def main() -> int:
         plt.xlabel("False Positive Rate")
         plt.ylabel("True Positive Rate")
         plt.title(f"ROC Curves — {lepton_flavor}")
-        plt.legend(loc="lower right")
+        plt.legend(loc="lower right", frameon=False)
+        plt.tick_params(direction="in", top=True, right=True)
         #plt.grid(True, linestyle="--", alpha=0.6)
         plt.tight_layout()
         plt.savefig(out_dir / "roc_curve.png", dpi=300)
@@ -543,6 +554,8 @@ def main() -> int:
         plt.yticks(range(len(indices)), [feature_cols[i] for i in indices])
         plt.xlabel("Feature Importance (Gain)")
         plt.title(f"Feature Importances — {lepton_flavor}")
+        plt.tick_params(axis="x", direction="in", top=True)
+        plt.tick_params(axis="y", left=False, right=False)
         plt.tight_layout()
         plt.savefig(out_dir / "feature_importance.png", dpi=300)
         plt.close()
