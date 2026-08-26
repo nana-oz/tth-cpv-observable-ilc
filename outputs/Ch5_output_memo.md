@@ -818,6 +818,7 @@ In `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` feature part, added ` 
   - wjet_antiquark
 - Top-decay b/bbar object
   - top_b
+  - antitop_bbar
  
 (Used lD_auxiliary, minimal_nufit model as the original and modified from it as above.)
 
@@ -905,8 +906,9 @@ Outputs are in `outputs/ml_superdataset/ml_observable_v2_lab/lD_auxiliary_wbjets
 
 
 
-## 6. Parameter Tuning with the Best Model (lD_auxiliary_wbjets)
-### 6.1 Parameter Tuning
+## 6. Finding the Best ML Model
+### 6.1 Parameter Tuning with the Best Model (lD_auxiliary_wbjets)
+#### 6.1.1 Parameter Tuning
 Using the model `lD_auxiliary_wbjets`, tune parameter to improve the fisher.
 
 Change parameters in `configs/analysis_ml_superdataset_lr_catboost_v2.yaml`.
@@ -927,8 +929,7 @@ Build ML observable and evaluate fisher information:
 ./scripts/run_lD_auxiliary_pipeline.sh wbjets higgs_rest iter1000_d7_lr005_es50
 ```
 
-
-### 6.2 Parameter Tuning & Fisher Information Summary Table
+#### 6.1.2 Parameter Tuning & Fisher Information Summary Table
 | Trial | ML model | feature | iterations | max_depth | learning_rate | random_seed | early_stopping_rounds | I_reco (electron) | I_reco (muon) |
 |-------|----------|---------|------------|-----------|---------------|-------------|-----------------------|-------------------|---------------|
 | 1 | catboost | lD_auxiliary_wbjets| 200 | 6 | 0.05 | 42 | -- | 3.81794 | 4.10482 |
@@ -940,5 +941,44 @@ Build ML observable and evaluate fisher information:
 | 7 | catboost | lD_auxiliary_wbjets| 1000 | 6 | 0.05 | 42 | 50 | 4.82400 | 4.99734 |
 | 8 | catboost | lD_auxiliary_wbjets| 1000 | 7 | 0.05 | 42 | 50 | 5.04906 | 5.33151 |
 
+
+### 6.2 Add lepton kinematic features (and lepton_charge) into lD_auxiliary_wbjets model
+#### 6.2.1 Training and Build ML Observable with lD_auxiliary_wbjets_lepton model
+
+In `configs/analysis_ml_superdataset_lr_catboost_v2.yaml` feature part, added ` lD_auxiliary_wbjets_lepton` sets. This change adds:
+- lepton
+  - E
+  - pt
+  - theta
+  - phi
+- lepton_charge (in auxiliary section)
+
+(Used lD_auxiliary_wbjets model as the original and modified from it as above.)
+
+Input for training:
+```
+python3 scripts/train_cpv_model.py \
+        --config configs/analysis_ml_superdataset_lr_catboost_v2.yaml \
+        --features outputs/ml_superdataset/features_v2/reco_cpv/features_reco_higgs_rest_chunk1_79.csv \
+        --version v2 \
+        --tag iter1000_d7_lr005_es50 \
+        --feature-set lD_auxiliary_wbjets_lepton \
+        --out-dir outputs/ml_superdataset/model_v2/lD_auxiliary_wbjets_lepton/catboost
+```
+
+Input for building ML observable and evaluate fisher information: 
+```
+./scripts/run_lD_auxiliary_pipeline.sh wbjets_lepton higgs_rest iter1000_d7_lr005_es50
+```
+
+#### 6.2.2 Fisher Information Comparison
+| Observable | Lepton category | ML model | feature | parameter | N reco | I reco |
+|------------|-----------------|----------|---------|-----------|--------|--------|
+| O_ML | electron | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 5.04906 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 5.33151 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 10.38057 |
+| O_ML | electron | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 6.24496 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 6.36106 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 12.60602 |
 
 
