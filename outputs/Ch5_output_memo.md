@@ -536,11 +536,11 @@ OR you can also use `script/run_ml_observable_pipeline.sh` mentioned above, whic
 #### 2.7.3 Plotting Combined Histogram
 For simply plotting the histograms like `template_test_electron_reco_cpv.png`, the pipeline `scripts/run_ml_observable_pipeline.sh` will automatically produce histograms. 
 
-For combined histogram (reco cpv and scaled reco sm), use `plot_conbined_hist.py` to plot. It will produce histograms for both electron and muon automatically. Make sure to set mode `ml`, as this code is also used for plotting combined angular observable histograms.
+For combined histogram (reco cpv and scaled reco sm), use `plot_combined_hist.py` to plot. It will produce histograms for both electron and muon automatically. Make sure to set mode `ml`, as this code is also used for plotting combined angular observable histograms.
 
 Input example (xgboost, v2, test)
 ```
-python3 src/ilc_tth_cpv/plot_conbined_hist.py \
+python3 src/ilc_tth_cpv/plot_combined_hist.py \
   --mode ml \
   --model-type xgboost \
   --version v2 \
@@ -977,8 +977,8 @@ Input for building ML observable and evaluate fisher information:
 | O_ML | electron | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 5.04906 |
 | O_ML | muon | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 5.33151 |
 | O_ML | electron + muon | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 10.38057 |
-| O_ML | electron | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 6.24496 |
-| O_ML | muon | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 6.36106 |
-| O_ML | electron + muon | catboost | lD_auxiliary_wbjets | iter1000_d7_lr005_es50 |  | 12.60602 |
+| O_ML | electron | catboost | lD_auxiliary_wbjets_lepton | iter1000_d7_lr005_es50 |  | 6.24496 |
+| O_ML | muon | catboost | lD_auxiliary_wbjets_lepton | iter1000_d7_lr005_es50 |  | 6.36106 |
+| O_ML | electron + muon | catboost | lD_auxiliary_wbjets_lepton | iter1000_d7_lr005_es50 |  | 12.60602 |
 
 
